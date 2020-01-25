@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "61500346089",
+    "firebase_url": "https://generalshoppinglist.firebaseio.com",
+    "project_id": "generalshoppinglist",
+    "storage_bucket": "generalshoppinglist.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61500346089:android:fd812974c9473f7eeb2a78",
+        "android_client_info": {
+          "package_name": "user862.com.shared_task_list"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "61500346089-nu6g8g0comlctcke5tfn1b3nvgj5funo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmKzAtUP4Cw5aUcHpE8WtL1Uw6Ve_noGM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61500346089-nu6g8g0comlctcke5tfn1b3nvgj5funo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "61500346089-d8itdsm0mjspcde615f6519178ibktkc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "user862.com.sharedTaskList"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
