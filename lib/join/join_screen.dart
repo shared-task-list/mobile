@@ -123,6 +123,7 @@ class JoinScreen extends StatelessWidget {
               onTap: () async {
                 _bloc.taskList = list.name;
                 _bloc.password = list.password;
+                _bloc.updateList(list.id);
 
                 await _bloc.savePreferences();
 

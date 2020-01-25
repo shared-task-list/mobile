@@ -25,7 +25,7 @@ class JoinRepository {
 
   Future<List<TaskList>> getLists() async {
     var db = await DBProvider.db.database;
-    List<Map> maps = await db.query(_taskListTable, orderBy: 'id desc');
+    List<Map> maps = await db.query(_taskListTable, orderBy: 'updated_at desc');
     var lists = List<TaskList>();
 
     for (final map in maps) {
@@ -38,5 +38,13 @@ class JoinRepository {
   Future removeTaskList(TaskList taskList) async {
     var db = await DBProvider.db.database;
     await db.delete(_taskListTable, where: 'id = ?', whereArgs: [taskList.id]);
+  }
+
+  Future updateTaskList(int id) async {
+    var db = await DBProvider.db.database;
+    await db.rawUpdate(
+      'update $_taskListTable set updated_at = ? where id = ?',
+      [DateTime.now().toIso8601String(), id],
+    );
   }
 }

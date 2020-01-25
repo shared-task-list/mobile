@@ -66,4 +66,8 @@ class JoinBloc {
     await _repository.removeTaskList(taskList);
     await getTaskLists();
   }
+
+  Future updateList(int id) async {
+    await _repository.updateTaskList(id);
+  }
 }

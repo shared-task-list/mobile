@@ -1,4 +1,4 @@
-# shared_task_list
+# Shared Task List
 
 A new Flutter application.
 

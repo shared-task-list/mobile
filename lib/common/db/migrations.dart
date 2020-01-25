@@ -32,4 +32,7 @@ const migrationScripts = [
     name Text
   );
   ''',
+  '''
+  alter table task_lists add updated_at text;
+  ''',
 ];

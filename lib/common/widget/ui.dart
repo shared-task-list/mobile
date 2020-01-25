@@ -30,7 +30,7 @@ class Ui {
     @required Widget body,
     Widget bar,
     EdgeInsetsGeometry insets,
-    Color bodyColor,
+    Color bodyColor = Colors.white,
   }) {
     if (Platform.isAndroid) {
       return Scaffold(
@@ -45,9 +45,9 @@ class Ui {
     if (Platform.isIOS) {
       return CupertinoPageScaffold(
         navigationBar: bar,
-        backgroundColor: bodyColor == null ? Colors.white : bodyColor,
+        backgroundColor: bodyColor,
         child: Container(
-          color: bodyColor == null ? Colors.white : bodyColor,
+          color: bodyColor,
           child: body,
           padding: insets,
         ),
