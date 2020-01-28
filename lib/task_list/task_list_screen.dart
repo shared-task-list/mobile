@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -46,7 +48,7 @@ class TaskListScreen extends StatelessWidget {
         if (!snapshot.hasData) {
           return Align(
             alignment: Alignment.center,
-            child: const CircularProgressIndicator(),
+            child: Ui.waitIndicator(),
           );
         }
 

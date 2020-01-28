@@ -1,7 +1,9 @@
+import 'package:global_configuration/global_configuration.dart';
 import 'package:intl/intl.dart';
 
 class Constant {
   static final Constant _singleton = Constant._internal();
+  static final url = GlobalConfiguration().getString("url");
 
   factory Constant() {
     return _singleton;
@@ -10,9 +12,7 @@ class Constant {
   Constant._internal();
 
   static const dbName = 'shared_task.sqlite';
-  static const url = "https://generalshoppinglist.firebaseio.com/";
   static const child = "tasks";
-  static const apiKey = "AIzaSyCWPeexaKNkUzu8WF9Hv1yx8t7Sl-o6twQ";
   static const taskListKey = "TaskList";
   static const passwordKey = "Password";
   static const authorKey = "Author";

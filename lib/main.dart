@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/join/join_screen.dart';
 import 'package:shared_task_list/task_list/task_list_screen.dart';
@@ -10,7 +11,16 @@ import 'package:uuid/uuid.dart';
 
 import 'common/constant.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await GlobalConfiguration().loadFromAsset("settings");
+  } catch (e) {
+    print(e);
+  }
+
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
