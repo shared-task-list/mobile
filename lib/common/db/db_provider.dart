@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/model/task.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'migrations.dart';
@@ -22,23 +23,43 @@ class DBProvider {
 
   DBProvider._();
 
-  initDB() async {
+  Future initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, Constant.dbName);
 
     return await openDatabase(
       path,
-      version: migrationScripts.length + 1,
+      version: 4,
       onOpen: (db) {},
       singleInstance: true,
       onCreate: (Database db, int version) async {
         initScript.forEach((script) async => await db.execute(script));
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
-        for (int i = oldVersion - 1; i < newVersion - 1; i++) {
-          await db.execute(migrationScripts[i]);
-        }
+        // for (int i = oldVersion - 1; i <= newVersion - 1; i++) {
+        //   await db.execute(migrationScripts[i]);
+        // }
+        await migrate(db);
       },
     );
+  }
+
+  Future migrate(Database db) async {
+    for (final table in tables) {
+      await replaceTable(db, table);
+    }
+  }
+
+  Future replaceTable(Database db, String table) async {
+    final maps = await db.query(table);
+    final batch = db.batch();
+    batch.rawDelete('drop table IF EXISTS $table');
+    batch.execute(scriptMap[table]);
+
+    for (final m in maps) {
+      batch.insert(table, m);
+    }
+
+    await batch.commit(noResult: true);
   }
 }

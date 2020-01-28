@@ -28,6 +28,6 @@ class TaskList {
         "id": id,
         "name": name,
         "password": password,
-        "updated_at": updatedAt.toIso8601String(),
+        "updated_at": updatedAt == null ? DateTime.now().toIso8601String() : updatedAt.toIso8601String(),
       };
 }

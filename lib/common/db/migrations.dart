@@ -2,7 +2,7 @@ const initScript = [
   '''
   CREATE TABLE if not exists tasks (
     Uid TEXT PRIMARY KEY,
-    Title Text,
+    Title TEXT,
     AuthorUid TEXT,
     Author TEXT,
     Category TEXT,
@@ -14,17 +14,28 @@ const initScript = [
   '''
   CREATE TABLE if not exists task_lists (
     id INTEGER PRIMARY KEY,
-    name Text,
-    password TEXT
+    name TEXT,
+    password TEXT,
+    updated_at TEXT
   );
   ''',
   '''
   CREATE TABLE if not exists categories (
     id INTEGER PRIMARY KEY,
-    name Text
+    name TEXT
   );
   ''',
 ];
+const tables = [
+  'tasks',
+  'task_lists',
+  'categories',
+];
+final scriptMap = {
+  'tasks': initScript[0],
+  'task_lists': initScript[1],
+  'categories': initScript[2],
+};
 const migrationScripts = [
   '''
   CREATE TABLE if not exists categories (

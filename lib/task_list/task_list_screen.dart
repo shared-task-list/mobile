@@ -93,7 +93,6 @@ class TaskListScreen extends StatelessWidget {
   }
 
   Widget _buildListItem(BuildContext context, UserTask task, double textWidth) {
-    String time = _getTimeString(task);
     return Material(
       color: Colors.white,
       child: Row(
@@ -230,9 +229,5 @@ class TaskListScreen extends StatelessWidget {
       ringWidth: 48,
       ringDiameter: 48 * 4.0,
     );
-  }
-
-  String _getTimeString(UserTask task) {
-    return Constant.dateFormatter.format(task.timestamp);
   }
 }
