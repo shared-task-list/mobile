@@ -8,13 +8,18 @@ import 'package:shared_task_list/common/category_provider.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/category.dart';
+import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
+import 'package:shared_task_list/settings/settings_repository.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
+import 'package:uuid/uuid.dart';
 
 class TaskListBloc {
   final _repository = TaskListRepository();
+  final _settingsRepository = SettingsRepository();
   final _fbClient = FbClient();
   final tasksMap = PublishSubject<Map<String, List<UserTask>>>();
+  final isShowQuickAdd = PublishSubject<bool>();
 
   var _taskList = List<UserTask>();
   var _taskMap = Map<String, List<UserTask>>();
@@ -26,6 +31,8 @@ class TaskListBloc {
 //    _fbClient.reference.onChildChanged.listen(onData);
     String hash = _getPasswordHash();
     ref = _fbClient.reference.child(Constant.taskList + hash);
+
+    isShowQuickAdd.add(true);
   }
 
   void _subscribe() {
@@ -159,8 +166,38 @@ class TaskListBloc {
     await prefs.remove(Constant.taskListKey);
     await prefs.remove(Constant.passwordKey);
 
+    _settingsRepository.saveSettings(Settings(defaultCategory: '', isShowCategories: true));
+
     Constant.taskList = '';
     Constant.password = '';
+  }
+
+  Future quickAdd(String title) async {
+    final settings = await _settingsRepository.getSettings();
+    String category = (settings?.defaultCategory == null || settings.defaultCategory.isEmpty) ? Constant.noCategory : settings.defaultCategory;
+
+    // get preferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userUid = prefs.getString(Constant.authorUidKey);
+
+    // create task
+    final task = UserTask(
+      title: title,
+      comment: '',
+      timestamp: DateTime.now(),
+      uid: Uuid().v4(),
+      author: Constant.userName,
+      category: category,
+      authorUid: userUid,
+    );
+    await _repository.createTask(task);
+    await _fbClient.addTask(task);
+
+//    if (!_taskMap.containsKey(task.category)) {
+//      _taskMap[task.category] = List<UserTask>();
+//    }
+//    _taskMap[task.category].add(task);
+//    tasksMap.add(_taskMap);
   }
 
   String _getPasswordHash() {
@@ -168,5 +205,10 @@ class TaskListBloc {
     Digest digest = sha256.convert(bytes);
 
     return base64.encode(digest.bytes);
+  }
+
+  void dispose() {
+    tasksMap.close();
+    isShowQuickAdd.close();
   }
 }

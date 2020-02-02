@@ -23,8 +23,10 @@ dependencies:
   flutter_sliding_up_panel: ^0.0.3
   cupertino_icons: ^0.1.2
   pull_to_refresh: ^1.5.7
-  intl: ^0.16.1
+  intl: ^0.16.0
   global_configuration: ^1.4.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -33,4 +35,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-  - assets/cfg/
+    - assets/cfg/
+flutter_intl:
+  enabled: true

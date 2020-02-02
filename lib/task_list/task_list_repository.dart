@@ -48,4 +48,9 @@ class TaskListRepository {
     var db = await DBProvider.db.database;
     db.delete(_taskTable);
   }
+
+  Future createTask(UserTask task) async {
+    var db = await DBProvider.db.database;
+    await db.insert(_taskTable, task.toMap());
+  }
 }

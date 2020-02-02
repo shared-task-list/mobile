@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class Ui {
-  static void route(BuildContext context, Widget widget) {
+  static void route(BuildContext context, Widget widget, {bool withHistory = true}) {
     PageRoute pageRoute;
 
     if (Platform.isIOS) {
@@ -22,8 +22,11 @@ class Ui {
         },
       );
     }
-
-    Navigator.push(context, pageRoute);
+    if (withHistory) {
+      Navigator.push(context, pageRoute);
+    } else {
+      Navigator.pushAndRemoveUntil(context, pageRoute, (Route<dynamic> route) => false);
+    }
   }
 
   static Widget scaffold({
@@ -119,16 +122,16 @@ class Ui {
     return null;
   }
 
-  static Widget actionButton(Widget icon, VoidCallback onPressed) {
+  static Widget actionButton(IconData icon, VoidCallback onPressed) {
     if (Platform.isAndroid) {
       return IconButton(
-        icon: icon,
+        icon: Icon(icon),
         onPressed: onPressed,
       );
     }
     if (Platform.isIOS) {
       return GestureDetector(
-        child: icon,
+        child: Icon(icon),
         onTap: onPressed,
       );
     }
@@ -148,7 +151,7 @@ class Ui {
     return null;
   }
 
-  static Widget flatButton(String title, VoidCallback onPressed, {double fontSize}) {
+  static Widget flatButton(String title, VoidCallback onPressed, {double fontSize, TextStyle style}) {
     Widget textChild = Text(
       title,
       style: TextStyle(fontSize: fontSize ?? 15),
@@ -162,20 +165,29 @@ class Ui {
     return null;
   }
 
-  static Widget button(String title, Color color, Color textColor, VoidCallback onPressed) {
-    Widget textChild = Text(title);
+  static Widget button({
+    String title,
+    Color color = Colors.blue,
+    Color textColor = Colors.white,
+    VoidCallback onPressed,
+    double radius,
+    TextStyle textStyle,
+  }) {
+    Widget textChild = Text(title, style: textStyle);
     if (Platform.isAndroid) {
       return RaisedButton(
         onPressed: onPressed,
         child: textChild,
         color: color,
         textColor: textColor,
+        shape: radius == null ? null : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
       );
     }
     if (Platform.isIOS) {
       return CupertinoButton.filled(
         child: textChild,
         onPressed: onPressed,
+        borderRadius: BorderRadius.all(Radius.circular(radius == null ? 8 : radius)),
       );
     }
     return null;
@@ -258,7 +270,7 @@ class Ui {
     return null;
   }
 
-  static Widget dialog({@required Widget child, String title}) {
+  static Widget dialog({@required Widget child}) {
     if (Platform.isAndroid) {
       return Dialog(
         elevation: 0,
@@ -292,6 +304,7 @@ class Ui {
     }
   }
 
+  // TODO: remove?
   static Widget refresh({
     @required Widget child,
     @required Future<void> Function() future,

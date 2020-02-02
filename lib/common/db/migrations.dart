@@ -25,16 +25,26 @@ const initScript = [
     name TEXT
   );
   ''',
+  '''
+  CREATE TABLE if not exists settings (
+    id INTEGER PRIMARY KEY,
+    default_category TEXT,
+    name TEXT,
+    is_show_categories INTEGER
+  );
+  '''
 ];
 const tables = [
   'tasks',
   'task_lists',
   'categories',
+  'settings',
 ];
 final scriptMap = {
   'tasks': initScript[0],
   'task_lists': initScript[1],
   'categories': initScript[2],
+  'settings': initScript[3],
 };
 const migrationScripts = [
   '''

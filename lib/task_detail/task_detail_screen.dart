@@ -2,6 +2,7 @@ import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
+import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/task_detail/task_detail_bloc.dart';
@@ -23,6 +24,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   final _bloc = TaskDetailBloc();
   final _pc = SlidingUpPanelController();
+  S locale;
 
   @override
   void dispose() {
@@ -32,6 +34,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    locale = S.of(context);
+
     if (widget.task != null) {
       _bloc.category = widget.task.category;
       _bloc.title = widget.task.title;
@@ -39,7 +43,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
 
     return Ui.scaffold(
-      bar: Ui.appBar(title: widget.task == null ? 'New task' : 'Task'),
+      bar: Ui.appBar(title: widget.task == null ? locale.newTask : locale.task),
       body: Material(
         color: Colors.white,
         child: Stack(
@@ -69,7 +73,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             child: TextFormField(
               initialValue: widget.task?.title ?? '',
               decoration: InputDecoration(
-                hintText: 'Title',
+                hintText: locale.title,
               ),
               autofocus: true,
               onChanged: (value) {
@@ -77,7 +81,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               },
               validator: (newValue) {
                 if (newValue.isEmpty) {
-                  return 'Please enter some text';
+                  return locale.required;
                 }
                 return null;
               },
@@ -90,7 +94,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               maxLines: 5,
 //              maxLength: 255,
               decoration: InputDecoration(
-                hintText: 'Comment',
+                hintText: locale.comment,
               ),
               onChanged: (value) {
                 _bloc.comment = value;
@@ -105,9 +109,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
               if (!snapshot.hasData) {
                 if (widget.task == null) {
-                  title = 'Category';
+                  title = locale.category;
                 } else {
-                  title = 'Category' + ' - ${widget.task.category}';
+                  title = locale.category + ' - ${widget.task.category}';
                 }
               } else {
                 title = snapshot.data;
@@ -127,7 +131,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             child: RaisedButton(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40.0)),
               child: Text(
-                widget.task == null ? 'Save' : 'Upgrade',
+                widget.task == null ? locale.create : locale.update,
                 style: TextStyle(color: Colors.white70, fontSize: 18),
               ),
               color: Colors.blue,
@@ -168,7 +172,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       left: 16.0,
                     ),
                     child: Text(
-                      'Category List (tap or drag)',
+                      locale.categoryList,
                       style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),

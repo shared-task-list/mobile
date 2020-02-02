@@ -10,6 +10,7 @@ import 'package:shared_task_list/task_list/task_list_screen.dart';
 import 'package:uuid/uuid.dart';
 
 import 'common/constant.dart';
+import 'generated/l10n.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +43,14 @@ class MyApp extends StatelessWidget {
 
         if (Platform.isIOS) {
           return CupertinoApp(
+            localizationsDelegates: [S.delegate],
+            supportedLocales: S.delegate.supportedLocales,
             home: screen,
           );
         } else {
           return MaterialApp(
+            localizationsDelegates: [S.delegate],
+            supportedLocales: S.delegate.supportedLocales,
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),

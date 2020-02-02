@@ -1,3 +1,5 @@
+import 'dart:io';
+
 /**
  * Author: Damodar Lohani
  * profile: https://github.com/lohanidamodar
@@ -7,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/widget/ui.dart';
+import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/join/join_bloc.dart';
 import 'package:shared_task_list/model/task_list.dart';
 import 'package:shared_task_list/task_list/task_list_screen.dart';
@@ -18,12 +22,14 @@ class JoinScreen extends StatelessWidget {
   Widget _buildPageContent(BuildContext context) {
     _bloc.getTaskLists();
 
-//    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-//      systemNavigationBarColor: Colors.transparent,
-//      systemNavigationBarIconBrightness: Brightness.dark,
-//      statusBarColor: Colors.transparent,
-//      statusBarBrightness: Brightness.light,
-//    ));
+    if (Platform.isAndroid) {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.light,
+      ));
+    }
 
     return Container(
       color: Colors.blue.shade100,
@@ -44,33 +50,27 @@ class JoinScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              FlatButton(
-                onPressed: () async {
-                  if (!_formKey.currentState.validate()) {
-                    return;
-                  }
-                  bool isExist = await _bloc.isExist();
+              Ui.flatButton(S.of(context).create, () async {
+                if (!_formKey.currentState.validate()) {
+                  return;
+                }
+                bool isExist = await _bloc.isExist();
 
-                  if (isExist) {
-                    _alertDialog(context, "Task List already exist");
-                    return;
-                  }
+                if (isExist) {
+                  _alertDialog(context, S.of(context).taskListExists);
+                  return;
+                }
 
-                  await _bloc.create();
-                  await _bloc.savePreferences();
+                await _bloc.create();
+                await _bloc.savePreferences();
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => TaskListScreen(),
-                    ),
-                  );
-                },
-                child: Text(
-                  "Create",
-                  style: TextStyle(color: Colors.blue, fontSize: 18.0),
-                ),
-              )
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => TaskListScreen(),
+                  ),
+                );
+              }, style: TextStyle(color: Colors.blue, fontSize: 18.0)),
             ],
           ),
           SizedBox(height: 20),
@@ -84,10 +84,7 @@ class JoinScreen extends StatelessWidget {
     return StreamBuilder<List<TaskList>>(
         stream: _bloc.taskLists,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Container();
-          }
-          if (snapshot.data.isEmpty) {
+          if (!snapshot.hasData || snapshot.data.isEmpty) {
             return Container();
           }
 
@@ -175,7 +172,7 @@ class JoinScreen extends StatelessWidget {
                           height: 90.0,
                         ),
                         ..._buildFormRow(
-                          hintText: "Username",
+                          hintText: S.of(context).username,
                           icon: Icons.person,
                           value: Constant.userName,
                           valueChanged: (String value) {
@@ -184,7 +181,7 @@ class JoinScreen extends StatelessWidget {
                           },
                         ),
                         ..._buildFormRow(
-                          hintText: "Task List",
+                          hintText: S.of(context).taskListName,
                           icon: Icons.list,
                           value: Constant.taskList,
                           valueChanged: (String value) {
@@ -193,7 +190,7 @@ class JoinScreen extends StatelessWidget {
                           },
                         ),
                         ..._buildFormRow(
-                          hintText: "Password",
+                          hintText: S.of(context).password,
                           icon: Icons.lock,
                           isPassword: true,
                           value: Constant.password,
@@ -223,36 +220,35 @@ class JoinScreen extends StatelessWidget {
             ),
             Positioned(
               bottom: 0,
-              left: MediaQuery.of(context).size.width / 2 - 65,
+              left: MediaQuery.of(context).size.width / 2 - (Platform.isIOS ? 100 : 65),
               child: Container(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40.0)),
-                    child: Text("Join", style: TextStyle(color: Colors.white70)),
-                    color: Colors.blue,
-                    onPressed: () async {
-                      if (_formKey.currentState != null && !_formKey.currentState.validate()) {
-                        return;
-                      }
-                      bool isExist = await _bloc.isExist();
+                  child: Ui.button(
+                      title: S.of(context).open,
+                      radius: 40,
+                      textStyle: TextStyle(color: Colors.white70),
+                      onPressed: () async {
+                        if (_formKey.currentState != null && !_formKey.currentState.validate()) {
+                          return;
+                        }
+                        bool isExist = await _bloc.isExist();
 
-                      if (!isExist) {
-                        _alertDialog(context, "Wrong Task List or Password");
-                        return;
-                      }
+                        if (!isExist) {
+                          _alertDialog(context, S.of(context).openError);
+                          return;
+                        }
 
-                      await _bloc.savePreferences();
+                        await _bloc.savePreferences();
 
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => TaskListScreen(),
-                        ),
-                        (Route<dynamic> route) => false,
-                      );
-                    },
-                  ),
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => TaskListScreen(),
+                          ),
+                          (Route<dynamic> route) => false,
+                        );
+                      }),
                 ),
               ),
             )
@@ -275,6 +271,7 @@ class JoinScreen extends StatelessWidget {
     String value,
     IconData icon,
     bool isPassword = false,
+    BuildContext context,
   }) {
     return [
       Container(
@@ -294,7 +291,7 @@ class JoinScreen extends StatelessWidget {
           onChanged: valueChanged,
           validator: (value) {
             if (value.isEmpty) {
-              return 'Please enter some text';
+              return S.of(context).required;
             }
             return null;
           },
@@ -351,7 +348,7 @@ class BeautifulAlertDialog extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      "Error",
+                      S.of(context).error,
                       style: Theme.of(context).textTheme.title,
                     ),
                     SizedBox(height: 10.0),

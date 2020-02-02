@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
+import 'package:shared_task_list/generated/l10n.dart';
 
 class CreateCategoryDialog extends StatelessWidget {
   final VoidCallback savePressed;
@@ -15,11 +15,10 @@ class CreateCategoryDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double _pad = Platform.isIOS ? 24 : 8;
-
+    final locale = S.of(context);
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: _pad),
+        padding: EdgeInsets.symmetric(horizontal: Constant.dialogPadding),
         child: Ui.dialog(
           child: Container(
             padding: EdgeInsets.only(right: 16.0),
@@ -38,7 +37,7 @@ class CreateCategoryDialog extends StatelessWidget {
                     children: <Widget>[
                       SizedBox(height: 20.0),
                       Text(
-                        "New Category",
+                        locale.newCategory,
                         style: Theme.of(context).textTheme.title,
                       ),
                       SizedBox(height: 20.0),
@@ -56,24 +55,24 @@ class CreateCategoryDialog extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           RaisedButton(
-                            child: Text("Cancel"),
+                            child: Text(locale.cancel),
                             color: Colors.red,
                             colorBrightness: Brightness.dark,
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                            shape: Constant.buttonShape,
                           ),
                           SizedBox(width: 20.0),
                           RaisedButton(
-                            child: Text("Create"),
+                            child: Text(locale.create),
                             color: Colors.blue,
                             colorBrightness: Brightness.dark,
                             onPressed: () {
                               savePressed();
                               Navigator.pop(context);
                             },
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                            shape: Constant.buttonShape,
                           ),
                         ],
                       ),

@@ -1,20 +1,31 @@
-import 'dart:io';
-
 import 'package:fab_circular_menu/fab_circular_menu.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/join/join_screen.dart';
 import 'package:shared_task_list/model/task.dart';
+import 'package:shared_task_list/settings/settings_screen.dart';
 import 'package:shared_task_list/task_detail/task_detail_screen.dart';
 import 'package:shared_task_list/task_list/create_category_dialog.dart';
-import 'package:shared_task_list/task_list/set_name_dialog.dart';
+import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
 
-class TaskListScreen extends StatelessWidget {
+class TaskListScreen extends StatefulWidget {
+  @override
+  _TaskListScreenState createState() => _TaskListScreenState();
+}
+
+class _TaskListScreenState extends State<TaskListScreen> {
   final _bloc = TaskListBloc();
   final RefreshController _refreshController = RefreshController(initialRefresh: false);
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bloc.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,19 +33,29 @@ class TaskListScreen extends StatelessWidget {
     double textWidth = MediaQuery.of(context).size.width - 80;
 
     return Ui.scaffold(
-      bar: Ui.appBar(title: Constant.taskList),
+      bar: Ui.appBar(
+        title: Constant.taskList,
+        rightButton: Ui.actionButton(Icons.refresh, () async {
+          await _bloc.getTasks();
+        }),
+      ),
       body: SmartRefresher(
         controller: _refreshController,
         enablePullDown: true,
         enablePullUp: false,
         onRefresh: () async {
-          _bloc.getTasks();
+          await _bloc.getTasks();
           _refreshController.refreshCompleted();
         },
         child: Stack(
           children: [
             _buildList(context, textWidth),
             _buildMenuButton(context),
+            StreamBuilder<bool>(
+                stream: _bloc.isShowQuickAdd,
+                builder: (ctx, snapshot) {
+                  return _buildQuickAdd(context);
+                }),
           ],
         ),
       ),
@@ -173,42 +194,29 @@ class TaskListScreen extends StatelessWidget {
   Widget _buildMenuButton(BuildContext context) {
     return FabCircularMenu(
       child: Container(),
+      animationDuration: const Duration(milliseconds: 400),
       options: <Widget>[
         IconButton(
-          icon: Icon(Icons.exit_to_app),
+          icon: const Icon(Icons.exit_to_app),
           onPressed: () async {
             await _bloc.exit();
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => JoinScreen(),
-              ),
-              (Route<dynamic> route) => false,
-            );
+            Ui.route(context, JoinScreen(), withHistory: false);
           },
         ),
         IconButton(
-          icon: Icon(Icons.person),
+          icon: const Icon(Icons.settings),
           onPressed: () {
-            Ui.openDialog(
-              context: context,
-              dialog: SetNameDialog(),
-            );
+            Ui.route(context, SettingsScreen());
           },
         ),
         IconButton(
-          icon: Icon(Icons.add),
+          icon: const Icon(Icons.add),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => TaskDetailScreen(),
-              ),
-            );
+            Ui.route(context, TaskDetailScreen());
           },
         ),
         IconButton(
-          icon: Icon(Icons.add_circle_outline),
+          icon: const Icon(Icons.add_circle_outline),
           onPressed: () {
             Ui.openDialog(
               context: context,
@@ -227,7 +235,27 @@ class TaskListScreen extends StatelessWidget {
       fabColor: Colors.blue,
       ringColor: Colors.blue.shade100,
       ringWidth: 48,
-      ringDiameter: 48 * 4.0,
+      ringDiameter: 50 * 5.0,
+    );
+  }
+
+  Widget _buildQuickAdd(BuildContext context) {
+    return Positioned(
+      bottom: 23,
+      right: 90,
+      child: FloatingActionButton(
+        heroTag: 'quickAdd',
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
+        onPressed: () {
+          Ui.openDialog(
+            context: context,
+            dialog: QuickAddDialog(onSetName: (String title) async {
+              await _bloc.quickAdd(title);
+            }),
+          );
+        },
+      ),
     );
   }
 }

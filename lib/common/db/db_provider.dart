@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_task_list/common/constant.dart';
-import 'package:shared_task_list/model/task.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'migrations.dart';
@@ -29,7 +28,7 @@ class DBProvider {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 6,
       onOpen: (db) {},
       singleInstance: true,
       onCreate: (Database db, int version) async {
@@ -51,7 +50,14 @@ class DBProvider {
   }
 
   Future replaceTable(Database db, String table) async {
-    final maps = await db.query(table);
+    List<Map> maps;
+
+    try {
+      maps = await db.query(table);
+    } catch (e) {
+      maps = [];
+    }
+
     final batch = db.batch();
     batch.rawDelete('drop table IF EXISTS $table');
     batch.execute(scriptMap[table]);
