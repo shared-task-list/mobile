@@ -66,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             StreamBuilder<String>(
                 stream: _bloc.category,
                 builder: (context, snapshot) {
-                  final cat = snapshot.data;
+                  final cat = snapshot.data ?? '';
                   return _buildRow(
                       primaryText: locale.defaultCategory,
                       secondText: cat.isEmpty ? Constant.noCategory : cat,

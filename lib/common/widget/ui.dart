@@ -193,16 +193,6 @@ class Ui {
     return null;
   }
 
-  static Widget switchButton({@required ValueChanged<bool> onChanged}) {
-    if (Platform.isAndroid) {
-      return Switch(value: true, onChanged: onChanged);
-    }
-    if (Platform.isIOS) {
-      return CupertinoSwitch(value: true, onChanged: onChanged);
-    }
-    return null;
-  }
-
   static Widget dropdown({
     @required double width,
     @required String title,

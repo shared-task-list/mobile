@@ -241,7 +241,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   Widget _buildQuickAdd(BuildContext context) {
     return Positioned(
-      bottom: 23,
+      bottom: 24,
       right: 90,
       child: FloatingActionButton(
         heroTag: 'quickAdd',
