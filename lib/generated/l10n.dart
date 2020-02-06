@@ -226,6 +226,15 @@ class S {
       args: [],
     );
   }
+
+  String get noCategory {
+    return Intl.message(
+      'No Category',
+      name: 'noCategory',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -23,12 +23,14 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent,
-      statusBarBrightness: Brightness.light,
-    ));
+    if (Platform.isAndroid) {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.light,
+      ));
+    }
     return _getApp();
   }
 
@@ -36,8 +38,7 @@ class MyApp extends StatelessWidget {
     return FutureBuilder(
       future: _getPreferences(),
       builder: (ctx, snapshot) {
-//        final screen = (Constant.taskList.isEmpty && Constant.password.isEmpty) ? JoinScreen() : TaskListScreen();
-        S s = S.of(ctx);
+        final screen = (Constant.taskList.isEmpty && Constant.password.isEmpty) ? JoinScreen() : TaskListScreen();
 
         if (Platform.isIOS) {
           return CupertinoApp(
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate
             ],
             supportedLocales: S.delegate.supportedLocales,
-            home: (Constant.taskList.isEmpty && Constant.password.isEmpty) ? JoinScreen() : TaskListScreen(),
+            home: screen,
           );
         } else {
           return MaterialApp(
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            home: (Constant.taskList.isEmpty && Constant.password.isEmpty) ? JoinScreen() : TaskListScreen(),
+            home: screen,
           );
         }
       },

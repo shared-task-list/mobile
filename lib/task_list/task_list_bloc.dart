@@ -172,10 +172,7 @@ class TaskListBloc {
     Constant.password = '';
   }
 
-  Future quickAdd(String title) async {
-    final settings = await _settingsRepository.getSettings();
-    String category = (settings?.defaultCategory == null || settings.defaultCategory.isEmpty) ? Constant.noCategory : settings.defaultCategory;
-
+  Future quickAdd(String title, String category) async {
     // get preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userUid = prefs.getString(Constant.authorUidKey);
@@ -192,12 +189,14 @@ class TaskListBloc {
     );
     await _repository.createTask(task);
     await _fbClient.addTask(task);
+  }
 
-//    if (!_taskMap.containsKey(task.category)) {
-//      _taskMap[task.category] = List<UserTask>();
-//    }
-//    _taskMap[task.category].add(task);
-//    tasksMap.add(_taskMap);
+  Future<List<Category>> getCategories() async {
+    return await CategoryProvider.getList();
+  }
+
+  Future<Settings> getSettings() async {
+    return await _settingsRepository.getSettings();
   }
 
   String _getPasswordHash() {

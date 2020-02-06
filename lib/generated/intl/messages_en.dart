@@ -31,6 +31,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "newCategory" : MessageLookupByLibrary.simpleMessage("New Category"),
     "newName" : MessageLookupByLibrary.simpleMessage("New Name"),
     "newTask" : MessageLookupByLibrary.simpleMessage("New Task"),
+    "noCategory" : MessageLookupByLibrary.simpleMessage("No Category"),
     "open" : MessageLookupByLibrary.simpleMessage("Open"),
     "openError" : MessageLookupByLibrary.simpleMessage("Wrong Task List or Password"),
     "password" : MessageLookupByLibrary.simpleMessage("Password"),

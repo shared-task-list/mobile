@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
+import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/join/join_screen.dart';
+import 'package:shared_task_list/model/category.dart';
+import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/settings/settings_screen.dart';
 import 'package:shared_task_list/task_detail/task_detail_screen.dart';
@@ -30,6 +33,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     _bloc.load();
+    Constant.noCategory = S.of(context).noCategory;
     double textWidth = MediaQuery.of(context).size.width - 80;
 
     return Ui.scaffold(
@@ -250,9 +254,30 @@ class _TaskListScreenState extends State<TaskListScreen> {
         onPressed: () {
           Ui.openDialog(
             context: context,
-            dialog: QuickAddDialog(onSetName: (String title) async {
-              await _bloc.quickAdd(title);
-            }),
+            dialog: FutureBuilder<List<Category>>(
+                future: _bloc.getCategories(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Container();
+                  }
+
+                  final categories = snapshot.data;
+
+                  return FutureBuilder<Settings>(
+                      future: _bloc.getSettings(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Container();
+                        }
+                        return QuickAddDialog(
+                          categories: categories, //.where((cat) => cat.name != snapshot.data.defaultCategory).toList(),
+                          defaultCategory: snapshot.data.defaultCategory,
+                          onSetName: (String title, String category) async {
+                            await _bloc.quickAdd(title, category);
+                          },
+                        );
+                      });
+                }),
           );
         },
       ),

@@ -20,5 +20,6 @@
     "categoryList": "Category List (tap or drag)",
     "title": "Title",
     "settings": "Settings",
-    "defaultCategory": "Default Category"
+    "defaultCategory": "Default Category",
+    "noCategory": "No Category"
 }

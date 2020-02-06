@@ -22,13 +22,13 @@ class Constant {
   static const passwordKey = "Password";
   static const authorKey = "Author";
   static const authorUidKey = "AuthorUid";
-  static const noCategory = "No Category";
   static const serviceTaskComment = "service task";
   static const dateFormat = 'dd MMM HH:MM';
   static final dateFormatter = DateFormat(dateFormat);
   static String password = "";
   static String userName = "";
   static String taskList = "";
+  static String noCategory = "";
 }
 
 class AppData {

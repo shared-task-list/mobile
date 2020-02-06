@@ -12,7 +12,7 @@ dependencies:
   flutter_custom_clippers: ^1.1.0
   uuid: ^2.0.4
   sqflite: ^1.2.0
-  firebase_core: ^0.4.1
+  firebase_core: ^0.4.3+3
   firebase_database: ^3.1.1
   path_provider: ^1.5.1
   path: ^1.6.4
@@ -27,6 +27,8 @@ dependencies:
   global_configuration: ^1.4.0
   flutter_localizations:
     sdk: flutter
+  flutter_cupertino_localizations: ^1.0.1
+  expandable: ^4.1.2
 
 dev_dependencies:
   flutter_test:

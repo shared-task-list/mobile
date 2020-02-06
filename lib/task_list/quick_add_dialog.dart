@@ -2,95 +2,125 @@ import 'package:flutter/material.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
+import 'package:shared_task_list/model/category.dart';
 
 class QuickAddDialog extends StatefulWidget {
-  final Function(String) onSetName;
+  final String defaultCategory;
+  final List<Category> categories;
+  final Function(String, String) onSetName;
 
-  const QuickAddDialog({Key key, this.onSetName}) : super(key: key);
+  QuickAddDialog({Key key, this.onSetName, this.categories, this.defaultCategory}) : super(key: key);
 
   @override
-  _QuickAddDialogState createState() => _QuickAddDialogState(onSetName);
+  _QuickAddDialogState createState() => _QuickAddDialogState(
+        onSetName,
+        categories,
+        (defaultCategory == null || defaultCategory.isEmpty) ? Constant.noCategory : defaultCategory,
+      );
 }
 
 class _QuickAddDialogState extends State<QuickAddDialog> {
-  final Function(String) onSetName;
+  final List<Category> categories;
+  final Function(String, String) onSetName;
+  String defaultCategory;
   String _title = '';
+  String _category = '';
   S locale;
 
-  _QuickAddDialogState(this.onSetName);
+  _QuickAddDialogState(this.onSetName, this.categories, this.defaultCategory);
 
   @override
   Widget build(BuildContext context) {
     locale = S.of(context);
+
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: Constant.dialogPadding),
         child: Ui.dialog(
-          child: Container(
-            padding: EdgeInsets.only(right: 16.0),
-            height: 180,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            child: Row(
-              children: <Widget>[
-                SizedBox(width: 40.0),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(height: 20.0),
-                      Text(
-                        locale.taskTitle,
-                        style: Theme.of(context).textTheme.title,
-                      ),
-                      SizedBox(height: 20.0),
-                      Flexible(
-                        child: Material(
-                          color: Colors.white,
+          child: Material(
+            child: Container(
+              padding: EdgeInsets.only(right: 16.0),
+              height: 230,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              child: Row(
+                children: <Widget>[
+                  SizedBox(width: 40.0),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(height: 20.0),
+                        Text(
+                          locale.taskTitle,
+                          style: Theme.of(context).textTheme.title,
+                        ),
+                        SizedBox(height: 20.0),
+                        Flexible(
                           child: TextField(
                             style: TextStyle(backgroundColor: Colors.white),
                             autofocus: true,
                             onChanged: (value) => _title = value,
                           ),
                         ),
-                      ),
-                      SizedBox(height: 10.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          RaisedButton(
-                            child: Text(locale.cancel),
-                            color: Colors.red,
-                            colorBrightness: Brightness.dark,
-                            onPressed: () {
-                              Navigator.pop(context);
+                        SizedBox(height: 30.0),
+                        Expanded(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            isDense: true,
+                            value: defaultCategory,
+                            onChanged: (String newValue) {
+                              setState(() {
+                                _category = newValue;
+                                defaultCategory = newValue;
+                              });
                             },
-                            shape: Constant.buttonShape,
+                            items: categories.map<DropdownMenuItem<String>>((Category value) {
+                              return DropdownMenuItem<String>(
+                                value: value.name,
+                                child: Text(value.name, style: TextStyle(fontSize: 18)),
+                              );
+                            }).toList(),
                           ),
-                          SizedBox(width: 20.0),
-                          RaisedButton(
-                            child: Text(locale.create),
-                            color: Colors.blue,
-                            colorBrightness: Brightness.dark,
-                            onPressed: () async {
-                              if (_title.isEmpty) {
-                                return;
-                              }
-                              onSetName(_title);
-                              Navigator.pop(context);
-                            },
-                            shape: Constant.buttonShape,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.0),
-                    ],
+                        ),
+                        SizedBox(height: 20.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            RaisedButton(
+                              child: Text(locale.cancel),
+                              color: Colors.red,
+                              colorBrightness: Brightness.dark,
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              shape: Constant.buttonShape,
+                            ),
+                            SizedBox(width: 20.0),
+                            RaisedButton(
+                              child: Text(locale.create),
+                              color: Colors.blue,
+                              colorBrightness: Brightness.dark,
+                              onPressed: () async {
+                                if (_title.isEmpty) {
+                                  return;
+                                }
+                                onSetName(_title, _category);
+                                Navigator.pop(context);
+                              },
+                              shape: Constant.buttonShape,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.0),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
