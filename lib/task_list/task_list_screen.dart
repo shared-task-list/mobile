@@ -270,7 +270,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           return Container();
                         }
                         return QuickAddDialog(
-                          categories: categories, //.where((cat) => cat.name != snapshot.data.defaultCategory).toList(),
+                          categories: categories,
                           defaultCategory: snapshot.data.defaultCategory,
                           onSetName: (String title, String category) async {
                             await _bloc.quickAdd(title, category);

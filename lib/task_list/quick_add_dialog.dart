@@ -22,12 +22,15 @@ class QuickAddDialog extends StatefulWidget {
 class _QuickAddDialogState extends State<QuickAddDialog> {
   final List<Category> categories;
   final Function(String, String) onSetName;
+  final _formKey = GlobalKey<FormState>();
   String defaultCategory;
   String _title = '';
   String _category = '';
   S locale;
 
-  _QuickAddDialogState(this.onSetName, this.categories, this.defaultCategory);
+  _QuickAddDialogState(this.onSetName, this.categories, this.defaultCategory) {
+    _category = defaultCategory;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +63,19 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                         ),
                         SizedBox(height: 20.0),
                         Flexible(
-                          child: TextField(
-                            style: TextStyle(backgroundColor: Colors.white),
-                            autofocus: true,
-                            onChanged: (value) => _title = value,
+                          child: Form(
+                            key: _formKey,
+                            child: TextFormField(
+                              style: TextStyle(backgroundColor: Colors.white),
+                              autofocus: true,
+                              onChanged: (value) => _title = value,
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return S.of(context).required;
+                                }
+                                return null;
+                              },
+                            ),
                           ),
                         ),
                         SizedBox(height: 30.0),
@@ -105,9 +117,10 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                               color: Colors.blue,
                               colorBrightness: Brightness.dark,
                               onPressed: () async {
-                                if (_title.isEmpty) {
+                                if (!_formKey.currentState.validate()) {
                                   return;
                                 }
+
                                 onSetName(_title, _category);
                                 Navigator.pop(context);
                               },
