@@ -21,5 +21,6 @@
     "title": "Название",
     "settings": "Настройки",
     "defaultCategory": "Категория по умолчанию",
-    "noCategory": "Без Категории"
+    "noCategory": "Без Категории",
+    "categoryName": "Название категории"
 }

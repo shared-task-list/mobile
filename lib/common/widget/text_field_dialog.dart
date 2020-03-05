@@ -1,37 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 
-class SetNameDialog extends StatefulWidget {
-  final Function(String) onSetName;
-  final String savedName;
+class TextFieldDialog extends StatefulWidget {
+  final String title;
+  final String hintText;
+  final String labelText;
+  final String agreeButtonText;
+  final ValueChanged<String> savePressed;
+  final IconData icon;
 
-  const SetNameDialog({Key key, this.onSetName, this.savedName}) : super(key: key);
+  TextFieldDialog({
+    Key key,
+    @required this.savePressed,
+    @required this.title,
+    this.agreeButtonText,
+    this.icon,
+    @required this.hintText,
+    @required this.labelText,
+  }) : super(key: key);
 
   @override
-  _SetNameDialogState createState() => _SetNameDialogState(onSetName, savedName);
+  _TextFieldDialogState createState() => _TextFieldDialogState();
 }
 
-class _SetNameDialogState extends State<SetNameDialog> {
-  final Function(String) onSetName;
-  final String savedName;
-  S locale;
-  String _newName = '';
-
-  _SetNameDialogState(this.onSetName, this.savedName);
+class _TextFieldDialogState extends State<TextFieldDialog> {
+  final _formKey = GlobalKey<FormState>();
+  String newData;
 
   @override
   Widget build(BuildContext context) {
-    locale = S.of(context);
+    S locale = S.of(context);
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: Constant.dialogPadding),
+        padding: EdgeInsets.symmetric(horizontal: 8),
         child: Ui.dialog(
           child: Container(
-            padding: EdgeInsets.only(right: 30.0),
+            padding: EdgeInsets.only(right: 32.0),
             height: 180,
             decoration: BoxDecoration(
               color: Colors.white,
@@ -47,17 +53,31 @@ class _SetNameDialogState extends State<SetNameDialog> {
                     children: <Widget>[
                       SizedBox(height: 20.0),
                       Text(
-                        locale.newName,
-                        style: Theme.of(context).textTheme.title,
+                        widget.title,
+                        style: Theme.of(context).textTheme.headline,
                       ),
                       SizedBox(height: 20.0),
                       Flexible(
                         child: Material(
                           color: Colors.white,
-                          child: TextField(
-                            style: TextStyle(backgroundColor: Colors.white),
-                            autofocus: true,
-                            onChanged: (value) => _newName = value,
+                          child: Form(
+                            key: _formKey,
+                            child: TextFormField(
+                              autofocus: true,
+                              maxLength: 30,
+                              onChanged: (String value) => newData = value,
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return 'Field is required';
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                icon: widget.icon == null ? null : Icon(widget.icon),
+                                hintText: widget.hintText,
+//                              labelText: labelText,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -72,27 +92,25 @@ class _SetNameDialogState extends State<SetNameDialog> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            shape: Constant.buttonShape,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                           ),
                           SizedBox(width: 20.0),
                           RaisedButton(
-                            child: Text(locale.update),
+                            child: Text(widget.agreeButtonText ?? locale.create),
                             color: Colors.blue,
                             colorBrightness: Brightness.dark,
-                            onPressed: () async {
-                              if (_newName.isEmpty) {
+                            onPressed: () {
+                              if (!_formKey.currentState.validate()) {
                                 return;
                               }
-                              SharedPreferences prefs = await SharedPreferences.getInstance();
-                              prefs.setString(Constant.authorKey, _newName);
-                              Constant.userName = _newName;
-                              onSetName(_newName);
+                              widget.savePressed(newData);
                               Navigator.pop(context);
                             },
-                            shape: Constant.buttonShape,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                           ),
                         ],
                       ),
+                      SizedBox(height: 10.0),
                     ],
                   ),
                 ),

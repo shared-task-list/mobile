@@ -25,7 +25,6 @@ class TaskListBloc {
   var _taskMap = Map<String, List<UserTask>>();
   var _categories = Set<String>();
   DatabaseReference ref;
-  String newCategory = '';
 
   TaskListBloc() {
 //    _fbClient.reference.onChildChanged.listen(onData);
@@ -150,7 +149,7 @@ class TaskListBloc {
     }
   }
 
-  void createNewCategory() {
+  void createNewCategory(String newCategory) {
     if (newCategory.isEmpty) {
       return;
     }

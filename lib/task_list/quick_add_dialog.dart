@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grouped_buttons/grouped_buttons.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
@@ -8,12 +9,20 @@ class QuickAddDialog extends StatefulWidget {
   final String defaultCategory;
   final List<Category> categories;
   final Function(String, String) onSetName;
+  final Function(String) onSetCategory;
 
-  QuickAddDialog({Key key, this.onSetName, this.categories, this.defaultCategory}) : super(key: key);
+  QuickAddDialog({
+    Key key,
+    this.onSetName,
+    this.categories,
+    this.defaultCategory,
+    this.onSetCategory,
+  }) : super(key: key);
 
   @override
   _QuickAddDialogState createState() => _QuickAddDialogState(
         onSetName,
+        onSetCategory,
         categories,
         (defaultCategory == null || defaultCategory.isEmpty) ? Constant.noCategory : defaultCategory,
       );
@@ -22,13 +31,14 @@ class QuickAddDialog extends StatefulWidget {
 class _QuickAddDialogState extends State<QuickAddDialog> {
   final List<Category> categories;
   final Function(String, String) onSetName;
+  final Function(String) onSetCategory;
   final _formKey = GlobalKey<FormState>();
   String defaultCategory;
   String _title = '';
   String _category = '';
   S locale;
 
-  _QuickAddDialogState(this.onSetName, this.categories, this.defaultCategory) {
+  _QuickAddDialogState(this.onSetName, this.onSetCategory, this.categories, this.defaultCategory) {
     _category = defaultCategory;
   }
 
@@ -42,8 +52,8 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
         child: Ui.dialog(
           child: Material(
             child: Container(
-              padding: EdgeInsets.only(right: 16.0),
-              height: 230,
+              padding: EdgeInsets.only(right: 32.0),
+              height: 230 + (categories.length * 45.0),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -79,23 +89,27 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                           ),
                         ),
                         SizedBox(height: 30.0),
-                        Expanded(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            isDense: true,
-                            value: defaultCategory,
-                            onChanged: (String newValue) {
-                              setState(() {
-                                _category = newValue;
-                                defaultCategory = newValue;
-                              });
-                            },
-                            items: categories.map<DropdownMenuItem<String>>((Category value) {
-                              return DropdownMenuItem<String>(
-                                value: value.name,
-                                child: Text(value.name, style: TextStyle(fontSize: 18)),
+                        SingleChildScrollView(
+                          child: RadioButtonGroup(
+                            labels: categories.map((category) => category.name).toList(),
+                            onSelected: (String selected) => setState(() {
+                              _category = selected;
+                              defaultCategory = selected;
+                              onSetCategory(selected);
+                            }),
+                            picked: _category,
+                            itemBuilder: (Radio rb, Text txt, int i) {
+                              return GestureDetector(
+                                child: Container(
+                                  child: Row(children: <Widget>[rb, txt]),
+                                ),
+                                onTap: () => setState(() {
+                                  _category = txt.data;
+                                  defaultCategory = txt.data;
+                                  onSetCategory(txt.data);
+                                }),
                               );
-                            }).toList(),
+                            },
                           ),
                         ),
                         SizedBox(height: 20.0),

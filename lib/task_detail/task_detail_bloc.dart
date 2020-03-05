@@ -18,7 +18,7 @@ class TaskDetailBloc {
   String title = '';
   String comment = '';
   String category = '';
-  String newCategory = '';
+//  String newCategory = '';
 
   Future getCategories() async {
     final categoryList = await CategoryProvider.getList();
@@ -56,7 +56,7 @@ class TaskDetailBloc {
     await _fbClient.updateTask(task);
   }
 
-  Future createNewCategory() async {
+  Future createNewCategory(String newCategory) async {
     if (newCategory.isEmpty) {
       return;
     }

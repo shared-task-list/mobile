@@ -21,5 +21,6 @@
     "title": "Title",
     "settings": "Settings",
     "defaultCategory": "Default Category",
-    "noCategory": "No Category"
+    "noCategory": "No Category",
+    "categoryName": "Category Name"
 }

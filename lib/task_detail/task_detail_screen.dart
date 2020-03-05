@@ -1,12 +1,12 @@
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
+import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/task_detail/task_detail_bloc.dart';
-import 'package:shared_task_list/task_list/create_category_dialog.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final UserTask task;
@@ -237,13 +237,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           onPressed: () {
             Ui.openDialog(
               context: context,
-              dialog: CreateCategoryDialog(
-                savePressed: () {
-                  _bloc.createNewCategory();
-                },
-                onTextChanged: (String value) {
-                  _bloc.newCategory = value;
-                },
+              dialog: TextFieldDialog(
+                savePressed: (String newCategory) => _bloc.createNewCategory(newCategory),
+                title: locale.newCategory,
+                labelText: null,
+                hintText: locale.categoryName,
               ),
             );
           },

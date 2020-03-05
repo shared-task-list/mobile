@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/settings/category_dialog.dart';
 import 'package:shared_task_list/settings/settings_bloc.dart';
-import 'package:shared_task_list/task_list/set_name_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -106,9 +106,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onTap: () async {
                               Ui.openDialog(
                                 context: context,
-                                dialog: SetNameDialog(onSetName: (String newName) {
+                                /*dialog: SetNameDialog(onSetName: (String newName) {
                                   _bloc.name.add(newName);
-                                }),
+                                }),*/
+                                dialog: TextFieldDialog(
+                                  savePressed: (String newName) => _bloc.name.add(newName),
+                                  title: locale.newName,
+                                  labelText: null,
+                                  hintText: locale.newName,
+                                ),
                               );
                             });
                       });

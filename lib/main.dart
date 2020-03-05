@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Future _getPreferences() async {
+  Future<SharedPreferences> _getPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Constant.taskList = prefs.getString(Constant.taskListKey) ?? "";
     Constant.password = prefs.getString(Constant.passwordKey) ?? "";
@@ -80,5 +80,7 @@ class MyApp extends StatelessWidget {
     if (userUUid.isEmpty) {
       prefs.setString(Constant.authorUidKey, Uuid().v4());
     }
+
+    return prefs;
   }
 }

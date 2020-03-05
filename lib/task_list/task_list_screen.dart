@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/join/join_screen.dart';
@@ -11,7 +12,6 @@ import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/settings/settings_screen.dart';
 import 'package:shared_task_list/task_detail/task_detail_screen.dart';
-import 'package:shared_task_list/task_list/create_category_dialog.dart';
 import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
 
@@ -23,6 +23,8 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   final _bloc = TaskListBloc();
   final RefreshController _refreshController = RefreshController(initialRefresh: false);
+  String _defaultCategory = '';
+  S _locale;
 
   @override
   void dispose() {
@@ -33,7 +35,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     _bloc.load();
-    Constant.noCategory = S.of(context).noCategory;
+    _locale = S.of(context);
+    Constant.noCategory = _locale.noCategory;
     double textWidth = MediaQuery.of(context).size.width - 80;
 
     return Ui.scaffold(
@@ -173,11 +176,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
           ),
           Container(
-            height: 28,
-            width: 28,
+            height: 32,
+            width: 32,
             margin: EdgeInsets.only(right: 6),
             decoration: BoxDecoration(
-              color: Colors.green.shade300,
+              color: Colors.green,
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
             child: IconButton(
@@ -224,13 +227,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
           onPressed: () {
             Ui.openDialog(
               context: context,
-              dialog: CreateCategoryDialog(
-                savePressed: () {
-                  _bloc.createNewCategory();
-                },
-                onTextChanged: (String value) {
-                  _bloc.newCategory = value;
-                },
+              dialog: TextFieldDialog(
+                savePressed: (String newCategory) => _bloc.createNewCategory(newCategory),
+                title: _locale.newCategory,
+                labelText: null,
+                hintText: _locale.categoryName,
               ),
             );
           },
@@ -250,7 +251,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       child: FloatingActionButton(
         heroTag: 'quickAdd',
         child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.green,
         onPressed: () {
           Ui.openDialog(
             context: context,
@@ -271,10 +272,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         }
                         return QuickAddDialog(
                           categories: categories,
-                          defaultCategory: snapshot.data.defaultCategory,
+                          defaultCategory: _defaultCategory.isEmpty ? snapshot.data.defaultCategory : _defaultCategory,
                           onSetName: (String title, String category) async {
+                            _defaultCategory = category;
                             await _bloc.quickAdd(title, category);
                           },
+                          onSetCategory: (String cat) => _defaultCategory = cat,
                         );
                       });
                 }),

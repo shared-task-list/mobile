@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel" : MessageLookupByLibrary.simpleMessage("Закрыть"),
     "category" : MessageLookupByLibrary.simpleMessage("Категория"),
     "categoryList" : MessageLookupByLibrary.simpleMessage("Список категорий (нажать или потянуть)"),
+    "categoryName" : MessageLookupByLibrary.simpleMessage("Название категории"),
     "comment" : MessageLookupByLibrary.simpleMessage("Комментарий"),
     "create" : MessageLookupByLibrary.simpleMessage("Создать"),
     "defaultCategory" : MessageLookupByLibrary.simpleMessage("Категория по умолчанию"),

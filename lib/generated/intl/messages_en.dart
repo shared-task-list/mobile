@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel" : MessageLookupByLibrary.simpleMessage("Cancel"),
     "category" : MessageLookupByLibrary.simpleMessage("Category"),
     "categoryList" : MessageLookupByLibrary.simpleMessage("Category List (tap or drag)"),
+    "categoryName" : MessageLookupByLibrary.simpleMessage("Category Name"),
     "comment" : MessageLookupByLibrary.simpleMessage("Comment"),
     "create" : MessageLookupByLibrary.simpleMessage("Create"),
     "defaultCategory" : MessageLookupByLibrary.simpleMessage("Default Category"),
