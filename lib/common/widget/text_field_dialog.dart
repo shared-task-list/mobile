@@ -38,7 +38,7 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
         child: Ui.dialog(
           child: Container(
             padding: EdgeInsets.only(right: 32.0),
-            height: 180,
+            height: 220,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -57,33 +57,31 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
                         style: Theme.of(context).textTheme.headline,
                       ),
                       SizedBox(height: 20.0),
-                      Flexible(
-                        child: Material(
-                          color: Colors.white,
-                          child: Form(
-                            key: _formKey,
-                            child: TextFormField(
-                              autofocus: true,
-                              maxLength: 30,
-                              onChanged: (String value) => newData = value,
-                              validator: (value) {
-                                if (value.isEmpty) {
-                                  return 'Field is required';
-                                }
-                                return null;
-                              },
-                              decoration: InputDecoration(
-                                icon: widget.icon == null ? null : Icon(widget.icon),
-                                hintText: widget.hintText,
+                      Material(
+                        color: Colors.white,
+                        child: Form(
+                          key: _formKey,
+                          child: TextFormField(
+                            autofocus: true,
+                            maxLength: 30,
+                            onChanged: (String value) => newData = value,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Field is required';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              icon: widget.icon == null ? null : Icon(widget.icon),
+                              hintText: widget.hintText,
 //                              labelText: labelText,
-                              ),
                             ),
                           ),
                         ),
                       ),
                       SizedBox(height: 10.0),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
                           RaisedButton(
                             child: Text(locale.cancel),
@@ -94,7 +92,7 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
                             },
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                           ),
-                          SizedBox(width: 20.0),
+//                          SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
                           RaisedButton(
                             child: Text(widget.agreeButtonText ?? locale.create),
                             color: Colors.blue,

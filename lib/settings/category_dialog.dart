@@ -72,7 +72,7 @@ class _CategoryDialogState extends State<CategoryDialog> {
                             }),
                       ),
                     ),
-                    SizedBox(height: 60),
+                    if (Platform.isIOS) SizedBox(height: 60),
                   ],
                 ),
                 if (Platform.isIOS)

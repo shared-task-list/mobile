@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
 import 'package:shared_task_list/common/constant.dart';
@@ -33,6 +35,7 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
   final Function(String, String) onSetName;
   final Function(String) onSetCategory;
   final _formKey = GlobalKey<FormState>();
+  final isIos = Platform.isIOS;
   String defaultCategory;
   String _title = '';
   String _category = '';
@@ -54,6 +57,7 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
             child: Container(
               padding: EdgeInsets.only(right: 32.0),
               height: 230 + (categories.length * 45.0),
+//            height: 400,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -63,56 +67,57 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                   SizedBox(width: 40.0),
                   Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+//                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         SizedBox(height: 20.0),
                         Text(
                           locale.taskTitle,
                           style: Theme.of(context).textTheme.title,
                         ),
-                        SizedBox(height: 20.0),
-                        Flexible(
-                          child: Form(
-                            key: _formKey,
-                            child: TextFormField(
-                              style: TextStyle(backgroundColor: Colors.white),
-                              autofocus: true,
-                              onChanged: (value) => _title = value,
-                              validator: (value) {
-                                if (value.isEmpty) {
-                                  return S.of(context).required;
-                                }
-                                return null;
+//                        SizedBox(height: 20.0),
+                        Form(
+                          key: _formKey,
+                          child: TextFormField(
+                            style: TextStyle(backgroundColor: Colors.white),
+                            autofocus: true,
+                            onChanged: (value) => _title = value,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return S.of(context).required;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+//                      SizedBox(height: 10.0),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: RadioButtonGroup(
+                              labels: categories.map((category) => category.name).toList(),
+                              onSelected: (String selected) => setState(() {
+                                _category = selected;
+                                defaultCategory = selected;
+                                onSetCategory(selected);
+                              }),
+                              picked: _category,
+                              itemBuilder: (Radio rb, Text txt, int i) {
+                                return GestureDetector(
+                                  child: Container(
+                                    child: Row(children: <Widget>[rb, txt]),
+                                  ),
+                                  onTap: () => setState(() {
+                                    _category = txt.data;
+                                    defaultCategory = txt.data;
+                                    onSetCategory(txt.data);
+                                  }),
+                                );
                               },
                             ),
                           ),
                         ),
-                        SizedBox(height: 30.0),
-                        SingleChildScrollView(
-                          child: RadioButtonGroup(
-                            labels: categories.map((category) => category.name).toList(),
-                            onSelected: (String selected) => setState(() {
-                              _category = selected;
-                              defaultCategory = selected;
-                              onSetCategory(selected);
-                            }),
-                            picked: _category,
-                            itemBuilder: (Radio rb, Text txt, int i) {
-                              return GestureDetector(
-                                child: Container(
-                                  child: Row(children: <Widget>[rb, txt]),
-                                ),
-                                onTap: () => setState(() {
-                                  _category = txt.data;
-                                  defaultCategory = txt.data;
-                                  onSetCategory(txt.data);
-                                }),
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 20.0),
+//                      SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -125,7 +130,7 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                               },
                               shape: Constant.buttonShape,
                             ),
-                            SizedBox(width: 20.0),
+                            SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
                             RaisedButton(
                               child: Text(locale.create),
                               color: Colors.blue,
@@ -150,6 +155,37 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRow(Category category) {
+    return InkWell(
+      enableFeedback: false,
+      onTap: () {
+        _category = category.name;
+        defaultCategory = category.name;
+        onSetCategory(category.name);
+      },
+      child: Container(
+        child: Row(
+          children: <Widget>[
+            Radio(
+              autofocus: _category == category.name,
+              value: category.name,
+              onChanged: (String value) {
+                _category = value;
+                defaultCategory = value;
+                onSetCategory(value);
+              },
+              groupValue: _category,
+            ),
+            Text(
+              category.name,
+              style: TextStyle(),
+            ),
+          ],
         ),
       ),
     );

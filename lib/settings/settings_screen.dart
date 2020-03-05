@@ -45,11 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             return Material(
               color: Colors.white,
-              child: Stack(
-                children: <Widget>[
-                  _buildBody(context),
-                ],
-              ),
+              child: _buildBody(context),
             );
           }),
 //      insets: const EdgeInsets.symmetric(horizontal: 16),
@@ -98,19 +94,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                   return StreamBuilder<String>(
                       stream: _bloc.name,
-                      builder: (context, snapshot) {
+                      builder: (ctx, snapshot) {
                         final data = snapshot.data ?? '';
                         return _buildRow(
                             primaryText: locale.username,
                             secondText: data,
-                            onTap: () async {
+                            onTap: () {
                               Ui.openDialog(
                                 context: context,
-                                /*dialog: SetNameDialog(onSetName: (String newName) {
-                                  _bloc.name.add(newName);
-                                }),*/
                                 dialog: TextFieldDialog(
-                                  savePressed: (String newName) => _bloc.name.add(newName),
+                                  savePressed: (String newName) {
+                                    _bloc.name.add(newName);
+                                    prefs.setString(Constant.authorKey, newName);
+                                  },
                                   title: locale.newName,
                                   labelText: null,
                                   hintText: locale.newName,

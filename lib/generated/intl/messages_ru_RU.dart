@@ -30,7 +30,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultCategory" : MessageLookupByLibrary.simpleMessage("Категория по умолчанию"),
     "error" : MessageLookupByLibrary.simpleMessage("Ошибка"),
     "newCategory" : MessageLookupByLibrary.simpleMessage("Новая категория"),
-    "newName" : MessageLookupByLibrary.simpleMessage("Введите новое имя"),
+    "newName" : MessageLookupByLibrary.simpleMessage("Новое имя"),
     "newTask" : MessageLookupByLibrary.simpleMessage("Новая задача"),
     "noCategory" : MessageLookupByLibrary.simpleMessage("Без Категории"),
     "open" : MessageLookupByLibrary.simpleMessage("Открыть"),
