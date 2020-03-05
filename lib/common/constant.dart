@@ -23,7 +23,7 @@ class Constant {
   static const authorKey = "Author";
   static const authorUidKey = "AuthorUid";
   static const serviceTaskComment = "service task";
-  static const dateFormat = 'dd MMM HH:MM';
+  static const dateFormat = 'dd MMMM HH:MM';
   static final dateFormatter = DateFormat(dateFormat);
   static String password = "";
   static String userName = "";
@@ -35,7 +35,6 @@ class AppData {
   static String password = "";
   static String userName = "";
   static String taskList = "";
-//  static List<String> categories = List<String>();
 }
 
 List<String> categories = List<String>();

@@ -23,7 +23,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static _notInlinedMessages(_) => <String, Function> {
     "cancel" : MessageLookupByLibrary.simpleMessage("Закрыть"),
     "category" : MessageLookupByLibrary.simpleMessage("Категория"),
-    "categoryList" : MessageLookupByLibrary.simpleMessage("Список категорий (нажать или потянуть)"),
+    "categoryList" : MessageLookupByLibrary.simpleMessage("Категории (нажать или потянуть)"),
     "categoryName" : MessageLookupByLibrary.simpleMessage("Название категории"),
     "comment" : MessageLookupByLibrary.simpleMessage("Комментарий"),
     "create" : MessageLookupByLibrary.simpleMessage("Создать"),

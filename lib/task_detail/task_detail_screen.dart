@@ -1,6 +1,7 @@
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
+import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
@@ -68,6 +69,22 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       child: Column(
         children: <Widget>[
           SizedBox(height: 30),
+          if (widget.task != null)
+            Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, bottom: 16),
+                  child: Text(
+                    '${widget.task.author} - ${Constant.dateFormatter.format(widget.task.timestamp)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+//          SizedBox(height: 30),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: TextFormField(
