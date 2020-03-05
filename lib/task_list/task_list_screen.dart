@@ -1,3 +1,4 @@
+import 'package:expandable/expandable.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   final RefreshController _refreshController = RefreshController(initialRefresh: false);
   String _defaultCategory = '';
   S _locale;
+  Settings _settings;
 
   @override
   void dispose() {
@@ -56,7 +58,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
         },
         child: Stack(
           children: [
-            _buildList(context, textWidth),
+            FutureBuilder<Settings>(
+                future: _bloc.getSettings(),
+                builder: (ctx, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Container();
+                  }
+
+                  _settings = snapshot.data;
+                  return _buildList(context, textWidth);
+                }),
             _buildMenuButton(context),
             StreamBuilder<bool>(
                 stream: _bloc.isShowQuickAdd,
@@ -83,37 +94,49 @@ class _TaskListScreenState extends State<TaskListScreen> {
         final tasks = snapshot.data;
         var widgets = <Widget>[];
 
-        tasks.forEach((category, taskList) {
-          if (taskList.isEmpty) {
-            return;
-          }
+        tasks.forEach(
+          (category, taskList) {
+            if (taskList.isEmpty) {
+              return;
+            }
 
-          widgets.add(Row(
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(top: 16, left: 16),
-                child: Text(
-                  category,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade600,
+            final ctrl = ExpandableController(initialExpanded: _settings.isShowCategories);
+
+            widgets.add(
+              ExpandablePanel(
+                theme: ExpandableThemeData(
+                  useInkWell: false,
+                  iconPadding: EdgeInsets.only(top: 32),
+                ),
+                controller: ctrl,
+                header: Container(
+                  padding: EdgeInsets.only(top: 16, left: 16, bottom: 16),
+                  margin: EdgeInsets.only(top: 16),
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ),
+                expanded: Column(
+                  children: taskList.map((task) => _buildListItem(context, task, textWidth)).toList(),
+                ),
               ),
-            ],
-          ));
-
-          for (final task in taskList) {
-            widgets.add(_buildListItem(context, task, textWidth));
-          }
-        });
+            );
+          },
+        );
 
         widgets.add(SizedBox(height: 100));
 
-        return SingleChildScrollView(
-          child: Column(
-            children: widgets,
+        return Material(
+          color: Colors.white,
+          child: SingleChildScrollView(
+            child: Column(
+              children: widgets,
+            ),
           ),
         );
       },
@@ -264,22 +287,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
                   final categories = snapshot.data;
 
-                  return FutureBuilder<Settings>(
-                      future: _bloc.getSettings(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Container();
-                        }
-                        return QuickAddDialog(
-                          categories: categories,
-                          defaultCategory: _defaultCategory.isEmpty ? snapshot.data.defaultCategory : _defaultCategory,
-                          onSetName: (String title, String category) async {
-                            _defaultCategory = category;
-                            await _bloc.quickAdd(title, category);
-                          },
-                          onSetCategory: (String cat) => _defaultCategory = cat,
-                        );
-                      });
+                  return QuickAddDialog(
+                    categories: categories,
+                    defaultCategory: _defaultCategory.isEmpty ? _settings.defaultCategory : _defaultCategory,
+                    onSetName: (String title, String category) async {
+                      _defaultCategory = category;
+                      await _bloc.quickAdd(title, category);
+                    },
+                    onSetCategory: (String cat) => _defaultCategory = cat,
+                  );
                 }),
           );
         },

@@ -41,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }
 
             _settings = snapshot.data;
+            _bloc.setVisibleCats(_settings.isShowCategories);
             _bloc.category.add(_settings.defaultCategory);
 
             return Material(
@@ -81,6 +82,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
                 }),
             // show/hide
+            InkWell(
+              onTap: () {
+                bool value = !_bloc.visibleCats;
+                _bloc.setVisibleCats(value);
+                _settings.isShowCategories = value;
+                _bloc.saveSettings(_settings);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Expand Categories',
+                      style: _primaryStyle,
+                    ),
+                    StreamBuilder<bool>(
+                        stream: _bloc.isShowCategories,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Container();
+                          }
+                          return Switch.adaptive(
+                            value: snapshot.data,
+                            onChanged: (bool value) {
+                              _bloc.setVisibleCats(value);
+                              _settings.isShowCategories = value;
+                              _bloc.saveSettings(_settings);
+                            },
+                          );
+                        }),
+                  ],
+                ),
+              ),
+            ),
             FutureBuilder<SharedPreferences>(
                 future: SharedPreferences.getInstance(),
                 builder: (context, snapshot) {
