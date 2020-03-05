@@ -72,6 +72,7 @@ class _CategoryDialogState extends State<CategoryDialog> {
                             }),
                       ),
                     ),
+                    SizedBox(height: 60),
                   ],
                 ),
                 if (Platform.isIOS)
@@ -99,26 +100,36 @@ class _CategoryDialogState extends State<CategoryDialog> {
   }
 
   Widget _buildRow(Category category) {
-    return Container(
-      child: Row(
-        children: <Widget>[
-          Radio(
-            autofocus: _currentCategory == category.name,
-            value: category.name,
-            onChanged: (String value) {
-              _currentCategory = value;
-              _onChanged(value);
-              setState(() {
+    return InkWell(
+      enableFeedback: false,
+      onTap: () {
+        _currentCategory = category.name;
+        _onChanged(category.name);
+        setState(() {
+          _currentCategory = category.name;
+        });
+      },
+      child: Container(
+        child: Row(
+          children: <Widget>[
+            Radio(
+              autofocus: _currentCategory == category.name,
+              value: category.name,
+              onChanged: (String value) {
                 _currentCategory = value;
-              });
-            },
-            groupValue: _currentCategory,
-          ),
-          Text(
-            category.name,
-            style: TextStyle(),
-          ),
-        ],
+                _onChanged(value);
+                setState(() {
+                  _currentCategory = value;
+                });
+              },
+              groupValue: _currentCategory,
+            ),
+            Text(
+              category.name,
+              style: TextStyle(),
+            ),
+          ],
+        ),
       ),
     );
   }
