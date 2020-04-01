@@ -103,7 +103,7 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                               }),
                               picked: _category,
                               itemBuilder: (Radio rb, Text txt, int i) {
-                                return GestureDetector(
+                                return InkWell(
                                   child: Container(
                                     child: Row(children: <Widget>[rb, txt]),
                                   ),

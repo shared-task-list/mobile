@@ -82,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
                 }),
             // show/hide
-            InkWell(
+            /*InkWell(
               onTap: () {
                 bool value = !_bloc.visibleCats;
                 _bloc.setVisibleCats(value);
@@ -116,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-            ),
+            ),*/
             FutureBuilder<SharedPreferences>(
                 future: SharedPreferences.getInstance(),
                 builder: (context, snapshot) {

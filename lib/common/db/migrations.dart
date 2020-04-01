@@ -22,7 +22,8 @@ const initScript = [
   '''
   CREATE TABLE if not exists categories (
     id INTEGER PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    color_string TEXT
   );
   ''',
   '''

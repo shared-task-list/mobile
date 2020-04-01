@@ -29,7 +29,7 @@ class _CategoryDialogState extends State<CategoryDialog> {
   @override
   Widget build(BuildContext context) {
     final double width = 200;
-    final double leftMargin = (width / 3);
+
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: Constant.dialogPadding),
@@ -46,10 +46,10 @@ class _CategoryDialogState extends State<CategoryDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Padding(
-                      padding: const EdgeInsets.only(top: 16, left: 16),
+                      padding: const EdgeInsets.only(top: 16, left: 16, bottom: 8),
                       child: Text(
                         'Set Default Category',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
                       ),
                     ),
                     Expanded(
@@ -72,23 +72,28 @@ class _CategoryDialogState extends State<CategoryDialog> {
                             }),
                       ),
                     ),
-                    if (Platform.isIOS) SizedBox(height: 60),
+                    if (Platform.isIOS) SizedBox(height: 70),
                   ],
                 ),
                 if (Platform.isIOS)
                   Positioned(
                     bottom: 10,
-                    left: leftMargin,
-                    child: SizedBox(
-                      height: 45,
-                      width: width,
-                      child: Ui.button(
-                        title: 'Ok',
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        radius: 20,
-                      ),
+                    width: MediaQuery.of(context).size.width - Constant.dialogPadding,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 45,
+                          width: width,
+                          child: Ui.button(
+                            title: 'OK',
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            radius: 20,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],

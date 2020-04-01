@@ -277,6 +277,29 @@ class Ui {
     return null;
   }
 
+  static Widget alertDialog({
+    @required Widget child,
+    @required List<Widget> actions,
+  }) {
+    if (Platform.isAndroid) {
+      return AlertDialog(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+//        child: child,
+        content: child,
+        actions: actions,
+      );
+    }
+    if (Platform.isIOS) {
+      return CupertinoAlertDialog(
+        content: child,
+        actions: actions,
+      );
+    }
+
+    return null;
+  }
+
   static void openDialog({BuildContext context, Widget dialog}) {
     if (Platform.isAndroid) {
       showDialog(

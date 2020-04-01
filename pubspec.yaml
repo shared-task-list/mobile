@@ -1,6 +1,6 @@
 name: shared_task_list
 description: A new Flutter application.
-version: 1.0.2+1
+version: 1.1.0+3
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -30,6 +30,7 @@ dependencies:
   flutter_cupertino_localizations: ^1.0.1
   expandable: ^4.1.2
   grouped_buttons: ^1.0.4
+  flutter_material_color_picker: ^1.0.5
 
 dev_dependencies:
   flutter_test:

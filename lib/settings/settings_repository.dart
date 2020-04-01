@@ -1,3 +1,4 @@
+import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
 import 'package:shared_task_list/model/settings.dart';
 
@@ -10,9 +11,9 @@ class SettingsRepository {
       List<Map> maps = await db.query(_tableName);
       var lists = maps.map((map) => Settings.fromMap(map));
 
-      return lists.first ?? Settings(defaultCategory: '', isShowCategories: true);
+      return lists.first ?? Settings(defaultCategory: Constant.noCategory, isShowCategories: true);
     } catch (e) {
-      return Settings(defaultCategory: '', isShowCategories: true);
+      return Settings(defaultCategory: Constant.noCategory, isShowCategories: true);
     }
   }
 

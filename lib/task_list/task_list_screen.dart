@@ -16,6 +16,8 @@ import 'package:shared_task_list/task_detail/task_detail_screen.dart';
 import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
 
+import 'color_set_dialog.dart';
+
 class TaskListScreen extends StatefulWidget {
   @override
   _TaskListScreenState createState() => _TaskListScreenState();
@@ -27,6 +29,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
   String _defaultCategory = '';
   S _locale;
   Settings _settings;
+  Future<bool> initFuture;
+
+  _TaskListScreenState() {
+    initFuture = _bloc.init();
+  }
 
   @override
   void dispose() {
@@ -36,48 +43,46 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _bloc.load();
+//    _bloc.init();
     _locale = S.of(context);
     Constant.noCategory = _locale.noCategory;
     double textWidth = MediaQuery.of(context).size.width - 80;
 
-    return Ui.scaffold(
-      bar: Ui.appBar(
-        title: Constant.taskList,
-        rightButton: Ui.actionButton(Icons.refresh, () async {
-          await _bloc.getTasks();
-        }),
-      ),
-      body: SmartRefresher(
-        controller: _refreshController,
-        enablePullDown: true,
-        enablePullUp: false,
-        onRefresh: () async {
-          await _bloc.getTasks();
-          _refreshController.refreshCompleted();
-        },
-        child: Stack(
-          children: [
-            FutureBuilder<Settings>(
-                future: _bloc.getSettings(),
-                builder: (ctx, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Container();
-                  }
+    _settings = Settings(defaultCategory: Constant.noCategory, isShowCategories: true);
 
-                  _settings = snapshot.data;
-                  return _buildList(context, textWidth);
-                }),
-            _buildMenuButton(context),
-            StreamBuilder<bool>(
-                stream: _bloc.isShowQuickAdd,
-                builder: (ctx, snapshot) {
-                  return _buildQuickAdd(context);
-                }),
-          ],
-        ),
-      ),
-    );
+    return FutureBuilder(
+        future: initFuture,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Ui.waitIndicator();
+          }
+          return Ui.scaffold(
+            bar: Ui.appBar(
+              title: Constant.taskList,
+              rightButton: Ui.actionButton(Icons.refresh, () async {
+                await _bloc.getTasks();
+              }),
+            ),
+            body: Stack(
+              children: [
+                /*StreamBuilder<Settings>(
+                  stream: _bloc.settings,
+                  builder: (ctx, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Container();
+                    }
+
+                    _settings = snapshot.data;
+                    return _buildList(context, textWidth);
+                  },
+                ),*/
+                _buildList(context, textWidth),
+                _buildMenuButton(context),
+                _buildQuickAdd(context),
+              ],
+            ),
+          );
+        });
   }
 
   Widget _buildList(BuildContext context, double textWidth) {
@@ -100,32 +105,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
               return;
             }
 
-            final ctrl = ExpandableController(initialExpanded: _settings.isShowCategories);
+            List<Widget> tasks = taskList.map((task) => _buildListItem(context, task, textWidth)).toList();
+            List<Widget> expandedWidgets = _buildExpandableWidgets(category, tasks);
 
-            widgets.add(
-              ExpandablePanel(
-                theme: ExpandableThemeData(
-                  useInkWell: false,
-                  iconPadding: EdgeInsets.only(top: 32),
-                ),
-                controller: ctrl,
-                header: Container(
-                  padding: EdgeInsets.only(top: 16, left: 16, bottom: 16),
-                  margin: EdgeInsets.only(top: 16),
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-                expanded: Column(
-                  children: taskList.map((task) => _buildListItem(context, task, textWidth)).toList(),
-                ),
-              ),
-            );
+            widgets.add(_buildExpandablePanel(category, expandedWidgets));
           },
         );
 
@@ -140,6 +123,91 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         );
       },
+    );
+  }
+
+  List<Widget> _buildExpandableWidgets(String category, List<Widget> tasks) {
+    return [
+      Ui.flatButton('Add New', () {
+        _defaultCategory = category;
+        // TODO:  to func
+        Ui.openDialog(
+          context: context,
+          dialog: FutureBuilder<List<Category>>(
+              future: _bloc.getCategories(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Container();
+                }
+
+                final categories = snapshot.data;
+
+                return QuickAddDialog(
+                  categories: categories,
+                  defaultCategory: _defaultCategory,
+                  onSetName: (String title, String category) async {
+                    _defaultCategory = category;
+                    await _bloc.quickAdd(title, category);
+                  },
+                  onSetCategory: (String cat) => _defaultCategory = cat,
+                );
+              }),
+        );
+      }),
+      ...tasks,
+    ];
+  }
+
+  Widget _buildExpandablePanel(String category, List<Widget> expandedWidgets) {
+    final ctrl = ExpandableController(initialExpanded: _settings.isShowCategories);
+
+    return ExpandablePanel(
+      theme: ExpandableThemeData(
+        useInkWell: false,
+        iconPadding: EdgeInsets.only(top: 32),
+      ),
+      controller: ctrl,
+      header: Container(
+        padding: EdgeInsets.only(top: 16, left: 16, bottom: 16),
+        margin: EdgeInsets.only(top: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            InkWell(
+              child: Icon(
+                Icons.color_lens,
+                size: 30,
+              ),
+              onTap: () {
+                Ui.openDialog(
+                  context: context,
+                  dialog: ColorSetDialog(
+                    onSetColor: (Color color) {
+                      _bloc.setColorForCategory(category, color);
+                    },
+                  ),
+                );
+              },
+            ),
+            StreamBuilder<Map<String, Category>>(
+                stream: _bloc.categoryMapStream,
+                builder: (context, snapshot) {
+                  return Text(
+                    category,
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: snapshot.hasData ? snapshot.data[category].getColor() : Colors.grey.shade600,
+                    ),
+                  );
+                }),
+            SizedBox(width: 10),
+          ],
+        ),
+      ),
+      expanded: Column(
+        children: expandedWidgets,
+      ),
     );
   }
 
@@ -158,45 +226,61 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 ),
               );
             },
-            child: Container(
-              margin: EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey[400],
-                    blurRadius: 1.0, // has the effect of softening the shadow
-                    spreadRadius: 1.0, // has the effect of extending the shadow
-                    offset: Offset(
-                      1.0, // horizontal, move right 10
-                      1.0, // vertical, move down 10
+            child: StreamBuilder<Map<String, Category>>(
+                stream: _bloc.categoryMapStream,
+                builder: (context, snapshot) {
+                  Color textColor = Colors.black;
+                  Color backgroundTaskColor = Colors.white;
+
+                  if (snapshot.hasData) {
+                    var catColor = snapshot.data[task.category].getColor();
+                    if (catColor != Colors.grey.shade600) {
+                      final brightness = ThemeData.estimateBrightnessForColor(catColor);
+                      textColor = brightness == Brightness.light ? Colors.black : Colors.white;
+                      backgroundTaskColor = catColor;
+                    }
+                  }
+
+                  return Container(
+                    margin: EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
+                    decoration: BoxDecoration(
+                      color: backgroundTaskColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey[400],
+                          blurRadius: 1.0, // has the effect of softening the shadow
+                          spreadRadius: 1.0, // has the effect of extending the shadow
+                          offset: Offset(
+                            1.0, // horizontal, move right 10
+                            1.0, // vertical, move down 10
+                          ),
+                        ),
+                      ],
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
                     ),
-                  ),
-                ],
-                borderRadius: BorderRadius.all(Radius.circular(20)),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    width: textWidth,
-                    margin: EdgeInsets.only(left: 16, top: 8, bottom: 8),
-                    child: Text(
-                      task.title,
-                      style: TextStyle(fontSize: 18),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: textWidth,
+                          margin: EdgeInsets.only(left: 16, top: 8, bottom: 8),
+                          child: Text(
+                            task.title,
+                            style: TextStyle(fontSize: 18, color: textColor),
+                          ),
+                        ),
+                        /*Container(
+                        margin: EdgeInsets.only(left: 16, bottom: 8, top: 4),
+                        child: Text(
+                          task.author + ' - ' + time,
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ),*/
+                      ],
                     ),
-                  ),
-                  /*Container(
-                    margin: EdgeInsets.only(left: 16, bottom: 8, top: 4),
-                    child: Text(
-                      task.author + ' - ' + time,
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ),*/
-                ],
-              ),
-            ),
+                  );
+                }),
           ),
           Container(
             height: 32,

@@ -5,15 +5,26 @@ import 'package:shared_task_list/model/category.dart';
 class CategoryProvider {
   static const _categoryTable = 'categories';
 
-  static Future saveList(Set<String> categories) async {
-    var db = await DBProvider.db.database;
+  static Future saveList(List<Category> newCategories) async {
+    var dbf = DBProvider.db.database;
+    var savedCategories = Map<String, Category>();
+    var savedList = await getList();
+    savedList.forEach((cat) {
+      savedCategories[cat.name] = cat;
+    });
+
+    var db = await dbf;
 
     try {
       var batch = db.batch();
       batch.rawDelete('delete from $_categoryTable');
 
-      for (final category in categories) {
-        batch.insert(_categoryTable, Category(name: category).toMap());
+      // заем добавитть новые
+      for (Category category in newCategories) {
+        if (savedCategories.containsKey(category.name)) {
+          category.colorString = savedCategories[category.name].colorString;
+        }
+        batch.insert(_categoryTable, category.toMap());
       }
 
       batch.commit(noResult: true);
@@ -33,5 +44,15 @@ class CategoryProvider {
     }
 
     return lists;
+  }
+
+  static Future save(Category category) async {
+    var db = await DBProvider.db.database;
+    var batch = db.batch();
+    batch.rawUpdate(
+      'update $_categoryTable set name = ?, color_string = ? where id = ?',
+      [category.name, category.colorString, category.id],
+    );
+    batch.commit(noResult: true);
   }
 }
