@@ -1,12 +1,53 @@
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
+import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/task.dart';
 
 class TaskListRepository {
   static const _taskTable = 'tasks';
+  final taskListStream = PublishSubject<List<UserTask>>();
+  final categoryListStream = PublishSubject<List<Category>>();
+
+  void dispose() {
+    taskListStream.close();
+    categoryListStream.close();
+  }
+
+  Future init() async {
+    var db = await DBProvider.db.database;
+    List<Map> maps = await db.rawQuery(
+      'select '
+      't.Uid as tuid, t.Title as ttitle, t.Category as tcat, t.Timestamp as tt, '
+      'cats.name as cname, cats.color_string as ccolor, cats.id as cid '
+      'from tasks as t '
+      'join categories as cats on 1 = 1 '
+      'join settings as s on 1 = 1',
+    );
+    List<UserTask> tasks = [];
+    List<Category> cats = [];
+    Set<String> taskId = {};
+    Set<String> catName = {};
+
+    for (final item in maps) {
+      if (!taskId.contains(item['tuid'])) {
+        var task = UserTask(uid: item['tuid'], category: item['tcat'], title: item['ttitle'], timestamp: DateTime.parse(item["tt"]));
+        tasks.add(task);
+        taskId.add(task.uid);
+      }
+      if (!catName.contains(item['cname'])) {
+        var cat = Category(name: item['cname'], colorString: item['ccolor'], id: item['cid']);
+        catName.add(cat.name);
+        cats.add(cat);
+      }
+    }
+
+    taskListStream.add(tasks);
+    categoryListStream.add(cats);
+  }
 
   Future<List<UserTask>> getTasks() async {
-    var db = await DBProvider.db.database;
+    final db = await DBProvider.db.database;
     List<Map> maps = await db.query(_taskTable);
     var lists = List<UserTask>();
 
@@ -24,7 +65,7 @@ class TaskListRepository {
   }
 
   Future saveTasks(List<UserTask> tasks) async {
-    var db = await DBProvider.db.database;
+    final db = await DBProvider.db.database;
     try {
       var batch = db.batch();
       batch.rawDelete('delete from $_taskTable');
@@ -40,17 +81,17 @@ class TaskListRepository {
   }
 
   Future remove(UserTask task) async {
-    var db = await DBProvider.db.database;
+    final db = await DBProvider.db.database;
     await db.delete(_taskTable, where: 'Uid = ?', whereArgs: [task.uid]);
   }
 
   Future clearTasks() async {
-    var db = await DBProvider.db.database;
+    final db = await DBProvider.db.database;
     db.delete(_taskTable);
   }
 
   Future createTask(UserTask task) async {
-    var db = await DBProvider.db.database;
+    final db = await DBProvider.db.database;
     await db.insert(_taskTable, task.toMap());
   }
 }

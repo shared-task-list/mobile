@@ -14,8 +14,8 @@ class UserTask {
   DateTime timestamp;
 
   UserTask({
-    @required this.author,
-    @required this.authorUid,
+    this.author,
+    this.authorUid,
     @required this.category,
     @required this.timestamp,
     @required this.title,

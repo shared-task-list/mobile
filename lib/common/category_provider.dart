@@ -6,25 +6,21 @@ class CategoryProvider {
   static const _categoryTable = 'categories';
 
   static Future saveList(List<Category> newCategories) async {
-    var dbf = DBProvider.db.database;
+    final db = await DBProvider.db.database;
     var savedCategories = Map<String, Category>();
-    var savedList = await getList();
-    savedList.forEach((cat) {
-      savedCategories[cat.name] = cat;
-    });
-
-    var db = await dbf;
 
     try {
       var batch = db.batch();
       batch.rawDelete('delete from $_categoryTable');
 
-      // заем добавитть новые
       for (Category category in newCategories) {
         if (savedCategories.containsKey(category.name)) {
           category.colorString = savedCategories[category.name].colorString;
         }
-        batch.insert(_categoryTable, category.toMap());
+        batch.rawInsert(
+          'insert into $_categoryTable (name, color_string) values (?,?)',
+          [category.name, category.colorString],
+        );
       }
 
       batch.commit(noResult: true);

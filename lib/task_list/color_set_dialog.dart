@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
@@ -31,7 +33,7 @@ class _ColorSetDialogState extends State<ColorSetDialog> {
       child: Stack(
         children: <Widget>[
           Container(
-            height: 450,
+            height: Platform.isIOS ? 450 : 570,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(10)),

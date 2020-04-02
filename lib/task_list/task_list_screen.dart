@@ -43,7 +43,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
-//    _bloc.init();
     _locale = S.of(context);
     Constant.noCategory = _locale.noCategory;
     double textWidth = MediaQuery.of(context).size.width - 80;
@@ -177,6 +176,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               child: Icon(
                 Icons.color_lens,
                 size: 30,
+                color: Colors.blue.shade600,
               ),
               onTap: () {
                 Ui.openDialog(
@@ -233,7 +233,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   Color backgroundTaskColor = Colors.white;
 
                   if (snapshot.hasData) {
-                    var catColor = snapshot.data[task.category].getColor();
+                    Color catColor = snapshot.data[task.category].getColor();
+
                     if (catColor != Colors.grey.shade600) {
                       final brightness = ThemeData.estimateBrightnessForColor(catColor);
                       textColor = brightness == Brightness.light ? Colors.black : Colors.white;

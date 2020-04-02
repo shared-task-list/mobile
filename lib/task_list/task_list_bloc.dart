@@ -19,9 +19,9 @@ class TaskListBloc {
   final _repository = TaskListRepository();
   final _settingsRepository = SettingsRepository();
   final _fbClient = FbClient();
-  final tasksMap = PublishSubject<Map<String, List<UserTask>>>();
+  final tasksMap = BehaviorSubject<Map<String, List<UserTask>>>();
   final settings = PublishSubject<Settings>();
-  final categoryMapStream = PublishSubject<Map<String, Category>>();
+  final categoryMapStream = BehaviorSubject<Map<String, Category>>();
 
   var _taskList = List<UserTask>();
   var _taskMap = Map<String, List<UserTask>>();
@@ -45,7 +45,7 @@ class TaskListBloc {
         task.category = Constant.noCategory;
       }
       if (!_categoryMap.containsKey(task.category)) {
-        _categoryMap[task.category] = Category(name: task.category, colorString: colorToString(Colors.grey.shade600));
+        _categoryMap[task.category] = Category(name: task.category, colorString: _colorToString(Colors.grey.shade600));
         Category(name: task.category).save();
       }
       try {
@@ -89,48 +89,44 @@ class TaskListBloc {
   }
 
   Future<bool> init() async {
-    load();
-//    getSettings();
-    var cats = await getCategories();
+    _repository.taskListStream.listen((taskList) async {
+      _taskList = taskList;
+      _createTaskMap(taskList);
+      tasksMap.add(_taskMap);
 
-    for (var cat in cats) {
-      _categoryMap[cat.name] = cat;
-    }
+      _load();
+      _subscribe();
+    });
+    _repository.categoryListStream.listen((catList) {
+      _setCategories(catList);
+      categoryMapStream.add(_categoryMap);
+      CategoryProvider.saveList(catList);
+    });
+    await _repository.init();
 
-    categoryMapStream.add(_categoryMap);
     return true;
   }
 
-  Future load() async {
-    if (_taskList.isNotEmpty) {
-      return;
-    }
-
-    await getTasks();
-    CategoryProvider.saveList(_categoryMap.values.toList());
-    _subscribe();
-    var cats = await getCategories();
-
-    for (var cat in cats) {
+  void _setCategories(List<Category> categories) {
+    for (final cat in categories) {
       _categoryMap[cat.name] = cat;
     }
 
     categoryMapStream.add(_categoryMap);
   }
 
+  Future _load() async {
+    await getTasks();
+    await CategoryProvider.saveList(_categoryMap.values.toList());
+
+    final cats = await getCategories();
+    _setCategories(cats);
+  }
+
   Future getTasks() async {
-    List<UserTask> _tasks = await _repository.getTasks();
-
-    if (_tasks.isNotEmpty) {
-      _taskList = _tasks;
-
-      createTaskMap(_taskList);
-      tasksMap.add(_taskMap);
-    }
-
     _taskList = await _fbClient.getAll(Constant.taskList);
 
-    await createTaskMap(_taskList);
+    _createTaskMap(_taskList);
     tasksMap.add(_taskMap);
 
     _repository.saveTasks(_taskList);
@@ -139,7 +135,7 @@ class TaskListBloc {
   Future remove(UserTask task) async {
     _taskList.remove(task);
 
-    createTaskMap(_taskList);
+    _createTaskMap(_taskList);
     tasksMap.add(_taskMap);
 
     _repository.remove(task);
@@ -149,23 +145,23 @@ class TaskListBloc {
   }
 
   // todo: to extension
-  String colorToString(Color color) {
+  String _colorToString(Color color) {
     return "${color.red},${color.green},${color.blue}";
   }
 
-  Future createTaskMap(List<UserTask> taskList) async {
+  void _createTaskMap(List<UserTask> taskList) {
     _taskMap.clear();
 
     for (final task in taskList) {
       if (task.category == null || task.category.isEmpty) {
         task.category = Constant.noCategory;
       }
-      _categoryMap[Constant.noCategory] = Category(
-        name: Constant.noCategory,
-        colorString: colorToString(Colors.grey.shade600),
+      _categoryMap[task.category] = Category(
+        name: task.category,
+        colorString: _colorToString(Colors.grey.shade600),
       );
     }
-    for (final category in _categoryMap.keys.toList()) {
+    for (final category in _categoryMap.keys) {
       if (category == Constant.noCategory) {
         _taskMap[Constant.noCategory] = taskList.where((task) => task.category == Constant.noCategory).toList();
         _taskMap[Constant.noCategory].sort((task1, task2) => task1.timestamp.compareTo(task2.timestamp));
@@ -182,7 +178,7 @@ class TaskListBloc {
       return;
     }
 
-    final category = Category(name: newCategory, colorString: colorToString(Colors.grey.shade600));
+    final category = Category(name: newCategory, colorString: _colorToString(Colors.grey.shade600));
     category.save();
     _categoryMap[newCategory] = category;
   }
@@ -238,6 +234,7 @@ class TaskListBloc {
     tasksMap.close();
     settings.close();
     categoryMapStream.close();
+    _repository.dispose();
   }
 
   Future setColorForCategory(String category, Color color) async {
