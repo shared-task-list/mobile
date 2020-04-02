@@ -102,8 +102,8 @@ class TaskListBloc {
       categoryMapStream.add(_categoryMap);
       CategoryProvider.saveList(catList);
     });
-    await _repository.init();
 
+    await _repository.init();
     return true;
   }
 
@@ -156,10 +156,15 @@ class TaskListBloc {
       if (task.category == null || task.category.isEmpty) {
         task.category = Constant.noCategory;
       }
-      _categoryMap[task.category] = Category(
-        name: task.category,
-        colorString: _colorToString(Colors.grey.shade600),
-      );
+
+      String colorString = _colorToString(Colors.grey.shade600);
+
+      if (_categoryMap.isNotEmpty) {
+        Color color = _categoryMap.containsKey(task.category) ? _categoryMap[task.category].getColor() : Colors.grey.shade600;
+        colorString = _colorToString(color);
+      }
+
+      _categoryMap[task.category] = Category(name: task.category, colorString: colorString);
     }
     for (final category in _categoryMap.keys) {
       if (category == Constant.noCategory) {
