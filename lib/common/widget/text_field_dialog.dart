@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
@@ -83,28 +85,32 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
-                          RaisedButton(
-                            child: Text(locale.cancel),
-                            color: Colors.red,
-                            colorBrightness: Brightness.dark,
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                          Expanded(
+                            child: RaisedButton(
+                              child: Text(locale.cancel),
+                              color: Colors.red,
+                              colorBrightness: Brightness.dark,
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                            ),
                           ),
-//                          SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
-                          RaisedButton(
-                            child: Text(widget.agreeButtonText ?? locale.create),
-                            color: Colors.blue,
-                            colorBrightness: Brightness.dark,
-                            onPressed: () {
-                              if (!_formKey.currentState.validate()) {
-                                return;
-                              }
-                              widget.savePressed(newData);
-                              Navigator.pop(context);
-                            },
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                          SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
+                          Expanded(
+                            child: RaisedButton(
+                              child: Text(widget.agreeButtonText ?? locale.create),
+                              color: Colors.blue,
+                              colorBrightness: Brightness.dark,
+                              onPressed: () {
+                                if (!_formKey.currentState.validate()) {
+                                  return;
+                                }
+                                widget.savePressed(newData);
+                                Navigator.pop(context);
+                              },
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                            ),
                           ),
                         ],
                       ),

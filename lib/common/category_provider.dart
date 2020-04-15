@@ -8,25 +8,27 @@ class CategoryProvider {
   static Future saveList(List<Category> newCategories) async {
     final db = await DBProvider.db.database;
     var savedCategories = Map<String, Category>();
+    var oldCategories = await getList();
 
-    try {
-      var batch = db.batch();
-      batch.rawDelete('delete from $_categoryTable');
-
-      for (Category category in newCategories) {
-        if (savedCategories.containsKey(category.name)) {
-          category.colorString = savedCategories[category.name].colorString;
-        }
-        batch.rawInsert(
-          'insert into $_categoryTable (name, color_string) values (?,?)',
-          [category.name, category.colorString],
-        );
-      }
-
-      batch.commit(noResult: true);
-    } catch (e) {
-      return;
+    for (final cat in oldCategories) {
+      savedCategories[cat.name] = cat;
     }
+
+    await db.rawDelete('delete from $_categoryTable');
+
+    var batch = db.batch();
+
+    for (Category category in newCategories) {
+      if (savedCategories.containsKey(category.name)) {
+        category.colorString = savedCategories[category.name].colorString;
+      }
+      batch.rawInsert(
+        'insert into $_categoryTable (name, color_string) values (?,?)',
+        [category.name, category.colorString],
+      );
+    }
+
+    batch.commit(noResult: true);
   }
 
   static Future<List<Category>> getList() async {

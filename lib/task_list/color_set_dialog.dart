@@ -30,61 +30,64 @@ class _ColorSetDialogState extends State<ColorSetDialog> {
     _locale = S.of(context);
 
     return Center(
-      child: Stack(
-        children: <Widget>[
-          Container(
-            height: Platform.isIOS ? 450 : 570,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            child: Ui.dialog(
-              child: Material(
+      child: Container(
+        margin: Platform.isIOS ? null : EdgeInsets.symmetric(horizontal: 16),
+        child: Stack(
+          children: <Widget>[
+            Container(
+              height: Platform.isIOS ? 450 : 570,
+              decoration: BoxDecoration(
                 color: Colors.white,
-                child: MaterialColorPicker(
-                  colors: fullMaterialColors,
-                  onColorChange: (Color color) {
-                    _color = color;
-                  },
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              child: Ui.dialog(
+                child: Material(
+                  color: Colors.white,
+                  child: MaterialColorPicker(
+                    colors: fullMaterialColors,
+                    onColorChange: (Color color) {
+                      _color = color;
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 10,
-            right: 10,
-            left: 10,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Expanded(
-                  child: RaisedButton(
-                    child: Text(_locale.cancel),
-                    color: Colors.red,
-                    colorBrightness: Brightness.dark,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    shape: Constant.buttonShape,
+            Positioned(
+              bottom: 10,
+              right: 10,
+              left: 10,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Expanded(
+                    child: RaisedButton(
+                      child: Text(_locale.cancel),
+                      color: Colors.red,
+                      colorBrightness: Brightness.dark,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      shape: Constant.buttonShape,
+                    ),
                   ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: RaisedButton(
-                    child: Text("Ok"),
-                    color: Colors.blue,
-                    colorBrightness: Brightness.dark,
-                    onPressed: () async {
-                      onSetColor(_color);
-                      Navigator.pop(context);
-                    },
-                    shape: Constant.buttonShape,
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: RaisedButton(
+                      child: Text("Ok"),
+                      color: Colors.blue,
+                      colorBrightness: Brightness.dark,
+                      onPressed: () async {
+                        onSetColor(_color);
+                        Navigator.pop(context);
+                      },
+                      shape: Constant.buttonShape,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

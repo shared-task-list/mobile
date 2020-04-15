@@ -121,29 +121,33 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            RaisedButton(
-                              child: Text(locale.cancel),
-                              color: Colors.red,
-                              colorBrightness: Brightness.dark,
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              shape: Constant.buttonShape,
+                            Expanded(
+                              child: RaisedButton(
+                                child: Text(locale.cancel),
+                                color: Colors.red,
+                                colorBrightness: Brightness.dark,
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                shape: Constant.buttonShape,
+                              ),
                             ),
                             SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
-                            RaisedButton(
-                              child: Text(locale.create),
-                              color: Colors.blue,
-                              colorBrightness: Brightness.dark,
-                              onPressed: () async {
-                                if (!_formKey.currentState.validate()) {
-                                  return;
-                                }
+                            Expanded(
+                              child: RaisedButton(
+                                child: Text(locale.create),
+                                color: Colors.blue,
+                                colorBrightness: Brightness.dark,
+                                onPressed: () async {
+                                  if (!_formKey.currentState.validate()) {
+                                    return;
+                                  }
 
-                                onSetName(_title, _category);
-                                Navigator.pop(context);
-                              },
-                              shape: Constant.buttonShape,
+                                  onSetName(_title, _category);
+                                  Navigator.pop(context);
+                                },
+                                shape: Constant.buttonShape,
+                              ),
                             ),
                           ],
                         ),

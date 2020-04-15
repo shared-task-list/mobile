@@ -1,6 +1,6 @@
-import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
@@ -245,7 +245,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Widget _buildMenuButton(BuildContext context) {
-    return FabCircularMenu(
+    /*return FabCircularMenu(
       child: Container(),
       options: <Widget>[
         IconButton(
@@ -277,6 +277,44 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       ringColor: Colors.blue.shade100,
       ringWidth: 48,
       ringDiameter: 48 * 4.0,
+    );*/
+    const labelBackground = const Color.fromRGBO(0, 0, 0, 0.6);
+    const labelTextStyle = const TextStyle(fontWeight: FontWeight.w500, color: Colors.white);
+
+    return SpeedDial(
+      marginBottom: 38,
+      marginRight: 32,
+      animatedIcon: AnimatedIcons.menu_close,
+      animatedIconTheme: IconThemeData(size: 22.0),
+      overlayOpacity: 0,
+      children: [
+        SpeedDialChild(
+          child: Icon(Icons.save, color: Colors.white),
+          backgroundColor: Colors.green,
+          onTap: () => Navigator.pop(context),
+          label: 'Save',
+          labelStyle: labelTextStyle,
+          labelBackgroundColor: labelBackground,
+        ),
+        SpeedDialChild(
+          child: Icon(Icons.add_circle_outline, color: Colors.white),
+          backgroundColor: Colors.purple,
+          onTap: () async {
+            Ui.openDialog(
+              context: context,
+              dialog: TextFieldDialog(
+                savePressed: (String newCategory) => _bloc.createNewCategory(newCategory),
+                title: locale.newCategory,
+                labelText: null,
+                hintText: locale.categoryName,
+              ),
+            );
+          },
+          label: 'Add Category',
+          labelStyle: labelTextStyle,
+          labelBackgroundColor: labelBackground,
+        ),
+      ],
     );
   }
 }

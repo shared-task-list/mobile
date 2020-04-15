@@ -272,7 +272,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return [
       ListTile(title: Text('Image'), onTap: _closeable(_openPick), leading: Icon(Icons.image)),
       ListTile(title: Text('Color'), onTap: _closeable(_openColor), leading: Icon(Icons.color_lens)),
-      ListTile(title: Text('Color'), onTap: _closeable(_clear), leading: Icon(Icons.clear)),
+      ListTile(title: Text('Clear'), onTap: _closeable(_clear), leading: Icon(Icons.clear)),
     ];
   }
 }

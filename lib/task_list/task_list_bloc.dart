@@ -176,6 +176,16 @@ class TaskListBloc {
       _taskMap[category] = taskList.where((task) => task.category == category).toList();
       _taskMap[category].sort((task1, task2) => task1.timestamp.compareTo(task2.timestamp));
     }
+
+    // clean old cats
+    Set<String> taskCategories = taskList.map((t) => t.category).toSet();
+    Set<String> forDelete = {};
+    _categoryMap.forEach((name, cat) {
+      if (!taskCategories.contains(name)) {
+        forDelete.add(name);
+      }
+    });
+    _categoryMap.removeWhere((name, cat) => forDelete.contains(name));
   }
 
   void createNewCategory(String newCategory) {

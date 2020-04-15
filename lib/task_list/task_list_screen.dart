@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:expandable/expandable.dart';
-import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -302,32 +302,47 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Widget _buildMenuButton(BuildContext context) {
-    return FabCircularMenu(
-      child: Container(),
-      animationDuration: const Duration(milliseconds: 400),
-      options: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.exit_to_app),
-          onPressed: () async {
+    const labelBackground = const Color.fromRGBO(0, 0, 0, 0.6);
+    const labelTextStyle = const TextStyle(fontWeight: FontWeight.w500, color: Colors.white);
+
+    return SpeedDial(
+      marginBottom: 40,
+      marginRight: 32,
+      animatedIcon: AnimatedIcons.menu_close,
+      animatedIconTheme: IconThemeData(size: 22.0),
+      overlayOpacity: 0,
+      children: [
+        SpeedDialChild(
+          child: Icon(Icons.exit_to_app, color: Colors.white),
+          backgroundColor: Colors.deepOrange,
+          onTap: () async {
             await _bloc.exit();
             Ui.route(context, JoinScreen(), withHistory: false);
           },
+          label: 'Exit',
+          labelStyle: labelTextStyle,
+          labelBackgroundColor: labelBackground,
         ),
-        IconButton(
-          icon: const Icon(Icons.settings),
-          onPressed: () {
-            Ui.route(context, SettingsScreen());
-          },
+        SpeedDialChild(
+          child: Icon(Icons.settings, color: Colors.white),
+          backgroundColor: Colors.cyan.shade800,
+          onTap: () => Ui.route(context, SettingsScreen()),
+          label: 'Settings',
+          labelStyle: labelTextStyle,
+          labelBackgroundColor: labelBackground,
         ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () {
-            Ui.route(context, TaskDetailScreen());
-          },
+        SpeedDialChild(
+          child: Icon(Icons.add, color: Colors.white),
+          backgroundColor: Colors.blue,
+          onTap: () => Ui.route(context, TaskDetailScreen()),
+          label: 'Add',
+          labelStyle: labelTextStyle,
+          labelBackgroundColor: labelBackground,
         ),
-        IconButton(
-          icon: const Icon(Icons.add_circle_outline),
-          onPressed: () {
+        SpeedDialChild(
+          child: Icon(Icons.add_circle_outline, color: Colors.white),
+          backgroundColor: Colors.purple,
+          onTap: () {
             Ui.openDialog(
               context: context,
               dialog: TextFieldDialog(
@@ -338,12 +353,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
               ),
             );
           },
+          label: 'Add Category',
+          labelStyle: labelTextStyle,
+          labelBackgroundColor: labelBackground,
         ),
       ],
-      fabColor: Colors.blue,
-      ringColor: Colors.blue.shade100,
-      ringWidth: 48,
-      ringDiameter: 50 * 5.0,
     );
   }
 
