@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_task_list/common/constant.dart';
 
 class Ui {
   static void route(BuildContext context, Widget widget, {bool withHistory = true}) {
@@ -39,7 +40,7 @@ class Ui {
       return Scaffold(
         appBar: bar,
         body: Container(
-          color: bodyColor == null ? Colors.white : bodyColor,
+          color: bodyColor == null ? Constant.bgColor : bodyColor,
           child: body,
           padding: insets,
         ),
@@ -64,22 +65,23 @@ class Ui {
     String title,
     Widget rightButton,
     Widget leftButton,
-    centerTitle = true,
+    bool centerTitle = true,
   }) {
+    final textColor = Constant.getColor(Colors.white, Colors.black);
     if (Platform.isAndroid) {
       return AppBar(
         title: Text(
           title,
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
         ),
         centerTitle: centerTitle,
-        backgroundColor: Colors.white,
+        backgroundColor: Constant.bgColor,
         brightness: Brightness.light,
         actions: <Widget>[
           if (rightButton != null) rightButton,
         ],
         leading: leftButton,
-        iconTheme: IconThemeData(color: Colors.blue),
+        iconTheme: IconThemeData(color: Constant.getColor(Colors.white, Colors.blue)),
       );
     }
     if (Platform.isIOS) {
@@ -88,10 +90,10 @@ class Ui {
         middle: Text(
           title,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: textColor),
         ),
         trailing: rightButton,
-        backgroundColor: Colors.white,
+        backgroundColor: Constant.bgColor,
       );
     }
 
@@ -123,15 +125,16 @@ class Ui {
   }
 
   static Widget actionButton(IconData icon, VoidCallback onPressed) {
+    final iconColor = Constant.getColor(Colors.white, Colors.blue);
     if (Platform.isAndroid) {
       return IconButton(
-        icon: Icon(icon),
+        icon: Icon(icon, color: iconColor),
         onPressed: onPressed,
       );
     }
     if (Platform.isIOS) {
       return GestureDetector(
-        child: Icon(icon),
+        child: Icon(icon, color: iconColor),
         onTap: onPressed,
       );
     }
@@ -335,5 +338,37 @@ class Ui {
     }
 
     return null;
+  }
+
+  static void actionSheet({
+    @required BuildContext context,
+    @required List<Widget> iosActions,
+    @required List<Widget> androidActions,
+  }) {
+    if (Platform.isIOS) {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (ctx) => CupertinoActionSheet(
+          actions: iosActions,
+          cancelButton: CupertinoActionSheetAction(
+            child: Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+            isDestructiveAction: true,
+          ),
+        ),
+      );
+    }
+    if (Platform.isAndroid) {
+      showModalBottomSheet(
+        context: context,
+        builder: (ctx) {
+          return Container(
+            child: Wrap(
+              children: androidActions,
+            ),
+          );
+        },
+      );
+    }
   }
 }

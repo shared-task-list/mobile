@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
@@ -8,6 +13,7 @@ import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/settings/category_dialog.dart';
 import 'package:shared_task_list/settings/settings_bloc.dart';
+import 'package:shared_task_list/task_list/color_set_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -31,26 +37,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     locale = S.of(context);
 
-    return Ui.scaffold(
-      bar: Ui.appBar(title: locale.settings),
-      body: FutureBuilder<Settings>(
-          future: _bloc.getSettings(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Container();
-            }
+    return StreamBuilder<Color>(
+        stream: _bloc.bgColor,
+        builder: (context, streamSnapshot) {
+          return Ui.scaffold(
+            bar: Ui.appBar(title: locale.settings),
+            body: FutureBuilder<Settings>(
+                future: _bloc.getSettings(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Container();
+                  }
 
-            _settings = snapshot.data;
-            _bloc.setVisibleCats(_settings.isShowCategories);
-            _bloc.category.add(_settings.defaultCategory);
+                  _settings = snapshot.data;
+                  _bloc.setVisibleCats(_settings.isShowCategories);
+                  _bloc.category.add(_settings.defaultCategory);
 
-            return Material(
-              color: Colors.white,
-              child: _buildBody(context),
-            );
-          }),
+                  return Material(
+                    color: streamSnapshot.data,
+                    child: _buildBody(context),
+                  );
+                }),
 //      insets: const EdgeInsets.symmetric(horizontal: 16),
-    );
+          );
+        });
   }
 
   Widget _buildBody(BuildContext context) {
@@ -151,12 +161,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             });
                       });
                 }),
+            _buildRow(
+              primaryText: 'Background',
+              secondText: '',
+              onTap: () async {
+                Ui.actionSheet(
+                  context: context,
+                  iosActions: _getBackgroundMenuOptions(forIos: true),
+                  androidActions: _getBackgroundMenuOptions(forIos: false),
+                );
+              },
+            ),
             SizedBox(height: 50),
           ],
         ),
 //        _buildSaveButton(),
       ],
     );
+  }
+
+  Future _openColor() async {
+    Ui.openDialog(
+      context: context,
+      dialog: ColorSetDialog(
+        onSetColor: (Color color) async {
+          final colorString = "${color.red},${color.green},${color.blue}";
+          var prefs = await SharedPreferences.getInstance();
+          prefs.setString('bg_color', colorString);
+          Constant.bgColor = color;
+          _bloc.bgColor.add(color);
+        },
+      ),
+    );
+  }
+
+  Future _openPick() async {
+    final image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (image == null) {
+      return;
+    }
+
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = documentsDirectory.path;
+
+    var bytes = await image.readAsBytes();
+    String fileName = image.path.split('/').last;
+
+    final file = File('$path/$fileName');
+    await file.writeAsBytes(bytes);
+
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setString('bg_name', fileName);
   }
 
   Widget _buildRow({
@@ -180,6 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               secondText,
               style: _secondStyle,
               textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -188,21 +245,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSaveButton() {
-    final double width = 200;
-    final double leftMargin = (MediaQuery.of(context).size.width / 2) - (width / 2);
-    return Positioned(
-      bottom: 20,
-      left: leftMargin,
-      child: SizedBox(
-        width: width,
-        height: 45,
-        child: Ui.button(
-          title: 'Save',
-          radius: 40,
-          onPressed: () {},
-        ),
-      ),
-    );
+  Future _clear() async {
+    var prefs = await SharedPreferences.getInstance();
+    prefs.remove('bg_name');
+    prefs.remove('bg_color');
+    Constant.bgColor = Colors.white;
+    _bloc.bgColor.add(Colors.white);
+  }
+
+  Function _closeable(Function f) {
+    return () {
+      Navigator.of(context).pop();
+      f();
+    };
+  }
+
+  List<Widget> _getBackgroundMenuOptions({@required bool forIos}) {
+    if (forIos) {
+      return [
+        CupertinoActionSheetAction(child: Text('Image'), onPressed: _closeable(_openPick)),
+        CupertinoActionSheetAction(child: Text('Color'), onPressed: _closeable(_openColor)),
+        CupertinoActionSheetAction(child: Text('Clear'), onPressed: _closeable(_clear)),
+      ];
+    }
+
+    return [
+      ListTile(title: Text('Image'), onTap: _closeable(_openPick), leading: Icon(Icons.image)),
+      ListTile(title: Text('Color'), onTap: _closeable(_openColor), leading: Icon(Icons.color_lens)),
+      ListTile(title: Text('Color'), onTap: _closeable(_clear), leading: Icon(Icons.clear)),
+    ];
   }
 }

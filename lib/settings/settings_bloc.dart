@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/settings/settings_repository.dart';
@@ -8,9 +10,14 @@ class SettingsBloc {
   final categories = BehaviorSubject<List<Category>>();
   final category = BehaviorSubject<String>();
   final name = BehaviorSubject<String>();
+  final bgColor = BehaviorSubject<Color>();
   final isShowCategories = BehaviorSubject<bool>();
 
   bool visibleCats = false;
+
+  SettingsBloc() {
+    bgColor.add(Constant.bgColor);
+  }
 
   Future<Settings> getSettings() async {
     return await _repository.getSettings();
@@ -30,5 +37,6 @@ class SettingsBloc {
     category.close();
     name.close();
     isShowCategories.close();
+    bgColor.close();
   }
 }

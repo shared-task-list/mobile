@@ -43,5 +43,7 @@
 	<string>Light</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>My description about why I need this capability</string>
 </dict>
 </plist>

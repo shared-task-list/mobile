@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:intl/intl.dart';
@@ -29,6 +30,12 @@ class Constant {
   static String userName = "";
   static String taskList = "";
   static String noCategory = "";
+  static Color bgColor;
+
+  static Color getColor(Color forDark, Color forLight) {
+    final brightness = ThemeData.estimateBrightnessForColor(Constant.bgColor);
+    return brightness == Brightness.light ? forLight : forDark;
+  }
 }
 
 class AppData {

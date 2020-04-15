@@ -81,6 +81,15 @@ class MyApp extends StatelessWidget {
       prefs.setString(Constant.authorUidKey, Uuid().v4());
     }
 
+    String colorString = prefs.getString('bg_color') ?? '';
+    Constant.bgColor = colorString.isEmpty ? Colors.white : _colorFromString(colorString);
+
     return prefs;
+  }
+
+  // todo: to extension
+  Color _colorFromString(String colorString) {
+    var nums = colorString.split(',').map((num) => int.parse(num)).toList();
+    return Color.fromARGB(255, nums[0], nums[1], nums[2]);
   }
 }

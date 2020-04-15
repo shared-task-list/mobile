@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:expandable/expandable.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
@@ -25,7 +29,6 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> {
   final _bloc = TaskListBloc();
-  final RefreshController _refreshController = RefreshController(initialRefresh: false);
   String _defaultCategory = '';
   S _locale;
   Settings _settings;
@@ -62,23 +65,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 await _bloc.getTasks();
               }),
             ),
-            body: Stack(
-              children: [
-                /*StreamBuilder<Settings>(
-                  stream: _bloc.settings,
-                  builder: (ctx, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Container();
-                    }
+            body: FutureBuilder<Widget>(
+              future: _buildBody(context, textWidth),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (!snapshot.hasData) {
+                  return Ui.waitIndicator();
+                }
 
-                    _settings = snapshot.data;
-                    return _buildList(context, textWidth);
-                  },
-                ),*/
-                _buildList(context, textWidth),
-                _buildMenuButton(context),
-                _buildQuickAdd(context),
-              ],
+                return snapshot.data;
+              },
             ),
           );
         });
@@ -105,16 +100,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
             }
 
             List<Widget> tasks = taskList.map((task) => _buildListItem(context, task, textWidth)).toList();
-            List<Widget> expandedWidgets = _buildExpandableWidgets(category, tasks);
+            List<Widget> expandedWidgets = _buildExpandableWidgets(context, category, tasks);
 
-            widgets.add(_buildExpandablePanel(category, expandedWidgets));
+            widgets.add(_buildExpandablePanel(context, category, expandedWidgets));
           },
         );
 
         widgets.add(SizedBox(height: 100));
 
         return Material(
-          color: Colors.white,
+          color: Colors.transparent,
           child: SingleChildScrollView(
             child: Column(
               children: widgets,
@@ -125,7 +120,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  List<Widget> _buildExpandableWidgets(String category, List<Widget> tasks) {
+  List<Widget> _buildExpandableWidgets(BuildContext context, String category, List<Widget> tasks) {
     return [
       Ui.flatButton('Add New', () {
         _defaultCategory = category;
@@ -157,7 +152,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     ];
   }
 
-  Widget _buildExpandablePanel(String category, List<Widget> expandedWidgets) {
+  Widget _buildExpandablePanel(BuildContext context, String category, List<Widget> expandedWidgets) {
     final ctrl = ExpandableController(initialExpanded: _settings.isShowCategories);
 
     return ExpandablePanel(
@@ -176,7 +171,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               child: Icon(
                 Icons.color_lens,
                 size: 30,
-                color: Colors.blue.shade600,
+                color: Constant.getColor(Colors.white, Colors.blue.shade600),
               ),
               onTap: () {
                 Ui.openDialog(
@@ -213,7 +208,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   Widget _buildListItem(BuildContext context, UserTask task, double textWidth) {
     return Material(
-      color: Colors.white,
+      color: Colors.transparent,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
@@ -385,6 +380,36 @@ class _TaskListScreenState extends State<TaskListScreen> {
           );
         },
       ),
+    );
+  }
+
+  Future<Widget> _buildBody(BuildContext context, double textWidth) async {
+    Widget body = Stack(
+      children: [
+        _buildList(context, textWidth),
+        _buildMenuButton(context),
+        _buildQuickAdd(context),
+      ],
+    );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bgName = prefs.getString('bg_name') ?? '';
+
+    if (bgName.isEmpty) {
+      return Container(child: body, color: Constant.bgColor);
+    }
+
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, bgName);
+    var img = FileImage(File(path));
+
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: img,
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: body,
     );
   }
 }

@@ -46,12 +46,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     return Ui.scaffold(
       bar: Ui.appBar(title: widget.task == null ? locale.newTask : locale.task),
       body: Material(
-        color: Colors.white,
+        color: Constant.bgColor,
         child: Stack(
           children: [
             SingleChildScrollView(
               child: Container(
-                color: Colors.white,
                 child: _buildBody(context),
               ),
             ),
