@@ -55,7 +55,7 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
         child: Ui.dialog(
           child: Material(
             child: Container(
-              padding: EdgeInsets.only(right: 32.0),
+              padding: const EdgeInsets.only(right: 32.0),
               height: 230 + (categories.length * 45.0),
 //            height: 400,
               decoration: BoxDecoration(

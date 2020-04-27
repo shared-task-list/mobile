@@ -280,24 +280,34 @@ class Ui {
     return null;
   }
 
-  static Widget alertDialog({
+  static Future<Widget> alertDialog({
+    @required String title,
     @required Widget child,
     @required List<Widget> actions,
+    @required BuildContext context,
   }) {
     if (Platform.isAndroid) {
-      return AlertDialog(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-//        child: child,
-        content: child,
-        actions: actions,
-      );
+      return showDialog(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: Text(title),
+              elevation: 0,
+              content: child,
+              actions: actions,
+            );
+          });
     }
     if (Platform.isIOS) {
-      return CupertinoAlertDialog(
-        content: child,
-        actions: actions,
-      );
+      return showCupertinoDialog(
+          context: context,
+          builder: (ctx) {
+            return CupertinoAlertDialog(
+              title: Text(title),
+              content: child,
+              actions: actions,
+            );
+          });
     }
 
     return null;

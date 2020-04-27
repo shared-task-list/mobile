@@ -16,15 +16,21 @@ class CategoryProvider {
 
     await db.rawDelete('delete from $_categoryTable');
 
-    var batch = db.batch();
+    final batch = db.batch();
 
     for (Category category in newCategories) {
       if (savedCategories.containsKey(category.name)) {
         category.colorString = savedCategories[category.name].colorString;
+        category.order = savedCategories[category.name].order;
+        category.isExpand = savedCategories[category.name].isExpand;
       }
+      if (category.isExpand == null) {
+        category.isExpand = true;
+      }
+
       batch.rawInsert(
-        'insert into $_categoryTable (name, color_string) values (?,?)',
-        [category.name, category.colorString],
+        'insert into $_categoryTable (name, color_string, "order", is_expand) values (?,?,?,?)',
+        [category.name, category.colorString, category.order, category.getExpand()],
       );
     }
 
@@ -48,8 +54,8 @@ class CategoryProvider {
     var db = await DBProvider.db.database;
     var batch = db.batch();
     batch.rawUpdate(
-      'update $_categoryTable set name = ?, color_string = ? where id = ?',
-      [category.name, category.colorString, category.id],
+      'update $_categoryTable set name = ?, color_string = ?, "order" = ?, is_expand = ? where id = ?',
+      [category.name, category.colorString, category.order, category.getExpand(), category.id],
     );
     batch.commit(noResult: true);
   }

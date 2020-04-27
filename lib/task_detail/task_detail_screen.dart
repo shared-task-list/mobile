@@ -1,7 +1,12 @@
+import 'dart:ui';
+
+import 'package:add_2_calendar/add_2_calendar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/widget/svg_icon.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
@@ -44,7 +49,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
 
     return Ui.scaffold(
-      bar: Ui.appBar(title: widget.task == null ? locale.newTask : locale.task),
+      bar: Ui.appBar(
+        title: widget.task == null ? locale.newTask : locale.task,
+        rightButton: GestureDetector(
+          child: SvgIcon(path: "add-to-calendar", color: Constant.getColor(Colors.white, Colors.blue)),
+          onTap: () => _addToCalendar(widget.task),
+        ),
+      ),
       body: Material(
         color: Constant.bgColor,
         child: Stack(
@@ -316,5 +327,20 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         ),
       ],
     );
+  }
+
+  void _addToCalendar(UserTask task) {
+    if (task?.title == null || task.title.isEmpty) {
+      Ui.alertDialog(
+          child: Text('Title is required'), actions: [Ui.flatButton('Ok', () => Navigator.of(context).pop())], context: context, title: 'Error');
+      return;
+    }
+    final Event event = Event(
+      title: task.title,
+      description: task.comment,
+      startDate: DateTime.now(),
+      endDate: DateTime.now().add(Duration(hours: 1)),
+    );
+    Add2Calendar.addEvent2Cal(event);
   }
 }

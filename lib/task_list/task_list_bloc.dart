@@ -260,4 +260,11 @@ class TaskListBloc {
     _categoryMap[category] = cat;
     categoryMapStream.add(_categoryMap);
   }
+
+  Future setCategoryExpand(String category) async {
+    var cat = _categoryMap[category];
+    cat.isExpand = !cat.isExpand;
+
+    await CategoryProvider.save(cat);
+  }
 }

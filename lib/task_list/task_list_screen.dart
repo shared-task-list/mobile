@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,7 +21,7 @@ import 'package:shared_task_list/task_detail/task_detail_screen.dart';
 import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
 
-import 'color_set_dialog.dart';
+import '../common/widget/color_set_dialog.dart';
 
 class TaskListScreen extends StatefulWidget {
   @override
@@ -122,38 +123,44 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   List<Widget> _buildExpandableWidgets(BuildContext context, String category, List<Widget> tasks) {
     return [
-      Ui.flatButton('Add New', () {
+      Ui.flatButton('Add New', () async {
         _defaultCategory = category;
-        // TODO:  to func
-        Ui.openDialog(
-          context: context,
-          dialog: FutureBuilder<List<Category>>(
-              future: _bloc.getCategories(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Container();
-                }
-
-                final categories = snapshot.data;
-
-                return QuickAddDialog(
-                  categories: categories,
-                  defaultCategory: _defaultCategory,
-                  onSetName: (String title, String category) async {
-                    _defaultCategory = category;
-                    await _bloc.quickAdd(title, category);
-                  },
-                  onSetCategory: (String cat) => _defaultCategory = cat,
-                );
-              }),
-        );
+        await _openQuickAdd(context);
       }),
       ...tasks,
     ];
   }
 
+  Future _openQuickAdd(BuildContext context) async {
+    Ui.openDialog(
+      context: context,
+      dialog: FutureBuilder<List<Category>>(
+          future: _bloc.getCategories(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Container();
+            }
+
+            final categories = snapshot.data;
+
+            return QuickAddDialog(
+              categories: categories,
+              defaultCategory: _defaultCategory,
+              onSetName: (String title, String category) async {
+                _defaultCategory = category;
+                await _bloc.quickAdd(title, category);
+              },
+              onSetCategory: (String cat) => _defaultCategory = cat,
+            );
+          }),
+    );
+  }
+
   Widget _buildExpandablePanel(BuildContext context, String category, List<Widget> expandedWidgets) {
     final ctrl = ExpandableController(initialExpanded: _settings.isShowCategories);
+    /*ctrl.addListener(() async {
+      await _bloc.setCategoryExpand(category);
+    });*/
 
     return ExpandablePanel(
       theme: ExpandableThemeData(
@@ -162,8 +169,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
       ),
       controller: ctrl,
       header: Container(
-        padding: EdgeInsets.only(top: 16, left: 16, bottom: 16),
-        margin: EdgeInsets.only(top: 16),
+        padding: const EdgeInsets.only(top: 16, left: 16, bottom: 16),
+        margin: const EdgeInsets.only(top: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -187,16 +194,26 @@ class _TaskListScreenState extends State<TaskListScreen> {
             StreamBuilder<Map<String, Category>>(
                 stream: _bloc.categoryMapStream,
                 builder: (context, snapshot) {
-                  return Text(
-                    category,
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      color: snapshot.hasData ? snapshot.data[category].getColor() : Colors.grey.shade600,
+                  if (snapshot.hasData) {
+//                    ctrl.expanded = snapshot.data[category].getExpand() == 1;
+                  }
+                  return Flexible(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Text(
+                        category,
+                        maxLines: 2,
+                        softWrap: true,
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          color: snapshot.hasData ? snapshot.data[category].getColor() : Colors.grey.shade600,
+                        ),
+                      ),
                     ),
                   );
                 }),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
           ],
         ),
       ),
@@ -283,7 +300,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             width: 32,
             margin: EdgeInsets.only(right: 6),
             decoration: BoxDecoration(
-              color: Colors.green,
+              color: Colors.cyan.shade800,
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
             child: IconButton(
@@ -368,7 +385,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       child: FloatingActionButton(
         heroTag: 'quickAdd',
         child: Icon(Icons.add),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.cyan.shade800,
         onPressed: () {
           Ui.openDialog(
             context: context,

@@ -1,6 +1,6 @@
 name: shared_task_list
 description: A new Flutter application.
-version: 1.2.0+4
+version: 1.4.0+6
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -32,6 +32,9 @@ dependencies:
   grouped_buttons: ^1.0.4
   flutter_material_color_picker: ^1.0.5
   image_picker: ^0.6.5
+  flutter_svg: ^0.17.4
+  add_2_calendar: ^1.4.0
+
 
 dev_dependencies:
   flutter_test:
@@ -41,5 +44,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/cfg/
+    - assets/image/add-to-calendar.svg
 flutter_intl:
   enabled: true

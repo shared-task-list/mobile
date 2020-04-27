@@ -6,13 +6,17 @@ import 'package:shared_task_list/common/db/db_provider.dart';
 
 class Category {
   int id;
-  final String name;
+  int order;
+  String name;
   String colorString;
+  bool isExpand;
 
   Category({
     this.id,
     @required this.name,
     this.colorString,
+    this.order,
+    this.isExpand,
   });
 
   factory Category.fromJson(String str) => Category.fromMap(json.decode(str));
@@ -23,12 +27,16 @@ class Category {
         id: json["id"],
         name: json["name"],
         colorString: json["color_string"],
+        order: json["order"] ?? 0,
+        isExpand: json["is_expand"] == 1 ? true : false,
       );
 
   Map<String, dynamic> toMap() => {
         "id": id,
         "name": name,
         "color_string": colorString,
+        "order": order,
+        "is_expand": getExpand(),
       };
 
   Future save() async {
@@ -43,5 +51,13 @@ class Category {
 
     var nums = colorString.split(',').map((num) => int.parse(num)).toList();
     return Color.fromARGB(255, nums[0], nums[1], nums[2]);
+  }
+
+  int getExpand() {
+    if (isExpand == null) {
+      return 1;
+    }
+
+    return isExpand ? 1 : 0;
   }
 }

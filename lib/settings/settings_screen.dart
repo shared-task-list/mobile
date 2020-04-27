@@ -7,13 +7,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/widget/color_set_dialog.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/settings/category_dialog.dart';
 import 'package:shared_task_list/settings/settings_bloc.dart';
-import 'package:shared_task_list/task_list/color_set_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override

@@ -44,6 +44,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>My description about why I need this capability</string>
+    <string>Allow please if you want set image to background</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>Allow please if you want added tasks to Calendar</string>
 </dict>
 </plist>
