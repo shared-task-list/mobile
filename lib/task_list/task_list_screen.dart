@@ -336,7 +336,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             await _bloc.exit();
             Ui.route(context, JoinScreen(), withHistory: false);
           },
-          label: 'Exit',
+          label: _locale.exit,
           labelStyle: labelTextStyle,
           labelBackgroundColor: labelBackground,
         ),
@@ -344,7 +344,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           child: Icon(Icons.settings, color: Colors.white),
           backgroundColor: Colors.cyan.shade800,
           onTap: () => Ui.route(context, SettingsScreen()),
-          label: 'Settings',
+          label: _locale.settings,
           labelStyle: labelTextStyle,
           labelBackgroundColor: labelBackground,
         ),
@@ -352,7 +352,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           child: Icon(Icons.add, color: Colors.white),
           backgroundColor: Colors.blue,
           onTap: () => Ui.route(context, TaskDetailScreen()),
-          label: 'Add',
+          label: _locale.newTask,
           labelStyle: labelTextStyle,
           labelBackgroundColor: labelBackground,
         ),
@@ -370,7 +370,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               ),
             );
           },
-          label: 'Add Category',
+          label: _locale.newCategory,
           labelStyle: labelTextStyle,
           labelBackgroundColor: labelBackground,
         ),

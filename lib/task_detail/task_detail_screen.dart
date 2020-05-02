@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:shared_task_list/common/constant.dart';
-import 'package:shared_task_list/common/widget/svg_icon.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
@@ -51,10 +50,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     return Ui.scaffold(
       bar: Ui.appBar(
         title: widget.task == null ? locale.newTask : locale.task,
-        rightButton: GestureDetector(
-          child: SvgIcon(path: "add-to-calendar", color: Constant.getColor(Colors.white, Colors.blue)),
-          onTap: () => _addToCalendar(widget.task),
-        ),
+        rightButton: Ui.actionSvgButton('add-to-calendar', () => _addToCalendar(widget.task)),
       ),
       body: Material(
         color: Constant.bgColor,
@@ -256,39 +252,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Widget _buildMenuButton(BuildContext context) {
-    /*return FabCircularMenu(
-      child: Container(),
-      options: <Widget>[
-        IconButton(
-          icon: Icon(Icons.add_circle_outline),
-          onPressed: () {
-            Ui.openDialog(
-              context: context,
-              dialog: TextFieldDialog(
-                savePressed: (String newCategory) => _bloc.createNewCategory(newCategory),
-                title: locale.newCategory,
-                labelText: null,
-                hintText: locale.categoryName,
-              ),
-            );
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.save),
-          onPressed: () async {
-            if (!_formKey.currentState.validate()) {
-              return;
-            }
-            await _bloc.createTask();
-            Navigator.pop(context);
-          },
-        ),
-      ],
-      fabColor: Colors.blue,
-      ringColor: Colors.blue.shade100,
-      ringWidth: 48,
-      ringDiameter: 48 * 4.0,
-    );*/
     const labelBackground = const Color.fromRGBO(0, 0, 0, 0.6);
     const labelTextStyle = const TextStyle(fontWeight: FontWeight.w500, color: Colors.white);
 
@@ -302,8 +265,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         SpeedDialChild(
           child: Icon(Icons.save, color: Colors.white),
           backgroundColor: Colors.green,
-          onTap: () => Navigator.pop(context),
-          label: 'Save',
+          onTap: () async {
+            if (!_formKey.currentState.validate()) {
+              return;
+            }
+            if (widget.task == null) {
+              await _bloc.createTask();
+            } else {
+              await _bloc.updateTask(widget.task);
+            }
+          },
+          label: widget.task == null ? locale.create : locale.update,
           labelStyle: labelTextStyle,
           labelBackgroundColor: labelBackground,
         ),
@@ -321,7 +293,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ),
             );
           },
-          label: 'Add Category',
+          label: locale.newCategory,
           labelStyle: labelTextStyle,
           labelBackgroundColor: labelBackground,
         ),

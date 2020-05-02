@@ -22,5 +22,10 @@
     "settings": "Settings",
     "defaultCategory": "Default Category",
     "noCategory": "No Category",
-    "categoryName": "Category Name"
+    "categoryName": "Category Name",
+    "exit": "Exit",
+    "background": "Background",
+    "image": "Image",
+    "color": "Color",
+    "clear": "Clear"
 }

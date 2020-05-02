@@ -21,14 +21,19 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
+    "background" : MessageLookupByLibrary.simpleMessage("Background"),
     "cancel" : MessageLookupByLibrary.simpleMessage("Cancel"),
     "category" : MessageLookupByLibrary.simpleMessage("Category"),
     "categoryList" : MessageLookupByLibrary.simpleMessage("Category List (tap or drag)"),
     "categoryName" : MessageLookupByLibrary.simpleMessage("Category Name"),
+    "clear" : MessageLookupByLibrary.simpleMessage("Clear"),
+    "color" : MessageLookupByLibrary.simpleMessage("Color"),
     "comment" : MessageLookupByLibrary.simpleMessage("Comment"),
     "create" : MessageLookupByLibrary.simpleMessage("Create"),
     "defaultCategory" : MessageLookupByLibrary.simpleMessage("Default Category"),
     "error" : MessageLookupByLibrary.simpleMessage("Error"),
+    "exit" : MessageLookupByLibrary.simpleMessage("Exit"),
+    "image" : MessageLookupByLibrary.simpleMessage("Image"),
     "newCategory" : MessageLookupByLibrary.simpleMessage("New Category"),
     "newName" : MessageLookupByLibrary.simpleMessage("New Name"),
     "newTask" : MessageLookupByLibrary.simpleMessage("New Task"),

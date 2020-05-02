@@ -162,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
                 }),
             _buildRow(
-              primaryText: 'Background',
+              primaryText: locale.background,
               secondText: '',
               onTap: () async {
                 Ui.actionSheet(
@@ -263,16 +263,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   List<Widget> _getBackgroundMenuOptions({@required bool forIos}) {
     if (forIos) {
       return [
-        CupertinoActionSheetAction(child: Text('Image'), onPressed: _closeable(_openPick)),
-        CupertinoActionSheetAction(child: Text('Color'), onPressed: _closeable(_openColor)),
-        CupertinoActionSheetAction(child: Text('Clear'), onPressed: _closeable(_clear)),
+        CupertinoActionSheetAction(child: Text(locale.image), onPressed: _closeable(_openPick)),
+        CupertinoActionSheetAction(child: Text(locale.color), onPressed: _closeable(_openColor)),
+        CupertinoActionSheetAction(child: Text(locale.clear), onPressed: _closeable(_clear)),
       ];
     }
 
     return [
-      ListTile(title: Text('Image'), onTap: _closeable(_openPick), leading: Icon(Icons.image)),
-      ListTile(title: Text('Color'), onTap: _closeable(_openColor), leading: Icon(Icons.color_lens)),
-      ListTile(title: Text('Clear'), onTap: _closeable(_clear), leading: Icon(Icons.clear)),
+      ListTile(title: Text(locale.image), onTap: _closeable(_openPick), leading: Icon(Icons.image)),
+      ListTile(title: Text(locale.color), onTap: _closeable(_openColor), leading: Icon(Icons.color_lens)),
+      ListTile(title: Text(locale.clear), onTap: _closeable(_clear), leading: Icon(Icons.clear)),
     ];
   }
 }

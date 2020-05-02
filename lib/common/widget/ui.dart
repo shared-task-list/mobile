@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/widget/svg_icon.dart';
 
 class Ui {
   static void route(BuildContext context, Widget widget, {bool withHistory = true}) {
@@ -135,6 +136,23 @@ class Ui {
     if (Platform.isIOS) {
       return GestureDetector(
         child: Icon(icon, color: iconColor),
+        onTap: onPressed,
+      );
+    }
+    return null;
+  }
+
+  static Widget actionSvgButton(String icon, VoidCallback onPressed) {
+    final iconColor = Constant.getColor(Colors.white, Colors.blue);
+    if (Platform.isAndroid) {
+      return IconButton(
+        icon: SvgIcon(path: icon, color: Constant.getColor(Colors.white, Colors.blue)),
+        onPressed: onPressed,
+      );
+    }
+    if (Platform.isIOS) {
+      return GestureDetector(
+        child: SvgIcon(path: icon, color: Constant.getColor(Colors.white, Colors.blue)),
         onTap: onPressed,
       );
     }

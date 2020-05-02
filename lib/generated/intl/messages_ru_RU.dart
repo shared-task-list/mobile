@@ -21,14 +21,19 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
+    "background" : MessageLookupByLibrary.simpleMessage("Фон"),
     "cancel" : MessageLookupByLibrary.simpleMessage("Закрыть"),
     "category" : MessageLookupByLibrary.simpleMessage("Категория"),
     "categoryList" : MessageLookupByLibrary.simpleMessage("Категории (нажать или потянуть)"),
     "categoryName" : MessageLookupByLibrary.simpleMessage("Название категории"),
+    "clear" : MessageLookupByLibrary.simpleMessage("Очистить"),
+    "color" : MessageLookupByLibrary.simpleMessage("Цвет"),
     "comment" : MessageLookupByLibrary.simpleMessage("Комментарий"),
     "create" : MessageLookupByLibrary.simpleMessage("Создать"),
     "defaultCategory" : MessageLookupByLibrary.simpleMessage("Категория по умолчанию"),
     "error" : MessageLookupByLibrary.simpleMessage("Ошибка"),
+    "exit" : MessageLookupByLibrary.simpleMessage("Выход"),
+    "image" : MessageLookupByLibrary.simpleMessage("Изображение"),
     "newCategory" : MessageLookupByLibrary.simpleMessage("Новая категория"),
     "newName" : MessageLookupByLibrary.simpleMessage("Новое имя"),
     "newTask" : MessageLookupByLibrary.simpleMessage("Новая задача"),

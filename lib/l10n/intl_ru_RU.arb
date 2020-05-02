@@ -22,5 +22,10 @@
     "settings": "Настройки",
     "defaultCategory": "Категория по умолчанию",
     "noCategory": "Без Категории",
-    "categoryName": "Название категории"
+    "categoryName": "Название категории",
+    "exit": "Выход",
+    "background": "Фон",
+    "image": "Изображение",
+    "color": "Цвет",
+    "clear": "Очистить"
 }
