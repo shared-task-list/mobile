@@ -9,6 +9,7 @@ class TextFieldDialog extends StatefulWidget {
   final String hintText;
   final String labelText;
   final String agreeButtonText;
+  final String oldText;
   final ValueChanged<String> savePressed;
   final IconData icon;
 
@@ -20,6 +21,7 @@ class TextFieldDialog extends StatefulWidget {
     this.icon,
     @required this.hintText,
     @required this.labelText,
+    this.oldText,
   }) : super(key: key);
 
   @override
@@ -56,7 +58,7 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
                       SizedBox(height: 20.0),
                       Text(
                         widget.title,
-                        style: Theme.of(context).textTheme.headline,
+                        style: Theme.of(context).textTheme.headline5,
                       ),
                       SizedBox(height: 20.0),
                       Material(
@@ -64,6 +66,7 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
                         child: Form(
                           key: _formKey,
                           child: TextFormField(
+                            initialValue: widget.oldText,
                             autofocus: true,
                             maxLength: 30,
                             onChanged: (String value) => newData = value,

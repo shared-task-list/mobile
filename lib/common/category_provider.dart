@@ -14,12 +14,15 @@ class CategoryProvider {
       savedCategories[cat.name] = cat;
     }
 
-    await db.rawDelete('delete from $_categoryTable');
+//    await db.rawDelete('delete from $_categoryTable');
 
     final batch = db.batch();
 
     for (Category category in newCategories) {
+      bool isExist = false;
+
       if (savedCategories.containsKey(category.name)) {
+        isExist = true;
         category.colorString = savedCategories[category.name].colorString;
         category.order = savedCategories[category.name].order;
         category.isExpand = savedCategories[category.name].isExpand;
@@ -27,11 +30,17 @@ class CategoryProvider {
       if (category.isExpand == null) {
         category.isExpand = true;
       }
-
-      batch.rawInsert(
-        'insert into $_categoryTable (name, color_string, "order", is_expand) values (?,?,?,?)',
-        [category.name, category.colorString, category.order, category.getExpand()],
-      );
+      if (isExist) {
+        batch.rawUpdate(
+          'update $_categoryTable set name = ?, color_string = ?, "order" = ?, is_expand = ? where id = ?',
+          [category.name, category.colorString, category.order, category.getExpand(), category.id],
+        );
+      } else {
+        batch.rawInsert(
+          'insert into $_categoryTable (name, color_string, "order", is_expand) values (?,?,?,?)',
+          [category.name, category.colorString, category.order, category.getExpand()],
+        );
+      }
     }
 
     batch.commit(noResult: true);
@@ -47,10 +56,13 @@ class CategoryProvider {
       lists.add(task);
     }
 
+    lists.sort((cat1, cat2) => cat1.order.compareTo(cat2.order));
     return lists;
   }
 
   static Future save(Category category) async {
+    print(category.name);
+    print(category.order);
     var db = await DBProvider.db.database;
     var batch = db.batch();
     batch.rawUpdate(

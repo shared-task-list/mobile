@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:path/path.dart';
@@ -16,7 +17,6 @@ import 'package:shared_task_list/join/join_screen.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
-import 'package:shared_task_list/settings/settings_screen.dart';
 import 'package:shared_task_list/task_detail/task_detail_screen.dart';
 import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
@@ -91,10 +91,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
           );
         }
 
-        final tasks = snapshot.data;
+//        final tasks = snapshot.data;
+        final categories = _bloc.categoryMap.values.toList();
+        categories.sort((cat1, cat2) => cat1.order?.compareTo(cat2.order ?? 0));
         var widgets = <Widget>[];
 
-        tasks.forEach(
+        for (final category in categories) {
+          var taskList = snapshot.data[category.name];
+
+          if (taskList.isEmpty) {
+            continue;
+          }
+
+          List<Widget> tasks = taskList.map((task) => _buildListItem(context, task, textWidth)).toList();
+          List<Widget> expandedWidgets = _buildExpandableWidgets(context, category.name, tasks);
+
+          widgets.add(_buildExpandablePanel(context, category.name, expandedWidgets));
+        }
+        /*tasks.forEach(
           (category, taskList) {
             if (taskList.isEmpty) {
               return;
@@ -105,7 +119,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
             widgets.add(_buildExpandablePanel(context, category, expandedWidgets));
           },
-        );
+        );*/
 
         widgets.add(SizedBox(height: 100));
 
@@ -295,24 +309,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   );
                 }),
           ),
-          Container(
-            height: 32,
-            width: 32,
-            margin: EdgeInsets.only(right: 6),
-            decoration: BoxDecoration(
-              color: Colors.cyan.shade800,
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            child: IconButton(
-              iconSize: 16,
-              color: Colors.white,
-              padding: EdgeInsets.all(0),
-              icon: Icon(Icons.done),
+          SizedBox(
+            width: 35,
+            child: FloatingActionButton(
+              heroTag: 'doneButton${task.uid}',
+              backgroundColor: Colors.cyan.shade800,
+              child: const Icon(Icons.done, size: 20),
               onPressed: () async {
                 await _bloc.remove(task);
               },
             ),
           ),
+          SizedBox(width: 5),
         ],
       ),
     );
@@ -337,14 +345,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
             Ui.route(context, JoinScreen(), withHistory: false);
           },
           label: _locale.exit,
-          labelStyle: labelTextStyle,
-          labelBackgroundColor: labelBackground,
-        ),
-        SpeedDialChild(
-          child: Icon(Icons.settings, color: Colors.white),
-          backgroundColor: Colors.cyan.shade800,
-          onTap: () => Ui.route(context, SettingsScreen()),
-          label: _locale.settings,
           labelStyle: labelTextStyle,
           labelBackgroundColor: labelBackground,
         ),

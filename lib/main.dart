@@ -7,11 +7,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/join/join_screen.dart';
-import 'package:shared_task_list/task_list/task_list_screen.dart';
 import 'package:uuid/uuid.dart';
 
 import 'common/constant.dart';
 import 'generated/l10n.dart';
+import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
     return FutureBuilder(
       future: _getPreferences(),
       builder: (ctx, snapshot) {
-        final screen = (Constant.taskList.isEmpty && Constant.password.isEmpty) ? JoinScreen() : TaskListScreen();
+        final screen = (Constant.taskList.isEmpty && Constant.password.isEmpty) ? JoinScreen() : Home();
 
         if (Platform.isIOS) {
           return CupertinoApp(
@@ -71,9 +71,9 @@ class MyApp extends StatelessWidget {
 
   Future<SharedPreferences> _getPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    Constant.taskList = prefs.getString(Constant.taskListKey) ?? "";
-    Constant.password = prefs.getString(Constant.passwordKey) ?? "";
-    Constant.userName = prefs.getString(Constant.authorKey) ?? "";
+    Constant.taskList = prefs.getString(Constant.taskListKey) ?? '';
+    Constant.password = prefs.getString(Constant.passwordKey) ?? '';
+    Constant.userName = prefs.getString(Constant.authorKey) ?? '';
 
     String userUUid = prefs.getString(Constant.authorUidKey) ?? '';
 

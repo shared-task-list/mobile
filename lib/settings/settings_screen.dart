@@ -58,7 +58,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: _buildBody(context),
                   );
                 }),
-//      insets: const EdgeInsets.symmetric(horizontal: 16),
           );
         });
   }
@@ -164,11 +163,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildRow(
               primaryText: locale.background,
               secondText: '',
-              onTap: () async {
-                Ui.actionSheet(
+              onTap: () {
+                Ui.showActionSheet(
                   context: context,
-                  iosActions: _getBackgroundMenuOptions(forIos: true),
-                  androidActions: _getBackgroundMenuOptions(forIos: false),
+                  builder: (ctx) => Ui.actionSheet(
+                    context: ctx,
+                    iosActions: _getBackgroundMenuOptions(ctx, forIos: true),
+                    androidActions: _getBackgroundMenuOptions(ctx, forIos: false),
+                  ),
                 );
               },
             ),
@@ -253,26 +255,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _bloc.bgColor.add(Colors.white);
   }
 
-  Function _closeable(Function f) {
+  Function _closeable(BuildContext ctx, Function f) {
     return () {
-      Navigator.of(context).pop();
+      Navigator.pop(ctx);
       f();
     };
   }
 
-  List<Widget> _getBackgroundMenuOptions({@required bool forIos}) {
+  List<Widget> _getBackgroundMenuOptions(BuildContext ctx, {@required bool forIos}) {
     if (forIos) {
       return [
-        CupertinoActionSheetAction(child: Text(locale.image), onPressed: _closeable(_openPick)),
-        CupertinoActionSheetAction(child: Text(locale.color), onPressed: _closeable(_openColor)),
-        CupertinoActionSheetAction(child: Text(locale.clear), onPressed: _closeable(_clear)),
+        CupertinoActionSheetAction(child: Text(locale.image), onPressed: _closeable(ctx, _openPick)),
+        CupertinoActionSheetAction(child: Text(locale.color), onPressed: _closeable(ctx, _openColor)),
+        CupertinoActionSheetAction(child: Text(locale.clear), onPressed: _closeable(ctx, _clear)),
       ];
     }
 
     return [
-      ListTile(title: Text(locale.image), onTap: _closeable(_openPick), leading: Icon(Icons.image)),
-      ListTile(title: Text(locale.color), onTap: _closeable(_openColor), leading: Icon(Icons.color_lens)),
-      ListTile(title: Text(locale.clear), onTap: _closeable(_clear), leading: Icon(Icons.clear)),
+      ListTile(title: Text(locale.image), onTap: _closeable(ctx, _openPick), leading: const Icon(Icons.image)),
+      ListTile(title: Text(locale.color), onTap: _closeable(ctx, _openColor), leading: const Icon(Icons.color_lens)),
+      ListTile(title: Text(locale.clear), onTap: _closeable(ctx, _clear), leading: const Icon(Icons.clear)),
     ];
   }
 }

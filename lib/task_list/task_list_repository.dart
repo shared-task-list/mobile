@@ -1,17 +1,16 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
+import 'package:shared_task_list/model/app_model.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/task.dart';
 
 class TaskListRepository {
   static const _taskTable = 'tasks';
-  final taskListStream = PublishSubject<List<UserTask>>();
-  final categoryListStream = PublishSubject<List<Category>>();
+  final initStream = PublishSubject<ListInitData>();
 
   void dispose() {
-    taskListStream.close();
-    categoryListStream.close();
+    initStream.close();
   }
 
   Future init() async {
@@ -19,7 +18,7 @@ class TaskListRepository {
     List<Map> maps = await db.rawQuery(
       'select '
       't.Uid as tuid, t.Title as ttitle, t.Category as tcat, t.Timestamp as tt, '
-      'cats.name as cname, cats.color_string as ccolor, cats.id as cid '
+      'cats.name as cname, cats.color_string as ccolor, cats.id as cid, cats."order" as corder '
       'from tasks as t '
       'join categories as cats on 1 = 1 '
       'join settings as s on 1 = 1',
@@ -31,19 +30,31 @@ class TaskListRepository {
 
     for (final item in maps) {
       if (!taskId.contains(item['tuid'])) {
-        var task = UserTask(uid: item['tuid'], category: item['tcat'], title: item['ttitle'], timestamp: DateTime.parse(item["tt"]));
+        var task = UserTask(
+          uid: item['tuid'],
+          category: item['tcat'],
+          title: item['ttitle'],
+          timestamp: DateTime.parse(item["tt"]),
+        );
         tasks.add(task);
         taskId.add(task.uid);
       }
       if (!catName.contains(item['cname'])) {
-        var cat = Category(name: item['cname'], colorString: item['ccolor'], id: item['cid']);
+        var cat = Category(
+          name: item['cname'],
+          colorString: item['ccolor'],
+          id: item['cid'],
+          order: item['corder'],
+        );
         catName.add(cat.name);
         cats.add(cat);
       }
     }
 
-    taskListStream.add(tasks);
-    categoryListStream.add(cats);
+    final initData = ListInitData()
+      ..categories = cats
+      ..tasks = tasks;
+    initStream.add(initData);
   }
 
   Future<List<UserTask>> getTasks() async {

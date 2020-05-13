@@ -36,6 +36,7 @@ class Ui {
     Widget bar,
     EdgeInsetsGeometry insets,
     Color bodyColor = Colors.white,
+    Widget float,
   }) {
     if (Platform.isAndroid) {
       return Scaffold(
@@ -45,6 +46,7 @@ class Ui {
           child: body,
           padding: insets,
         ),
+        floatingActionButton: float,
       );
     }
     if (Platform.isIOS) {
@@ -53,7 +55,7 @@ class Ui {
         backgroundColor: bodyColor,
         child: Container(
           color: bodyColor,
-          child: body,
+          child: SafeArea(child: body),
           padding: insets,
         ),
       );
@@ -111,7 +113,7 @@ class Ui {
       return SliverAppBar(
         title: Text(title),
         centerTitle: centerTitle,
-        backgroundColor: Colors.white,
+        backgroundColor: Constant.bgColor,
         pinned: true,
         floating: true,
         actions: <Widget>[
@@ -119,6 +121,15 @@ class Ui {
         ],
         leading: leftButton,
 //        forceElevated: innerBoxIsScrolled,
+      );
+    }
+    if (Platform.isIOS) {
+      return CupertinoSliverNavigationBar(
+        largeTitle: Text(title),
+        backgroundColor: Constant.bgColor,
+        trailing: rightButton,
+        leading: leftButton,
+        middle: Text(title),
       );
     }
 
@@ -143,7 +154,6 @@ class Ui {
   }
 
   static Widget actionSvgButton(String icon, VoidCallback onPressed) {
-    final iconColor = Constant.getColor(Colors.white, Colors.blue);
     if (Platform.isAndroid) {
       return IconButton(
         icon: SvgIcon(path: icon, color: Constant.getColor(Colors.white, Colors.blue)),
@@ -298,105 +308,129 @@ class Ui {
     return null;
   }
 
-  static Future<Widget> alertDialog({
+  static void showAlert({
+    @required WidgetBuilder builder,
+    @required BuildContext context,
+  }) {
+    if (Platform.isAndroid) {
+      showDialog(
+        context: context,
+        builder: builder,
+      );
+    }
+    if (Platform.isIOS) {
+      showCupertinoDialog(
+        context: context,
+        builder: builder,
+      );
+    }
+  }
+
+  static Widget alertDialog({
     @required String title,
     @required Widget child,
     @required List<Widget> actions,
     @required BuildContext context,
   }) {
     if (Platform.isAndroid) {
-      return showDialog(
-          context: context,
-          builder: (ctx) {
-            return AlertDialog(
-              title: Text(title),
-              elevation: 0,
-              content: child,
-              actions: actions,
-            );
-          });
+      return AlertDialog(
+        title: Text(title),
+        elevation: 0,
+        content: child,
+        actions: actions,
+      );
     }
     if (Platform.isIOS) {
-      return showCupertinoDialog(
-          context: context,
-          builder: (ctx) {
-            return CupertinoAlertDialog(
-              title: Text(title),
-              content: child,
-              actions: actions,
-            );
-          });
-    }
-
-    return null;
-  }
-
-  static void openDialog({BuildContext context, Widget dialog}) {
-    if (Platform.isAndroid) {
-      showDialog(
-          context: context,
-          builder: (ctx) {
-            return dialog;
-          });
-    }
-    if (Platform.isIOS) {
-      showCupertinoDialog(
-          context: context,
-          builder: (ctx) {
-            return dialog;
-          });
-    }
-  }
-
-  // TODO: remove?
-  static Widget refresh({
-    @required Widget child,
-    @required Future<void> Function() future,
-  }) {
-    if (Platform.isAndroid) {
-      return RefreshIndicator(child: child, onRefresh: future);
-    }
-    if (Platform.isIOS) {
-      return CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverRefreshControl(onRefresh: future),
-          child,
-        ],
+      return CupertinoAlertDialog(
+        title: Text(title),
+        content: child,
+        actions: actions,
       );
     }
 
     return null;
   }
 
-  static void actionSheet({
+  static Widget alertAction({
+    @required BuildContext context,
+    @required Function onPressed,
+    @required String text,
+    bool isDestructive = false,
+  }) {
+    if (Platform.isIOS) {
+      return CupertinoDialogAction(
+        child: Text(text),
+        onPressed: onPressed,
+        isDestructiveAction: isDestructive,
+      );
+    }
+    if (Platform.isAndroid) {
+      return FlatButton(
+        child: Text(text),
+        onPressed: onPressed,
+      );
+    }
+
+    return null;
+  }
+
+  static void openDialog({
+    @required BuildContext context,
+    @required Widget dialog,
+  }) {
+    if (Platform.isAndroid) {
+      showDialog(context: context, builder: (_) => dialog);
+    }
+    if (Platform.isIOS) {
+      showCupertinoDialog(context: context, builder: (_) => dialog);
+    }
+  }
+
+  static Future showActionSheet({
+    @required BuildContext context,
+    @required WidgetBuilder builder,
+  }) async {
+    if (Platform.isIOS) {
+      await showCupertinoModalPopup(
+        context: context,
+        builder: builder,
+      );
+    }
+    if (Platform.isAndroid) {
+      await showModalBottomSheet(
+        context: context,
+        builder: builder,
+      );
+    }
+  }
+
+  static Widget actionSheet({
     @required BuildContext context,
     @required List<Widget> iosActions,
     @required List<Widget> androidActions,
   }) {
     if (Platform.isIOS) {
-      showCupertinoModalPopup(
-        context: context,
-        builder: (ctx) => CupertinoActionSheet(
-          actions: iosActions,
-          cancelButton: CupertinoActionSheetAction(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-            isDestructiveAction: true,
-          ),
+      return CupertinoActionSheet(
+        actions: iosActions,
+        cancelButton: CupertinoActionSheetAction(
+          child: Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+          isDestructiveAction: true,
         ),
       );
     }
     if (Platform.isAndroid) {
-      showModalBottomSheet(
-        context: context,
-        builder: (ctx) {
-          return Container(
-            child: Wrap(
-              children: androidActions,
-            ),
-          );
-        },
+      return Container(
+        child: Wrap(
+          children: androidActions,
+        ),
       );
     }
+
+    return null;
+  }
+
+  static Widget icon(IconData forIos, IconData forDroid) {
+    return Icon(Platform.isIOS ? forIos : forDroid);
   }
 }

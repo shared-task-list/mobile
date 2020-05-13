@@ -18,14 +18,14 @@ import 'package:uuid/uuid.dart';
 class TaskListBloc {
   final _repository = TaskListRepository();
   final _settingsRepository = SettingsRepository();
-  final _fbClient = FbClient();
+  final _fbClient = FbClient(); // TODO: to provider
   final tasksMap = BehaviorSubject<Map<String, List<UserTask>>>();
   final settings = PublishSubject<Settings>();
   final categoryMapStream = BehaviorSubject<Map<String, Category>>();
 
   var _taskList = List<UserTask>();
   var _taskMap = Map<String, List<UserTask>>();
-  var _categoryMap = Map<String, Category>();
+  var categoryMap = Map<String, Category>();
   DatabaseReference ref;
 
   TaskListBloc() {
@@ -44,8 +44,8 @@ class TaskListBloc {
       if (task.category.isEmpty) {
         task.category = Constant.noCategory;
       }
-      if (!_categoryMap.containsKey(task.category)) {
-        _categoryMap[task.category] = Category(name: task.category, colorString: _colorToString(Colors.grey.shade600));
+      if (!categoryMap.containsKey(task.category)) {
+        categoryMap[task.category] = Category(name: task.category, colorString: _colorToString(Colors.grey.shade600));
         Category(name: task.category).save();
       }
       try {
@@ -80,6 +80,11 @@ class TaskListBloc {
       }
 
       int index = _taskList.indexWhere((UserTask t) => t.uid == task.uid);
+
+      if (!_taskMap.containsKey(task.category)) {
+        return;
+      }
+
       int mapIndex = _taskMap[task.category].indexWhere((UserTask t) => t.uid == task.uid);
 
       _taskList[index] = task;
@@ -89,18 +94,16 @@ class TaskListBloc {
   }
 
   Future<bool> init() async {
-    _repository.taskListStream.listen((taskList) async {
-      _taskList = taskList;
-      _createTaskMap(taskList);
+    _repository.initStream.listen((data) {
+      _setCategories(data.categories);
+
+      _taskList = data.tasks;
+      _createTaskMap(_taskList);
       tasksMap.add(_taskMap);
 
       _load();
       _subscribe();
-    });
-    _repository.categoryListStream.listen((catList) {
-      _setCategories(catList);
-      categoryMapStream.add(_categoryMap);
-      CategoryProvider.saveList(catList);
+      CategoryProvider.saveList(data.categories);
     });
 
     await _repository.init();
@@ -109,15 +112,15 @@ class TaskListBloc {
 
   void _setCategories(List<Category> categories) {
     for (final cat in categories) {
-      _categoryMap[cat.name] = cat;
+      categoryMap[cat.name] = cat;
     }
 
-    categoryMapStream.add(_categoryMap);
+    categoryMapStream.add(categoryMap);
   }
 
   Future _load() async {
     await getTasks();
-    await CategoryProvider.saveList(_categoryMap.values.toList());
+    await CategoryProvider.saveList(categoryMap.values.toList());
 
     final cats = await getCategories();
     _setCategories(cats);
@@ -149,6 +152,7 @@ class TaskListBloc {
     return "${color.red},${color.green},${color.blue}";
   }
 
+  // FIXME: need refactoring
   void _createTaskMap(List<UserTask> taskList) {
     _taskMap.clear();
 
@@ -158,15 +162,25 @@ class TaskListBloc {
       }
 
       String colorString = _colorToString(Colors.grey.shade600);
+      Category category;
 
-      if (_categoryMap.isNotEmpty) {
-        Color color = _categoryMap.containsKey(task.category) ? _categoryMap[task.category].getColor() : Colors.grey.shade600;
+      if (categoryMap.isNotEmpty) {
+        Color color = categoryMap.containsKey(task.category) ? categoryMap[task.category].getColor() : Colors.grey.shade600;
         colorString = _colorToString(color);
       }
+      if (categoryMap.containsKey(task.category)) {
+        category = categoryMap[task.category];
+      } else {
+        category = Category(
+          name: task.category,
+          colorString: colorString,
+          order: DateTime.now().millisecondsSinceEpoch,
+        );
+      }
 
-      _categoryMap[task.category] = Category(name: task.category, colorString: colorString);
+      categoryMap[task.category] = category;
     }
-    for (final category in _categoryMap.keys) {
+    for (final category in categoryMap.keys) {
       if (category == Constant.noCategory) {
         _taskMap[Constant.noCategory] = taskList.where((task) => task.category == Constant.noCategory).toList();
         _taskMap[Constant.noCategory].sort((task1, task2) => task1.timestamp.compareTo(task2.timestamp));
@@ -180,12 +194,12 @@ class TaskListBloc {
     // clean old cats
     Set<String> taskCategories = taskList.map((t) => t.category).toSet();
     Set<String> forDelete = {};
-    _categoryMap.forEach((name, cat) {
+    categoryMap.forEach((name, cat) {
       if (!taskCategories.contains(name)) {
         forDelete.add(name);
       }
     });
-    _categoryMap.removeWhere((name, cat) => forDelete.contains(name));
+    categoryMap.removeWhere((name, cat) => forDelete.contains(name));
   }
 
   void createNewCategory(String newCategory) {
@@ -193,9 +207,13 @@ class TaskListBloc {
       return;
     }
 
-    final category = Category(name: newCategory, colorString: _colorToString(Colors.grey.shade600));
+    final category = Category(
+      name: newCategory,
+      colorString: _colorToString(Colors.grey.shade600),
+      order: DateTime.now().millisecondsSinceEpoch,
+    );
     category.save();
-    _categoryMap[newCategory] = category;
+    categoryMap[newCategory] = category;
   }
 
   Future exit() async {
@@ -253,16 +271,16 @@ class TaskListBloc {
   }
 
   Future setColorForCategory(String category, Color color) async {
-    var cat = _categoryMap[category];
+    var cat = categoryMap[category];
     cat.colorString = "${color.red},${color.green},${color.blue}";
     await CategoryProvider.save(cat);
 
-    _categoryMap[category] = cat;
-    categoryMapStream.add(_categoryMap);
+    categoryMap[category] = cat;
+    categoryMapStream.add(categoryMap);
   }
 
   Future setCategoryExpand(String category) async {
-    var cat = _categoryMap[category];
+    var cat = categoryMap[category];
     cat.isExpand = !cat.isExpand;
 
     await CategoryProvider.save(cat);
