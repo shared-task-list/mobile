@@ -41,6 +41,8 @@ class CategoryListBloc {
     _categoryList.removeWhere((cat) => cat.id == category.id);
     categories.add(_categoryList);
 
+    CategoryProvider.delete(category);
+
     final fbClient = FbClient();
     final tasks = await _taskListRepo.getTasks();
     final categoryTask = tasks.where((task) => task.category == category.name);

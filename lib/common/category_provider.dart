@@ -61,8 +61,6 @@ class CategoryProvider {
   }
 
   static Future save(Category category) async {
-    print(category.name);
-    print(category.order);
     var db = await DBProvider.db.database;
     var batch = db.batch();
     batch.rawUpdate(
@@ -70,5 +68,10 @@ class CategoryProvider {
       [category.name, category.colorString, category.order, category.getExpand(), category.id],
     );
     batch.commit(noResult: true);
+  }
+
+  static Future delete(Category category) async {
+    var db = await DBProvider.db.database;
+    await db.delete(_categoryTable, where: 'id = ?', whereArgs: [category.id]);
   }
 }

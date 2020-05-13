@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:expandable/expandable.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -107,18 +108,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
           widgets.add(_buildExpandablePanel(context, category.name, expandedWidgets));
         }
-        /*tasks.forEach(
-          (category, taskList) {
-            if (taskList.isEmpty) {
-              return;
-            }
-
-            List<Widget> tasks = taskList.map((task) => _buildListItem(context, task, textWidth)).toList();
-            List<Widget> expandedWidgets = _buildExpandableWidgets(context, category, tasks);
-
-            widgets.add(_buildExpandablePanel(context, category, expandedWidgets));
-          },
-        );*/
 
         widgets.add(SizedBox(height: 100));
 
@@ -162,6 +151,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
               onSetName: (String title, String category) async {
                 _defaultCategory = category;
                 await _bloc.quickAdd(title, category);
+                Flushbar(
+                  title: "Create",
+                  message: "Task $title was created!",
+                  duration: Duration(seconds: 3),
+                )..show(context);
               },
               onSetCategory: (String cat) => _defaultCategory = cat,
             );
@@ -308,6 +302,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
               child: const Icon(Icons.done, size: 20),
               onPressed: () async {
                 await _bloc.remove(task);
+                Flushbar(
+                  title: "Done",
+                  message: "Task ${task.title} is complete!",
+                  duration: Duration(seconds: 3),
+                )..show(context);
               },
             ),
           ),
@@ -354,7 +353,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
             Ui.openDialog(
               context: context,
               dialog: TextFieldDialog(
-                savePressed: (String newCategory) => _bloc.createNewCategory(newCategory),
+                savePressed: (String newCategory) {
+                  _bloc.createNewCategory(newCategory);
+                  Flushbar(
+                    title: "Create",
+                    message: "Category $newCategory was created!",
+                    duration: Duration(seconds: 3),
+                  )..show(context);
+                },
                 title: _locale.newCategory,
                 labelText: null,
                 hintText: _locale.categoryName,

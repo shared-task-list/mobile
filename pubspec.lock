@@ -134,6 +134,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.5"
+  flushbar:
+    dependency: "direct main"
+    description:
+      name: flushbar
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.10.2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -314,7 +321,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.7"
+    version: "1.6.8"
   path_provider_macos:
     dependency: transitive
     description:
@@ -384,7 +391,7 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.7+1"
+    version: "0.5.7+2"
   shared_preferences_macos:
     dependency: transitive
     description:
@@ -503,5 +510,5 @@ packages:
     source: hosted
     version: "3.6.1"
 sdks:
-  dart: ">=2.7.0 <3.0.0"
+  dart: ">=2.7.2 <3.0.0"
   flutter: ">=1.12.13+hotfix.5 <2.0.0"
