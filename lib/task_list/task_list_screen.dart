@@ -91,7 +91,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
           );
         }
 
-//        final tasks = snapshot.data;
         final categories = _bloc.categoryMap.values.toList();
         categories.sort((cat1, cat2) => cat1.order?.compareTo(cat2.order ?? 0));
         var widgets = <Widget>[];
@@ -99,7 +98,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         for (final category in categories) {
           var taskList = snapshot.data[category.name];
 
-          if (taskList.isEmpty) {
+          if (taskList == null || taskList.isEmpty) {
             continue;
           }
 
@@ -238,20 +237,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Widget _buildListItem(BuildContext context, UserTask task, double textWidth) {
+    bool hasComment = task.comment != null && task.comment.isNotEmpty;
+
     return Material(
       color: Colors.transparent,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => TaskDetailScreen(task: task),
-                ),
-              );
-            },
+            onTap: () => Ui.route(context, TaskDetailScreen(task: task)),
             child: StreamBuilder<Map<String, Category>>(
                 stream: _bloc.categoryMapStream,
                 builder: (context, snapshot) {
@@ -269,7 +263,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   }
 
                   return Container(
-                    margin: EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                     decoration: BoxDecoration(
                       color: backgroundTaskColor,
                       boxShadow: [
@@ -277,33 +271,29 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           color: Colors.grey[400],
                           blurRadius: 1.0, // has the effect of softening the shadow
                           spreadRadius: 1.0, // has the effect of extending the shadow
-                          offset: Offset(
+                          offset: const Offset(
                             1.0, // horizontal, move right 10
                             1.0, // vertical, move down 10
                           ),
                         ),
                       ],
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderRadius: const BorderRadius.all(const Radius.circular(20)),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: <Widget>[
                         Container(
-                          width: textWidth,
+                          width: hasComment ? textWidth - 35 : textWidth,
                           margin: EdgeInsets.only(left: 16, top: 8, bottom: 8),
                           child: Text(
                             task.title,
                             style: TextStyle(fontSize: 18, color: textColor),
                           ),
                         ),
-                        /*Container(
-                        margin: EdgeInsets.only(left: 16, bottom: 8, top: 4),
-                        child: Text(
-                          task.author + ' - ' + time,
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ),*/
+                        if (hasComment)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Ui.icon(CupertinoIcons.conversation_bubble, Icons.chat_bubble_outline),
+                          ),
                       ],
                     ),
                   );
@@ -312,6 +302,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           SizedBox(
             width: 35,
             child: FloatingActionButton(
+              mini: true,
               heroTag: 'doneButton${task.uid}',
               backgroundColor: Colors.cyan.shade800,
               child: const Icon(Icons.done, size: 20),
@@ -320,7 +311,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               },
             ),
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
         ],
       ),
     );
