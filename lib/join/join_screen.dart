@@ -13,7 +13,8 @@ import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/join/join_bloc.dart';
 import 'package:shared_task_list/model/task_list.dart';
-import 'package:shared_task_list/task_list/task_list_screen.dart';
+
+import '../home.dart';
 
 class JoinScreen extends StatelessWidget {
   final _bloc = JoinBloc();
@@ -67,7 +68,7 @@ class JoinScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (BuildContext context) => TaskListScreen(),
+                    builder: (BuildContext context) => Home(),
                   ),
                 );
               }, style: TextStyle(color: Colors.blue, fontSize: 18.0)),
@@ -127,7 +128,7 @@ class JoinScreen extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (BuildContext context) => TaskListScreen(),
+                    builder: (BuildContext context) => Home(),
                   ),
                   (Route<dynamic> route) => false,
                 );
@@ -244,7 +245,7 @@ class JoinScreen extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (BuildContext context) => TaskListScreen(),
+                            builder: (BuildContext context) => Home(),
                           ),
                           (Route<dynamic> route) => false,
                         );

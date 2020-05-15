@@ -287,6 +287,33 @@ class S {
       args: [],
     );
   }
+
+  String get show_quick_add {
+    return Intl.message(
+      'Show Quick Add',
+      name: 'show_quick_add',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get tasks {
+    return Intl.message(
+      'Tasks',
+      name: 'tasks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get categories {
+    return Intl.message(
+      'Categories',
+      name: 'categories',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

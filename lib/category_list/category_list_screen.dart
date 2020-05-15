@@ -21,7 +21,7 @@ class CategoryListScreen extends StatelessWidget {
       bar: Ui.appBar(
         title: 'Categories',
         rightButton: Platform.isIOS
-            ? Ui.actionButton(CupertinoIcons.add, () {
+            ? Ui.actionButton(Ui.icon(CupertinoIcons.add, Icons.add), () {
                 _showAddDialog(context);
               })
             : null,

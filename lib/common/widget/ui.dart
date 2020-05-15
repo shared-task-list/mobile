@@ -55,7 +55,7 @@ class Ui {
         backgroundColor: bodyColor,
         child: Container(
           color: bodyColor,
-          child: SafeArea(child: body),
+          child: body,
           padding: insets,
         ),
       );
@@ -136,17 +136,17 @@ class Ui {
     return null;
   }
 
-  static Widget actionButton(IconData icon, VoidCallback onPressed) {
+  static Widget actionButton(Widget icon, VoidCallback onPressed) {
     final iconColor = Constant.getColor(Colors.white, Colors.blue);
     if (Platform.isAndroid) {
       return IconButton(
-        icon: Icon(icon, color: iconColor),
+        icon: icon,
         onPressed: onPressed,
       );
     }
     if (Platform.isIOS) {
       return GestureDetector(
-        child: Icon(icon, color: iconColor),
+        child: icon,
         onTap: onPressed,
       );
     }
@@ -185,7 +185,7 @@ class Ui {
   static Widget flatButton(String title, VoidCallback onPressed, {double fontSize, TextStyle style}) {
     Widget textChild = Text(
       title,
-      style: TextStyle(fontSize: fontSize ?? 15),
+      style: style,
     );
     if (Platform.isAndroid) {
       return FlatButton(onPressed: onPressed, child: textChild);
@@ -430,7 +430,25 @@ class Ui {
     return null;
   }
 
-  static Widget icon(IconData forIos, IconData forDroid) {
+  static Widget icon(IconData forIos, IconData forDroid, {Color color, double size}) {
     return Icon(Platform.isIOS ? forIos : forDroid);
+  }
+
+  static Widget wswitch({
+    @required bool value,
+    @required ValueChanged<bool> onChange,
+  }) {
+    if (Platform.isIOS) {
+      return CupertinoSwitch(
+        value: value,
+        onChanged: onChange,
+      );
+    }
+    if (Platform.isAndroid) {
+      return Switch(
+        value: value,
+        onChanged: onChange,
+      );
+    }
   }
 }

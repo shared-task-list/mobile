@@ -27,5 +27,8 @@
     "background": "Фон",
     "image": "Изображение",
     "color": "Цвет",
-    "clear": "Очистить"
+    "clear": "Очистить",
+    "show_quick_add": "Show Quick Add",
+    "tasks": "Задачи",
+    "categories": "Категории"
 }

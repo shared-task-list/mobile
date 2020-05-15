@@ -27,5 +27,9 @@
     "background": "Background",
     "image": "Image",
     "color": "Color",
-    "clear": "Clear"
+    "clear": "Clear",
+    "show_quick_add": "Show Quick Add",
+    "tasks": "Tasks",
+    "categories": "Categories"
+
 }

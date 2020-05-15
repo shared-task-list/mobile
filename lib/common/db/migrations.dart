@@ -33,7 +33,8 @@ const initScript = [
     id INTEGER PRIMARY KEY,
     default_category TEXT,
     name TEXT,
-    is_show_categories INTEGER
+    is_show_categories INTEGER,
+    is_show_quick_add INTEGER
   );
   '''
 ];

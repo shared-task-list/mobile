@@ -11,6 +11,7 @@ import 'package:shared_task_list/common/widget/color_set_dialog.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
+import 'package:shared_task_list/join/join_screen.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/settings/category_dialog.dart';
 import 'package:shared_task_list/settings/settings_bloc.dart';
@@ -91,11 +92,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       });
                 }),
             // show/hide
-            /*InkWell(
+            InkWell(
               onTap: () {
-                bool value = !_bloc.visibleCats;
-                _bloc.setVisibleCats(value);
-                _settings.isShowCategories = value;
+                setState(() {
+                  _settings.isShowQuickAdd = !_settings.isShowQuickAdd;
+                });
                 _bloc.saveSettings(_settings);
               },
               child: Padding(
@@ -104,28 +105,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      'Expand Categories',
+                      locale.show_quick_add,
                       style: _primaryStyle,
                     ),
-                    StreamBuilder<bool>(
-                        stream: _bloc.isShowCategories,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Container();
-                          }
-                          return Switch.adaptive(
-                            value: snapshot.data,
-                            onChanged: (bool value) {
-                              _bloc.setVisibleCats(value);
-                              _settings.isShowCategories = value;
-                              _bloc.saveSettings(_settings);
-                            },
-                          );
-                        }),
+                    Ui.wswitch(
+                      value: _settings.isShowQuickAdd,
+                      onChange: (bool value) {
+                        setState(() {
+                          _settings.isShowQuickAdd = value;
+                        });
+                        _bloc.saveSettings(_settings);
+                      },
+                    ),
                   ],
                 ),
               ),
-            ),*/
+            ),
             FutureBuilder<SharedPreferences>(
                 future: SharedPreferences.getInstance(),
                 builder: (context, snapshot) {
@@ -174,10 +169,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
+            Container(
+              margin: EdgeInsets.only(top: 55),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    width: 200,
+                    child: Ui.flatButton(
+                      locale.exit,
+                      () async {
+                        await _bloc.exit();
+                        Ui.route(context, JoinScreen(), withHistory: false);
+                      },
+                      style: TextStyle(color: Colors.red, fontSize: 22),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             SizedBox(height: 50),
           ],
         ),
-//        _buildSaveButton(),
       ],
     );
   }

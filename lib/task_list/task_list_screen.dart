@@ -1,12 +1,11 @@
 import 'dart:io';
 
+import 'package:cool_ui/cool_ui.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,13 +13,12 @@ import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
-import 'package:shared_task_list/join/join_screen.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
-import 'package:shared_task_list/task_detail/task_detail_screen.dart';
 import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
+import 'package:shared_task_list/task_list/task_list_item.dart';
 
 import '../common/widget/color_set_dialog.dart';
 
@@ -36,10 +34,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Settings _settings;
   Future<bool> initFuture;
 
-  _TaskListScreenState() {
-    initFuture = _bloc.init();
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -48,24 +42,95 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    initFuture = _bloc.init();
     _locale = S.of(context);
     Constant.noCategory = _locale.noCategory;
     double textWidth = MediaQuery.of(context).size.width - 80;
 
-    _settings = Settings(defaultCategory: Constant.noCategory, isShowCategories: true);
+    _settings = Settings(
+      defaultCategory: Constant.noCategory,
+      isShowCategories: true,
+      isShowQuickAdd: true,
+    );
 
     return FutureBuilder(
         future: initFuture,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Ui.waitIndicator();
           }
           return Ui.scaffold(
             bar: Ui.appBar(
               title: Constant.taskList,
-              rightButton: Ui.actionButton(Icons.refresh, () async {
+              leftButton: Ui.actionButton(Ui.icon(CupertinoIcons.refresh, Icons.refresh), () async {
                 await _bloc.getTasks();
               }),
+              rightButton: CupertinoPopoverButton(
+                child: Ui.icon(CupertinoIcons.ellipsis, Icons.more_vert),
+                popoverWidth: 250,
+                popoverBuild: (ctx) {
+                  return SizedBox(
+                    width: 250.0,
+                    height: 140.0,
+                    child: Column(
+                      children: <Widget>[
+                        ListTile(
+                          title: Text(_locale.newTask),
+                          leading: Ui.icon(CupertinoIcons.add, Icons.add, color: Colors.teal.shade800, size: 40),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            Ui.openDialog(
+                              context: context,
+                              dialog: FutureBuilder<List<Category>>(
+                                  future: _bloc.getCategories(),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return Container();
+                                    }
+
+                                    final categories = snapshot.data;
+
+                                    return QuickAddDialog(
+                                      categories: categories,
+                                      defaultCategory: _defaultCategory.isEmpty ? _settings.defaultCategory : _defaultCategory,
+                                      onSetName: (String title, String category) async {
+                                        _defaultCategory = category;
+                                        await _bloc.quickAdd(title, category);
+                                      },
+                                      onSetCategory: (String cat) => _defaultCategory = cat,
+                                    );
+                                  }),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          title: Text(_locale.newCategory),
+                          leading: Ui.icon(CupertinoIcons.add_circled, Icons.add_circle_outline, color: Colors.teal.shade800, size: 40),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            Ui.openDialog(
+                              context: context,
+                              dialog: TextFieldDialog(
+                                savePressed: (String newCategory) {
+                                  _bloc.createNewCategory(newCategory);
+                                  Flushbar(
+                                    title: "Create",
+                                    message: "Category $newCategory was created!",
+                                    duration: Duration(seconds: 3),
+                                  )..show(context);
+                                },
+                                title: _locale.newCategory,
+                                labelText: null,
+                                hintText: _locale.categoryName,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
             body: FutureBuilder<Widget>(
               future: _buildBody(context, textWidth),
@@ -86,14 +151,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
       stream: _bloc.tasksMap,
       builder: (ctx, snapshot) {
         if (!snapshot.hasData) {
-          return Align(
-            alignment: Alignment.center,
-            child: Ui.waitIndicator(),
-          );
+          return Ui.waitIndicator();
         }
 
         final categories = _bloc.categoryMap.values.toList();
-        categories.sort((cat1, cat2) => cat1.order?.compareTo(cat2.order ?? 0));
+
+        if (categories.isNotEmpty) {
+          categories.sort((cat1, cat2) => cat1.order?.compareTo(cat2.order ?? 0));
+        }
+
         var widgets = <Widget>[];
 
         for (final category in categories) {
@@ -103,7 +169,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             continue;
           }
 
-          List<Widget> tasks = taskList.map((task) => _buildListItem(context, task, textWidth)).toList();
+          List<Widget> tasks = taskList.map((task) => TaskListItem(bloc: _bloc, task: task, textWidth: textWidth)).toList();
           List<Widget> expandedWidgets = _buildExpandableWidgets(context, category.name, tasks);
 
           widgets.add(_buildExpandablePanel(context, category.name, expandedWidgets));
@@ -230,155 +296,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  Widget _buildListItem(BuildContext context, UserTask task, double textWidth) {
-    bool hasComment = task.comment != null && task.comment.isNotEmpty;
-
-    return Material(
-      color: Colors.transparent,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          GestureDetector(
-            onTap: () => Ui.route(context, TaskDetailScreen(task: task)),
-            child: StreamBuilder<Map<String, Category>>(
-                stream: _bloc.categoryMapStream,
-                builder: (context, snapshot) {
-                  Color textColor = Colors.black;
-                  Color backgroundTaskColor = Colors.white;
-
-                  if (snapshot.hasData) {
-                    Color catColor = snapshot.data[task.category].getColor();
-
-                    if (catColor != Colors.grey.shade600) {
-                      final brightness = ThemeData.estimateBrightnessForColor(catColor);
-                      textColor = brightness == Brightness.light ? Colors.black : Colors.white;
-                      backgroundTaskColor = catColor;
-                    }
-                  }
-
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: backgroundTaskColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey[400],
-                          blurRadius: 1.0, // has the effect of softening the shadow
-                          spreadRadius: 1.0, // has the effect of extending the shadow
-                          offset: const Offset(
-                            1.0, // horizontal, move right 10
-                            1.0, // vertical, move down 10
-                          ),
-                        ),
-                      ],
-                      borderRadius: const BorderRadius.all(const Radius.circular(20)),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Container(
-                          width: hasComment ? textWidth - 35 : textWidth,
-                          margin: EdgeInsets.only(left: 16, top: 8, bottom: 8),
-                          child: Text(
-                            task.title,
-                            style: TextStyle(fontSize: 18, color: textColor),
-                          ),
-                        ),
-                        if (hasComment)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Ui.icon(CupertinoIcons.conversation_bubble, Icons.chat_bubble_outline),
-                          ),
-                      ],
-                    ),
-                  );
-                }),
-          ),
-          SizedBox(
-            width: 35,
-            child: FloatingActionButton(
-              mini: true,
-              heroTag: 'doneButton${task.uid}',
-              backgroundColor: Colors.cyan.shade800,
-              child: const Icon(Icons.done, size: 20),
-              onPressed: () async {
-                await _bloc.remove(task);
-                Flushbar(
-                  title: "Done",
-                  message: "Task ${task.title} is complete!",
-                  duration: Duration(seconds: 3),
-                )..show(context);
-              },
-            ),
-          ),
-          const SizedBox(width: 5),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuButton(BuildContext context) {
-    const labelBackground = const Color.fromRGBO(0, 0, 0, 0.6);
-    const labelTextStyle = const TextStyle(fontWeight: FontWeight.w500, color: Colors.white);
-
-    return SpeedDial(
-      marginBottom: 40,
-      marginRight: 32,
-      animatedIcon: AnimatedIcons.menu_close,
-      animatedIconTheme: IconThemeData(size: 22.0),
-      overlayOpacity: 0,
-      children: [
-        SpeedDialChild(
-          child: Icon(Icons.exit_to_app, color: Colors.white),
-          backgroundColor: Colors.deepOrange,
-          onTap: () async {
-            await _bloc.exit();
-            Ui.route(context, JoinScreen(), withHistory: false);
-          },
-          label: _locale.exit,
-          labelStyle: labelTextStyle,
-          labelBackgroundColor: labelBackground,
-        ),
-        SpeedDialChild(
-          child: Icon(Icons.add, color: Colors.white),
-          backgroundColor: Colors.blue,
-          onTap: () => Ui.route(context, TaskDetailScreen()),
-          label: _locale.newTask,
-          labelStyle: labelTextStyle,
-          labelBackgroundColor: labelBackground,
-        ),
-        SpeedDialChild(
-          child: Icon(Icons.add_circle_outline, color: Colors.white),
-          backgroundColor: Colors.purple,
-          onTap: () {
-            Ui.openDialog(
-              context: context,
-              dialog: TextFieldDialog(
-                savePressed: (String newCategory) {
-                  _bloc.createNewCategory(newCategory);
-                  Flushbar(
-                    title: "Create",
-                    message: "Category $newCategory was created!",
-                    duration: Duration(seconds: 3),
-                  )..show(context);
-                },
-                title: _locale.newCategory,
-                labelText: null,
-                hintText: _locale.categoryName,
-              ),
-            );
-          },
-          label: _locale.newCategory,
-          labelStyle: labelTextStyle,
-          labelBackgroundColor: labelBackground,
-        ),
-      ],
-    );
-  }
-
   Widget _buildQuickAdd(BuildContext context) {
     return Positioned(
       bottom: 24,
-      right: 90,
+      right: 24,
       child: FloatingActionButton(
         heroTag: 'quickAdd',
         child: Icon(Icons.add),
@@ -413,10 +334,21 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   Future<Widget> _buildBody(BuildContext context, double textWidth) async {
     Widget body = Stack(
+      fit: StackFit.expand,
       children: [
         _buildList(context, textWidth),
-        _buildMenuButton(context),
-        _buildQuickAdd(context),
+        StreamBuilder<Settings>(
+            stream: _bloc.settings,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Container();
+              }
+              if (snapshot.data.isShowQuickAdd) {
+                return _buildQuickAdd(context);
+              }
+
+              return Container();
+            }),
       ],
     );
     SharedPreferences prefs = await SharedPreferences.getInstance();

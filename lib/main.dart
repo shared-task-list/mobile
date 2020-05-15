@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.white,
         systemNavigationBarIconBrightness: Brightness.dark,
-        statusBarColor: Colors.transparent,
-        statusBarBrightness: Brightness.light,
+//        statusBarColor: Colors.transparent,
+//        statusBarBrightness: Brightness.light,
       ));
     }
     return _getApp();

@@ -28,7 +28,7 @@ class DBProvider {
 
     return await openDatabase(
       path,
-      version: 10,
+      version: 11,
       onOpen: (db) {},
       singleInstance: true,
       onCreate: (Database db, int version) async {

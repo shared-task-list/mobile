@@ -9,6 +9,7 @@ import 'package:shared_task_list/task_list/task_list_screen.dart';
 
 import 'category_list/category_list_screen.dart';
 import 'common/widget/ui.dart';
+import 'generated/l10n.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -16,6 +17,7 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home> {
+  S _locale;
   int _selectedIndex = 0;
   final _pages = <Widget>[
     TaskListScreen(),
@@ -25,6 +27,8 @@ class _Home extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    _locale = S.of(context);
+
     if (Platform.isIOS) {
       return CupertinoTabScaffold(
         tabBar: CupertinoTabBar(
@@ -67,17 +71,15 @@ class _Home extends State<Home> {
 
   List<BottomNavigationBarItem> _getItems() {
     return <BottomNavigationBarItem>[
-      _getItem('Tasks', Icon(Icons.format_list_bulleted)),
-      _getItem('Categories', Ui.icon(CupertinoIcons.collections, Icons.category)),
-      _getItem('Settings', Ui.icon(CupertinoIcons.settings, Icons.settings)),
+      _getItem(_locale.tasks, Icon(Icons.format_list_bulleted)),
+      _getItem(_locale.categories, Ui.icon(CupertinoIcons.collections, Icons.category)),
+      _getItem(_locale.settings, Ui.icon(CupertinoIcons.settings, Icons.settings)),
     ];
   }
 
   BottomNavigationBarItem _getItem(String title, Widget icon) {
     return BottomNavigationBarItem(
-//      icon: _getImage(imageName),
       icon: icon,
-//      activeIcon: _getImage(imageName, isActive: true),
       title: Text(title),
     );
   }

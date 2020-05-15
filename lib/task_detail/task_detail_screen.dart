@@ -62,7 +62,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ),
             ),
             _buildSlidePanel(),
-            _buildMenuButton(context),
+//            _buildMenuButton(context),
           ],
         ),
       ),
@@ -115,7 +115,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             child: TextFormField(
               initialValue: widget.task?.comment ?? '',
               maxLines: 5,
-//              maxLength: 255,
               decoration: InputDecoration(
                 hintText: locale.comment,
               ),
@@ -207,6 +206,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               height: 0.5,
               color: Colors.grey,
             ),*/
+            Ui.flatButton('Add New Category', () {
+              Ui.openDialog(
+                context: context,
+                dialog: TextFieldDialog(
+                  savePressed: (String newCategory) => _bloc.createNewCategory(newCategory),
+                  title: locale.newCategory,
+                  labelText: null,
+                  hintText: locale.categoryName,
+                ),
+              );
+            }),
             Flexible(
               child: Container(
                 child: StreamBuilder<List<Category>>(

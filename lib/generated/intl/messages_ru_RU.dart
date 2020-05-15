@@ -23,6 +23,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static _notInlinedMessages(_) => <String, Function> {
     "background" : MessageLookupByLibrary.simpleMessage("Фон"),
     "cancel" : MessageLookupByLibrary.simpleMessage("Закрыть"),
+    "categories" : MessageLookupByLibrary.simpleMessage("Категории"),
     "category" : MessageLookupByLibrary.simpleMessage("Категория"),
     "categoryList" : MessageLookupByLibrary.simpleMessage("Категории (нажать или потянуть)"),
     "categoryName" : MessageLookupByLibrary.simpleMessage("Название категории"),
@@ -43,10 +44,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "password" : MessageLookupByLibrary.simpleMessage("Пароль"),
     "required" : MessageLookupByLibrary.simpleMessage("Поле не может быть пустым"),
     "settings" : MessageLookupByLibrary.simpleMessage("Настройки"),
+    "show_quick_add" : MessageLookupByLibrary.simpleMessage("Show Quick Add"),
     "task" : MessageLookupByLibrary.simpleMessage("Задача"),
     "taskListExists" : MessageLookupByLibrary.simpleMessage("Такой список уже есть"),
     "taskListName" : MessageLookupByLibrary.simpleMessage("Название списка"),
     "taskTitle" : MessageLookupByLibrary.simpleMessage("Название задачи"),
+    "tasks" : MessageLookupByLibrary.simpleMessage("Задачи"),
     "title" : MessageLookupByLibrary.simpleMessage("Название"),
     "update" : MessageLookupByLibrary.simpleMessage("Обновить"),
     "username" : MessageLookupByLibrary.simpleMessage("Имя")

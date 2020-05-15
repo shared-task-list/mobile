@@ -11,9 +11,18 @@ class SettingsRepository {
       List<Map> maps = await db.query(_tableName);
       var lists = maps.map((map) => Settings.fromMap(map));
 
-      return lists.first ?? Settings(defaultCategory: Constant.noCategory, isShowCategories: true);
+      return lists.first ??
+          Settings(
+            defaultCategory: Constant.noCategory,
+            isShowCategories: true,
+            isShowQuickAdd: true,
+          );
     } catch (e) {
-      return Settings(defaultCategory: Constant.noCategory, isShowCategories: true);
+      return Settings(
+        defaultCategory: Constant.noCategory,
+        isShowCategories: true,
+        isShowQuickAdd: true,
+      );
     }
   }
 

@@ -23,6 +23,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static _notInlinedMessages(_) => <String, Function> {
     "background" : MessageLookupByLibrary.simpleMessage("Background"),
     "cancel" : MessageLookupByLibrary.simpleMessage("Cancel"),
+    "categories" : MessageLookupByLibrary.simpleMessage("Categories"),
     "category" : MessageLookupByLibrary.simpleMessage("Category"),
     "categoryList" : MessageLookupByLibrary.simpleMessage("Category List (tap or drag)"),
     "categoryName" : MessageLookupByLibrary.simpleMessage("Category Name"),
@@ -43,10 +44,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "password" : MessageLookupByLibrary.simpleMessage("Password"),
     "required" : MessageLookupByLibrary.simpleMessage("Could not be empty"),
     "settings" : MessageLookupByLibrary.simpleMessage("Settings"),
+    "show_quick_add" : MessageLookupByLibrary.simpleMessage("Show Quick Add"),
     "task" : MessageLookupByLibrary.simpleMessage("Task"),
     "taskListExists" : MessageLookupByLibrary.simpleMessage("Task List already exist"),
     "taskListName" : MessageLookupByLibrary.simpleMessage("Task List"),
     "taskTitle" : MessageLookupByLibrary.simpleMessage("Task Title"),
+    "tasks" : MessageLookupByLibrary.simpleMessage("Tasks"),
     "title" : MessageLookupByLibrary.simpleMessage("Title"),
     "update" : MessageLookupByLibrary.simpleMessage("Update"),
     "username" : MessageLookupByLibrary.simpleMessage("Username")

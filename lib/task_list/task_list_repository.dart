@@ -3,7 +3,9 @@ import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
 import 'package:shared_task_list/model/app_model.dart';
 import 'package:shared_task_list/model/category.dart';
+import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
+import 'package:shared_task_list/settings/settings_repository.dart';
 
 class TaskListRepository {
   static const _taskTable = 'tasks';
@@ -18,7 +20,8 @@ class TaskListRepository {
     List<Map> maps = await db.rawQuery(
       'select '
       't.Uid as tuid, t.Title as ttitle, t.Category as tcat, t.Timestamp as tt, '
-      'cats.name as cname, cats.color_string as ccolor, cats.id as cid, cats."order" as corder '
+      'cats.name as cname, cats.color_string as ccolor, cats.id as cid, cats."order" as corder, '
+      's.default_category as sdf, s.is_show_categories as ssc, s.is_show_quick_add as sqd '
       'from tasks as t '
       'join categories as cats on 1 = 1 '
       'join settings as s on 1 = 1',
@@ -27,6 +30,29 @@ class TaskListRepository {
     List<Category> cats = [];
     Set<String> taskId = {};
     Set<String> catName = {};
+
+    if (maps.isEmpty) {
+      Settings settings = Settings(
+        defaultCategory: Constant.noCategory,
+        isShowCategories: true,
+        isShowQuickAdd: true,
+      );
+      final initData = ListInitData()
+        ..categories = cats
+        ..tasks = tasks
+        ..settings = settings;
+      initStream.add(initData);
+
+      var repo = SettingsRepository();
+      await repo.saveSettings(settings);
+      return;
+    }
+
+    Settings settings = Settings(
+      defaultCategory: maps.first['sdf'],
+      isShowCategories: maps.first['ssc'] == null ? true : maps.first['ssc'] == 1,
+      isShowQuickAdd: maps.first['sqd'] == null ? true : maps.first['sqd'] == 1,
+    );
 
     for (final item in maps) {
       if (!taskId.contains(item['tuid'])) {
@@ -44,7 +70,7 @@ class TaskListRepository {
           name: item['cname'],
           colorString: item['ccolor'],
           id: item['cid'],
-          order: item['corder'],
+          order: item['corder'] ?? 0,
         );
         catName.add(cat.name);
         cats.add(cat);
@@ -53,7 +79,8 @@ class TaskListRepository {
 
     final initData = ListInitData()
       ..categories = cats
-      ..tasks = tasks;
+      ..tasks = tasks
+      ..settings = settings;
     initStream.add(initData);
   }
 

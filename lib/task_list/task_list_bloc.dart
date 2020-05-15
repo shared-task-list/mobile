@@ -11,16 +11,14 @@ import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
-import 'package:shared_task_list/settings/settings_repository.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskListBloc {
   final _repository = TaskListRepository();
-  final _settingsRepository = SettingsRepository();
   final _fbClient = FbClient(); // TODO: to provider
   final tasksMap = BehaviorSubject<Map<String, List<UserTask>>>();
-  final settings = PublishSubject<Settings>();
+  final settings = BehaviorSubject<Settings>();
   final categoryMapStream = BehaviorSubject<Map<String, Category>>();
 
   var _taskList = List<UserTask>();
@@ -45,8 +43,11 @@ class TaskListBloc {
         task.category = Constant.noCategory;
       }
       if (!categoryMap.containsKey(task.category)) {
-        categoryMap[task.category] = Category(name: task.category, colorString: _colorToString(Colors.grey.shade600));
-        Category(name: task.category).save();
+        categoryMap[task.category] = Category(
+          name: task.category,
+          colorString: _colorToString(Colors.grey.shade600),
+          order: DateTime.now().millisecondsSinceEpoch,
+        );
       }
       try {
         _taskList.firstWhere((UserTask t) => t.uid == task.uid);
@@ -95,6 +96,7 @@ class TaskListBloc {
 
   Future<bool> init() async {
     _repository.initStream.listen((data) {
+      settings.add(data.settings);
       _setCategories(data.categories);
 
       _taskList = data.tasks;
@@ -132,7 +134,7 @@ class TaskListBloc {
     _createTaskMap(_taskList);
     tasksMap.add(_taskMap);
 
-    _repository.saveTasks(_taskList);
+    await _repository.saveTasks(_taskList);
   }
 
   Future remove(UserTask task) async {
@@ -216,18 +218,6 @@ class TaskListBloc {
     categoryMap[newCategory] = category;
   }
 
-  Future exit() async {
-    await _repository.clearTasks();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(Constant.taskListKey);
-    await prefs.remove(Constant.passwordKey);
-
-    _settingsRepository.saveSettings(Settings(defaultCategory: '', isShowCategories: true));
-
-    Constant.taskList = '';
-    Constant.password = '';
-  }
-
   Future quickAdd(String title, String category) async {
     // get preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -249,11 +239,6 @@ class TaskListBloc {
 
   Future<List<Category>> getCategories() async {
     return await CategoryProvider.getList();
-  }
-
-  Future getSettings() async {
-    var _settings = await _settingsRepository.getSettings();
-    settings.add(_settings);
   }
 
   String _getPasswordHash() {
