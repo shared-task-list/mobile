@@ -5,6 +5,7 @@ import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/task_detail/task_detail_repository.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
+import 'package:shared_task_list/common/extension/color_extension.dart';
 
 class CategoryListBloc {
   final categories = BehaviorSubject<List<Category>>();
@@ -82,7 +83,7 @@ class CategoryListBloc {
 
     final category = Category(
       name: name,
-      colorString: _colorToString(Colors.grey.shade600),
+      colorString: Colors.grey.shade600.toRgbString(),
       order: DateTime.now().millisecondsSinceEpoch,
     );
 
@@ -93,9 +94,5 @@ class CategoryListBloc {
 
   void dispose() {
     categories.close();
-  }
-
-  String _colorToString(Color color) {
-    return "${color.red},${color.green},${color.blue}";
   }
 }

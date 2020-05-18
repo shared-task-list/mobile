@@ -1,6 +1,7 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
+import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/app_model.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
@@ -9,6 +10,7 @@ import 'package:shared_task_list/settings/settings_repository.dart';
 
 class TaskListRepository {
   static const _taskTable = 'tasks';
+  final _fbClient = FbClient();
   final initStream = PublishSubject<ListInitData>();
 
   void dispose() {

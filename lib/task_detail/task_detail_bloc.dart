@@ -2,7 +2,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/category_provider.dart';
 import 'package:shared_task_list/common/constant.dart';
-import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/task_detail/task_detail_repository.dart';
@@ -10,7 +9,6 @@ import 'package:uuid/uuid.dart';
 
 class TaskDetailBloc {
   final _repository = TaskDetailRepository();
-  final _fbClient = FbClient();
   final categories = BehaviorSubject<List<Category>>();
   final categoryButtonTitle = BehaviorSubject<String>();
   final _categoryTitle = 'Category';
@@ -44,7 +42,6 @@ class TaskDetailBloc {
     );
 
     await _repository.createTask(task);
-    await _fbClient.addTask(task);
   }
 
   Future updateTask(UserTask task) async {
@@ -53,7 +50,6 @@ class TaskDetailBloc {
     task.category = category;
 
     _repository.updateTask(task);
-    await _fbClient.updateTask(task);
   }
 
   Future createNewCategory(String newCategory) async {

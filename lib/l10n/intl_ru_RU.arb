@@ -30,5 +30,6 @@
     "clear": "Очистить",
     "show_quick_add": "Show Quick Add",
     "tasks": "Задачи",
-    "categories": "Категории"
+    "categories": "Категории",
+    "add_new": "Добавить"
 }

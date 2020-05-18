@@ -30,6 +30,7 @@
     "clear": "Clear",
     "show_quick_add": "Show Quick Add",
     "tasks": "Tasks",
-    "categories": "Categories"
+    "categories": "Categories",
+    "add_new": "Add New"
 
 }

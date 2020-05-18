@@ -13,6 +13,7 @@ import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
 import 'package:uuid/uuid.dart';
+import 'package:shared_task_list/common/extension/color_extension.dart';
 
 class TaskListBloc {
   final _repository = TaskListRepository();
@@ -45,7 +46,7 @@ class TaskListBloc {
       if (!categoryMap.containsKey(task.category)) {
         categoryMap[task.category] = Category(
           name: task.category,
-          colorString: _colorToString(Colors.grey.shade600),
+          colorString: Colors.grey.shade600.toRgbString(),
           order: DateTime.now().millisecondsSinceEpoch,
         );
       }

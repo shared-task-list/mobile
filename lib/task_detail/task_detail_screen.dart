@@ -206,7 +206,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               height: 0.5,
               color: Colors.grey,
             ),*/
-            Ui.flatButton('Add New Category', () {
+            Ui.flatButton(locale.add_new, () {
               Ui.openDialog(
                 context: context,
                 dialog: TextFieldDialog(

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cool_ui/cool_ui.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,17 +9,17 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/constant.dart';
-import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
+import 'package:shared_task_list/task_list/popover_menu.dart';
 import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
 import 'package:shared_task_list/task_list/task_list_item.dart';
 
-import '../common/widget/color_set_dialog.dart';
+import 'package:shared_task_list/common/widget/color_set_dialog.dart';
 
 class TaskListScreen extends StatefulWidget {
   @override
@@ -65,72 +64,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               leftButton: Ui.actionButton(Ui.icon(CupertinoIcons.refresh, Icons.refresh), () async {
                 await _bloc.getTasks();
               }),
-              rightButton: CupertinoPopoverButton(
-                child: Ui.icon(CupertinoIcons.ellipsis, Icons.more_vert),
-                popoverWidth: 250,
-                popoverBuild: (ctx) {
-                  return SizedBox(
-                    width: 250.0,
-                    height: 140.0,
-                    child: Column(
-                      children: <Widget>[
-                        ListTile(
-                          title: Text(_locale.newTask),
-                          leading: Ui.icon(CupertinoIcons.add, Icons.add, color: Colors.teal.shade800, size: 40),
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            Ui.openDialog(
-                              context: context,
-                              dialog: FutureBuilder<List<Category>>(
-                                  future: _bloc.getCategories(),
-                                  builder: (context, snapshot) {
-                                    if (!snapshot.hasData) {
-                                      return Container();
-                                    }
-
-                                    final categories = snapshot.data;
-
-                                    return QuickAddDialog(
-                                      categories: categories,
-                                      defaultCategory: _defaultCategory.isEmpty ? _settings.defaultCategory : _defaultCategory,
-                                      onSetName: (String title, String category) async {
-                                        _defaultCategory = category;
-                                        await _bloc.quickAdd(title, category);
-                                      },
-                                      onSetCategory: (String cat) => _defaultCategory = cat,
-                                    );
-                                  }),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          title: Text(_locale.newCategory),
-                          leading: Ui.icon(CupertinoIcons.add_circled, Icons.add_circle_outline, color: Colors.teal.shade800, size: 40),
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            Ui.openDialog(
-                              context: context,
-                              dialog: TextFieldDialog(
-                                savePressed: (String newCategory) {
-                                  _bloc.createNewCategory(newCategory);
-                                  Flushbar(
-                                    title: "Create",
-                                    message: "Category $newCategory was created!",
-                                    duration: Duration(seconds: 3),
-                                  )..show(context);
-                                },
-                                title: _locale.newCategory,
-                                labelText: null,
-                                hintText: _locale.categoryName,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              rightButton: PopoverMenu(bloc: _bloc, rootContext: context),
             ),
             body: FutureBuilder<Widget>(
               future: _buildBody(context, textWidth),
@@ -191,7 +125,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   List<Widget> _buildExpandableWidgets(BuildContext context, String category, List<Widget> tasks) {
     return [
-      Ui.flatButton('Add New', () async {
+      Ui.flatButton(_locale.add_new, () async {
         _defaultCategory = category;
         await _openQuickAdd(context);
       }),

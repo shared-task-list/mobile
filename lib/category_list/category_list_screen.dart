@@ -8,14 +8,17 @@ import 'package:shared_task_list/category_list/category_list_bloc.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
+import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/category.dart';
 
 class CategoryListScreen extends StatelessWidget {
   final _bloc = CategoryListBloc();
+  S _locale;
 
   @override
   Widget build(BuildContext context) {
     _bloc.getCategories();
+    _locale = S.of(context);
 
     return Ui.scaffold(
       bar: Ui.appBar(
@@ -50,34 +53,42 @@ class CategoryListScreen extends StatelessWidget {
 
           final categories = snapshot.data;
 
-          return ReorderableListView(
-            onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex),
+          return Column(
             children: <Widget>[
-              for (final category in categories)
-                ListTile(
-                  key: ValueKey(category),
-                  trailing: SizedBox(
-                    width: 100,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Ui.icon(CupertinoIcons.pen, Icons.edit),
-                          onPressed: () {
-                            _showEditDialog(context, category);
-                          },
+              Ui.flatButton(_locale.add_new, () {
+                _showAddDialog(context);
+              }),
+              ReorderableListView(
+                onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex),
+                children: <Widget>[
+                  for (final category in categories)
+                    ListTile(
+                      key: ValueKey(category),
+                      leading: Icon(Icons.drag_handle),
+                      trailing: SizedBox(
+                        width: 100,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Ui.icon(CupertinoIcons.pen, Icons.edit),
+                              onPressed: () {
+                                _showEditDialog(context, category);
+                              },
+                            ),
+                            IconButton(
+                              icon: Ui.icon(CupertinoIcons.delete_simple, Icons.delete),
+                              onPressed: () {
+                                _showConfirmDeleteDialog(context, category);
+                              },
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: Ui.icon(CupertinoIcons.delete_simple, Icons.delete),
-                          onPressed: () {
-                            _showConfirmDeleteDialog(context, category);
-                          },
-                        ),
-                      ],
+                      ),
+                      title: Text(category.name),
                     ),
-                  ),
-                  title: Text(category.name),
-                ),
+                ],
+              ),
             ],
           );
         });

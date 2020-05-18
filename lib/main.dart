@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 import 'common/constant.dart';
 import 'generated/l10n.dart';
 import 'home.dart';
+import 'package:shared_task_list/common/extension/string_extension.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,14 +83,8 @@ class MyApp extends StatelessWidget {
     }
 
     String colorString = prefs.getString('bg_color') ?? '';
-    Constant.bgColor = colorString.isEmpty ? Colors.white : _colorFromString(colorString);
+    Constant.bgColor = colorString.isEmpty ? Colors.white : colorString.toColor;
 
     return prefs;
-  }
-
-  // todo: to extension
-  Color _colorFromString(String colorString) {
-    var nums = colorString.split(',').map((num) => int.parse(num)).toList();
-    return Color.fromARGB(255, nums[0], nums[1], nums[2]);
   }
 }
