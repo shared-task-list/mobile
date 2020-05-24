@@ -9,6 +9,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/widget/color_set_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/category.dart';
@@ -18,8 +19,6 @@ import 'package:shared_task_list/task_list/popover_menu.dart';
 import 'package:shared_task_list/task_list/quick_add_dialog.dart';
 import 'package:shared_task_list/task_list/task_list_bloc.dart';
 import 'package:shared_task_list/task_list/task_list_item.dart';
-
-import 'package:shared_task_list/common/widget/color_set_dialog.dart';
 
 class TaskListScreen extends StatefulWidget {
   @override

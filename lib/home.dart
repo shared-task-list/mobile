@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/list_of_lists/list_of_lists_screen.dart';
 import 'package:shared_task_list/settings/settings_screen.dart';
 import 'package:shared_task_list/task_list/task_list_screen.dart';
 
@@ -22,6 +23,7 @@ class _Home extends State<Home> {
   final _pages = <Widget>[
     TaskListScreen(),
     CategoryListScreen(),
+    ListOfListsScreen(),
     SettingsScreen(),
   ];
 
@@ -73,6 +75,7 @@ class _Home extends State<Home> {
     return <BottomNavigationBarItem>[
       _getItem(_locale.tasks, Icon(Icons.format_list_bulleted)),
       _getItem(_locale.categories, Ui.icon(CupertinoIcons.collections, Icons.category)),
+      _getItem(_locale.my_lists, Ui.icon(CupertinoIcons.collections_solid, Icons.view_list)),
       _getItem(_locale.settings, Ui.icon(CupertinoIcons.settings, Icons.settings)),
     ];
   }

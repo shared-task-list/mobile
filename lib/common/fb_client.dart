@@ -27,6 +27,15 @@ class FbClient {
     return data != null;
   }
 
+  Future<bool> isExistList(String name, String password) async {
+    String hash = _getPasswordHashForNew(password);
+    DataSnapshot snapshot = await _db.child(name + hash).once();
+
+    var data = snapshot.value as Map<dynamic, dynamic>;
+
+    return data != null;
+  }
+
   Future<List<UserTask>> getAll(String taskList) async {
     String hash = _getPasswordHash();
     DataSnapshot snapshot = await _db.child(taskList + hash).once();
@@ -72,6 +81,20 @@ class FbClient {
     await _db.child(taskList + hash).push().set(serviceTask.toMap());
   }
 
+  Future createNewTaskList(String name, String password) async {
+    String hash = _getPasswordHashForNew(password);
+    final serviceTask = UserTask(
+      author: 'Admin',
+      comment: Constant.serviceTaskComment,
+      timestamp: DateTime.now(),
+      authorUid: null,
+      category: null,
+      title: null,
+      uid: null,
+    );
+    await _db.child(name + hash).push().set(serviceTask.toMap());
+  }
+
   Future addTask(UserTask task) async {
     String hash = _getPasswordHash();
     await _db.child(Constant.taskList + hash).child(task.uid).set(task.toMap());
@@ -89,6 +112,13 @@ class FbClient {
 
   String _getPasswordHash() {
     List<int> bytes = utf8.encode(Constant.password);
+    Digest digest = sha256.convert(bytes);
+
+    return base64.encode(digest.bytes);
+  }
+
+  String _getPasswordHashForNew(String password) {
+    List<int> bytes = utf8.encode(password);
     Digest digest = sha256.convert(bytes);
 
     return base64.encode(digest.bytes);

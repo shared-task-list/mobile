@@ -323,6 +323,96 @@ class S {
       args: [],
     );
   }
+
+  String get current {
+    return Intl.message(
+      'current',
+      name: 'current',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get current_list_changed {
+    return Intl.message(
+      'Current List Changed',
+      name: 'current_list_changed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get current_list_changed_to {
+    return Intl.message(
+      'You current list was changed to ',
+      name: 'current_list_changed_to',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get delete_list {
+    return Intl.message(
+      'Delete List ',
+      name: 'delete_list',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get task_delete_too {
+    return Intl.message(
+      'All tasks in list also will be deleted',
+      name: 'task_delete_too',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get delete {
+    return Intl.message(
+      'Delete',
+      name: 'delete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get new_list {
+    return Intl.message(
+      'New List',
+      name: 'new_list',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get my_lists {
+    return Intl.message(
+      'My Lists',
+      name: 'my_lists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get field_required {
+    return Intl.message(
+      'Field is required',
+      name: 'field_required',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get recent_lists {
+    return Intl.message(
+      'Recent Lists',
+      name: 'recent_lists',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -431,7 +431,10 @@ class Ui {
   }
 
   static Widget icon(IconData forIos, IconData forDroid, {Color color, double size}) {
-    return Icon(Platform.isIOS ? forIos : forDroid);
+    return Icon(
+      Platform.isIOS ? forIos : forDroid,
+      color: color,
+    );
   }
 
   static Widget wswitch({

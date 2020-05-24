@@ -58,36 +58,38 @@ class CategoryListScreen extends StatelessWidget {
               Ui.flatButton(_locale.add_new, () {
                 _showAddDialog(context);
               }),
-              ReorderableListView(
-                onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex),
-                children: <Widget>[
-                  for (final category in categories)
-                    ListTile(
-                      key: ValueKey(category),
-                      leading: Icon(Icons.drag_handle),
-                      trailing: SizedBox(
-                        width: 100,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            IconButton(
-                              icon: Ui.icon(CupertinoIcons.pen, Icons.edit),
-                              onPressed: () {
-                                _showEditDialog(context, category);
-                              },
-                            ),
-                            IconButton(
-                              icon: Ui.icon(CupertinoIcons.delete_simple, Icons.delete),
-                              onPressed: () {
-                                _showConfirmDeleteDialog(context, category);
-                              },
-                            ),
-                          ],
+              Expanded(
+                child: ReorderableListView(
+                  onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex),
+                  children: <Widget>[
+                    for (final category in categories)
+                      ListTile(
+                        key: ValueKey(category),
+                        leading: Icon(Icons.drag_handle),
+                        trailing: SizedBox(
+                          width: 100,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              IconButton(
+                                icon: Ui.icon(CupertinoIcons.pen, Icons.edit),
+                                onPressed: () {
+                                  _showEditDialog(context, category);
+                                },
+                              ),
+                              IconButton(
+                                icon: Ui.icon(CupertinoIcons.delete_simple, Icons.delete),
+                                onPressed: () {
+                                  _showConfirmDeleteDialog(context, category);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
+                        title: Text(category.name),
                       ),
-                      title: Text(category.name),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ],
           );

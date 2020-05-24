@@ -12,14 +12,12 @@ class TaskListItem extends StatelessWidget {
   const TaskListItem({
     Key key,
     @required TaskListBloc bloc,
-//    @required this.context,
     @required this.task,
     @required this.textWidth,
   })  : _bloc = bloc,
         super(key: key);
 
   final TaskListBloc _bloc;
-//  final BuildContext context;
   final UserTask task;
   final double textWidth;
 
@@ -39,12 +37,13 @@ class TaskListItem extends StatelessWidget {
                 builder: (context, snapshot) {
                   Color textColor = Colors.black;
                   Color backgroundTaskColor = Colors.white;
+                  var brightness = ThemeData.estimateBrightnessForColor(backgroundTaskColor);
 
                   if (snapshot.hasData) {
                     Color catColor = snapshot.data[task.category].getColor();
 
                     if (catColor != Colors.grey.shade600) {
-                      final brightness = ThemeData.estimateBrightnessForColor(catColor);
+                      brightness = ThemeData.estimateBrightnessForColor(catColor);
                       textColor = brightness == Brightness.light ? Colors.black : Colors.white;
                       backgroundTaskColor = catColor;
                     }
@@ -80,7 +79,11 @@ class TaskListItem extends StatelessWidget {
                         if (hasComment)
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Ui.icon(CupertinoIcons.conversation_bubble, Icons.chat_bubble_outline),
+                            child: Ui.icon(
+                              CupertinoIcons.conversation_bubble,
+                              Icons.chat_bubble_outline,
+                              color: brightness == Brightness.light ? Colors.black : Colors.white,
+                            ),
                           ),
                       ],
                     ),

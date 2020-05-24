@@ -31,6 +31,15 @@
     "show_quick_add": "Show Quick Add",
     "tasks": "Tasks",
     "categories": "Categories",
-    "add_new": "Add New"
-
+    "add_new": "Add New",
+    "current": "current",
+    "current_list_changed": "Current List Changed",
+    "current_list_changed_to": "You current list was changed to ",
+    "delete_list": "Delete List ",
+    "task_delete_too": "All tasks in list also will be deleted",
+    "delete": "Delete",
+    "new_list": "New List",
+    "my_lists": "My Lists",
+    "field_required": "Field is required",
+    "recent_lists": "Recent Lists"
 }

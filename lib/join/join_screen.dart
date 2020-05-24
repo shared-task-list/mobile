@@ -36,17 +36,13 @@ class JoinScreen extends StatelessWidget {
       color: Colors.blue.shade100,
       child: ListView(
         children: <Widget>[
-          SizedBox(
-            height: 30.0,
-          ),
+          const SizedBox(height: 30.0),
           /*CircleAvatar(
               child: PNetworkImage(origami),
               maxRadius: 50,
               backgroundColor: Colors.transparent,
             ),*/
-          SizedBox(
-            height: 20.0,
-          ),
+          const SizedBox(height: 20.0),
           _buildLoginForm(context),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -74,7 +70,7 @@ class JoinScreen extends StatelessWidget {
               }, style: TextStyle(color: Colors.blue, fontSize: 18.0)),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildRecentLists(),
         ],
       ),
@@ -95,8 +91,8 @@ class JoinScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 16.0),
                   child: Text(
-                    'Recent Lists',
-                    style: TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold),
+                    S.of(context).recent_lists,
+                    style: const TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -110,10 +106,10 @@ class JoinScreen extends StatelessWidget {
             widgets.add(ListTile(
               leading: Text(
                 list.name,
-                style: TextStyle(fontSize: 18, color: Colors.blue),
+                style: const TextStyle(fontSize: 18, color: Colors.blue),
               ),
               trailing: IconButton(
-                icon: Icon(Icons.delete),
+                icon: const Icon(Icons.delete),
                 onPressed: () async {
                   await _bloc.removeList(list);
                 },
@@ -140,9 +136,7 @@ class JoinScreen extends StatelessWidget {
                 ));*/
           }
 
-          return Column(
-            children: widgets,
-          );
+          return Column(children: widgets);
         });
   }
 
@@ -151,16 +145,16 @@ class JoinScreen extends StatelessWidget {
       key: _formKey,
       child: Container(
         height: 480,
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Stack(
           children: <Widget>[
             ClipPath(
               clipper: RoundedDiagonalPathClipper(),
               child: Container(
                 height: 420,
-                padding: EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(40.0)),
+                  borderRadius: const BorderRadius.all(const Radius.circular(40.0)),
                   color: Colors.white,
                 ),
                 child: FutureBuilder(
@@ -169,9 +163,7 @@ class JoinScreen extends StatelessWidget {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        SizedBox(
-                          height: 90.0,
-                        ),
+                        const SizedBox(height: 90.0),
                         ..._buildFormRow(
                           hintText: S.of(context).username,
                           icon: Icons.person,
@@ -200,9 +192,7 @@ class JoinScreen extends StatelessWidget {
                             Constant.password = value;
                           },
                         ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
+                        SizedBox(height: 10.0),
                       ],
                     );
                   },
@@ -215,7 +205,7 @@ class JoinScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 40.0,
                   backgroundColor: Colors.blue.shade600,
-                  child: Icon(Icons.person),
+                  child: const Icon(Icons.person),
                 ),
               ],
             ),
@@ -228,7 +218,7 @@ class JoinScreen extends StatelessWidget {
                   child: Ui.button(
                       title: S.of(context).open,
                       radius: 40,
-                      textStyle: TextStyle(color: Colors.white70),
+                      textStyle: const TextStyle(color: Colors.white70),
                       onPressed: () async {
                         if (_formKey.currentState != null && !_formKey.currentState.validate()) {
                           return;
@@ -279,7 +269,7 @@ class JoinScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: TextFormField(
           initialValue: value,
-          style: TextStyle(color: Colors.blue),
+          style: const TextStyle(color: Colors.blue),
           obscureText: isPassword,
           decoration: InputDecoration(
               hintText: hintText,
@@ -329,20 +319,20 @@ class BeautifulAlertDialog extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Container(
-          padding: EdgeInsets.only(right: 16.0),
+          padding: const EdgeInsets.only(right: 16.0),
           height: 150,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              bottomLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-              bottomRight: Radius.circular(10),
+              topLeft: const Radius.circular(10),
+              bottomLeft: const Radius.circular(10),
+              topRight: const Radius.circular(10),
+              bottomRight: const Radius.circular(10),
             ),
           ),
           child: Row(
             children: <Widget>[
-              SizedBox(width: 40.0),
+              const SizedBox(width: 40.0),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -352,16 +342,16 @@ class BeautifulAlertDialog extends StatelessWidget {
                       S.of(context).error,
                       style: Theme.of(context).textTheme.headline6,
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     Flexible(
                       child: Text(alertText),
                     ),
-                    SizedBox(height: 20.0),
+                    const SizedBox(height: 20.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         RaisedButton(
-                          child: Text("Ok"),
+                          child: const Text("Ok"),
                           color: Colors.red,
                           colorBrightness: Brightness.dark,
                           onPressed: () {

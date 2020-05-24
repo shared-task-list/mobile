@@ -31,5 +31,15 @@
     "show_quick_add": "Show Quick Add",
     "tasks": "Задачи",
     "categories": "Категории",
-    "add_new": "Добавить"
+    "add_new": "Добавить",
+    "current": "текущий",
+    "current_list_changed": "Текущий список изменен",
+    "current_list_changed_to": "Ваш текущий списрк изменен на ",
+    "delete_list": "Удалить список ",
+    "task_delete_too": "Все задачи в списке также будут удалены",
+    "delete": "Удалить",
+    "new_list": "Новый список",
+    "my_lists": "Мои списки",
+    "field_required": "Поле обязательно",
+    "recent_lists": "Недавние списки"
 }
