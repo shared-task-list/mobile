@@ -1,48 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:rxdart/subjects.dart';
-import 'package:shared_task_list/common/category_provider.dart';
+import 'package:shared_task_list/category_list/category_list_repository.dart';
+import 'package:shared_task_list/common/extension/color_extension.dart';
 import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/task_detail/task_detail_repository.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
-import 'package:shared_task_list/common/extension/color_extension.dart';
 
 class CategoryListBloc {
   final categories = BehaviorSubject<List<Category>>();
-  final _categoryList = List<Category>();
   final _taskListRepo = TaskListRepository();
   final _taskDetailRepo = TaskDetailRepository();
+  final _repo = CategoryListRepository();
 
-  Future getCategories() async {
-    _categoryList.clear();
-    var cats = await CategoryProvider.getList();
-    _categoryList.addAll(cats);
-    categories.add(_categoryList);
+  CategoryListBloc() {
+    _repo.getList();
+    _repo.categories.listen((taskList) => categories.add(taskList));
   }
 
-  Future updateOrder(int oldIndex, int newIndex) async {
-    final updatedCat = _categoryList[oldIndex];
-    _categoryList.removeAt(oldIndex);
+  Future updateOrder(int oldIndex, int newIndex, List<Category> cats) async {
+    final updatedCat = cats[oldIndex];
+    cats.removeAt(oldIndex);
 
-    if (newIndex >= _categoryList.length) {
-      _categoryList.add(updatedCat);
+    if (newIndex >= cats.length) {
+      cats.add(updatedCat);
     } else {
-      _categoryList.insert(newIndex, updatedCat);
+      cats.insert(newIndex, updatedCat);
     }
 
-    categories.add(_categoryList);
+    categories.add(cats);
 
-    for (int i = 0; i < _categoryList.length; ++i) {
-      _categoryList[i].order = i + 1;
-      await CategoryProvider.save(_categoryList[i]);
+    for (int i = 0; i < cats.length; ++i) {
+      cats[i].order = i + 1;
+      await _repo.save(cats[i]);
     }
   }
 
   Future deleteCategory(Category category) async {
-    _categoryList.removeWhere((cat) => cat.id == category.id);
-    categories.add(_categoryList);
-
-    CategoryProvider.delete(category);
+    await _repo.delete(category);
+    _repo.getList();
 
     final fbClient = FbClient();
     final tasks = await _taskListRepo.getTasks();
@@ -55,14 +51,9 @@ class CategoryListBloc {
 
   Future updateCategoryName(Category category, String newName) async {
     String oldName = category.name;
-
-    for (int i = 0; i < _categoryList.length; ++i) {
-      if (_categoryList[i].id == category.id) {
-        _categoryList[i].name = newName;
-      }
-    }
-
-    categories.add(_categoryList);
+    category.name = newName;
+    await _repo.save(category);
+    _repo.getList();
 
     final fbClient = FbClient();
     final tasks = await _taskListRepo.getTasks();
@@ -72,8 +63,6 @@ class CategoryListBloc {
       fbClient.updateTask(task);
       _taskDetailRepo.updateTask(task);
     });
-
-    CategoryProvider.save(category);
   }
 
   Future createNewCategory(String name) async {
@@ -87,12 +76,12 @@ class CategoryListBloc {
       order: DateTime.now().millisecondsSinceEpoch,
     );
 
-    _categoryList.add(category);
-    categories.add(_categoryList);
     await category.save();
+    _repo.getList();
   }
 
   void dispose() {
     categories.close();
+    _repo.dispose();
   }
 }

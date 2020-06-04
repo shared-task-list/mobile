@@ -17,7 +17,6 @@ class CategoryListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _bloc.getCategories();
     _locale = S.of(context);
 
     return Ui.scaffold(
@@ -60,7 +59,7 @@ class CategoryListScreen extends StatelessWidget {
               }),
               Expanded(
                 child: ReorderableListView(
-                  onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex),
+                  onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex, categories),
                   children: <Widget>[
                     for (final category in categories)
                       ListTile(

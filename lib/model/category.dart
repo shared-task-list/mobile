@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
+import 'package:shared_task_list/common/extension/string_extension.dart';
 
 class Category {
   int id;
@@ -49,8 +50,7 @@ class Category {
       return Colors.grey.shade600;
     }
 
-    var nums = colorString.split(',').map((num) => int.parse(num)).toList();
-    return Color.fromARGB(255, nums[0], nums[1], nums[2]);
+    return colorString.toColor();
   }
 
   int getExpand() {
