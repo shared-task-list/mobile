@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
+import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
 import 'package:shared_task_list/common/extension/string_extension.dart';
 
 class Category {
-  int id;
+  int? id;
   int order;
   String name;
   String colorString;
@@ -14,10 +14,10 @@ class Category {
 
   Category({
     this.id,
-    @required this.name,
-    this.colorString,
-    this.order,
-    this.isExpand,
+    required this.name,
+    this.colorString = '',
+    this.order = 0,
+    this.isExpand = true,
   });
 
   factory Category.fromJson(String str) => Category.fromMap(json.decode(str));
@@ -33,7 +33,7 @@ class Category {
       );
 
   Map<String, dynamic> toMap() => {
-        "id": id,
+        // "id": id,
         "name": name,
         "color_string": colorString,
         "order": order,
@@ -46,18 +46,14 @@ class Category {
   }
 
   Color getColor() {
-    if (colorString == null || colorString.isEmpty) {
-      return Colors.grey.shade600;
+    if (colorString.isEmpty) {
+      return Constant.defaultCategoryColor;
     }
 
     return colorString.toColor();
   }
 
   int getExpand() {
-    if (isExpand == null) {
-      return 1;
-    }
-
     return isExpand ? 1 : 0;
   }
 }

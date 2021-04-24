@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 
@@ -8,19 +7,19 @@ class AddListDialog extends StatefulWidget {
   final String title;
   final String hintText;
   final String labelText;
-  final String agreeButtonText;
-  final String oldText;
+  final String? agreeButtonText;
+  final String? oldText;
   final Function(String, String) savePressed;
-  final IconData icon;
+  final IconData? icon;
 
   AddListDialog({
-    Key key,
-    @required this.savePressed,
-    @required this.title,
+    Key? key,
+    required this.savePressed,
+    required this.title,
+    required this.hintText,
+    required this.labelText,
     this.agreeButtonText,
     this.icon,
-    @required this.hintText,
-    @required this.labelText,
     this.oldText,
   }) : super(key: key);
 
@@ -30,8 +29,8 @@ class AddListDialog extends StatefulWidget {
 
 class _AddListDialogState extends State<AddListDialog> {
   final _formKey = GlobalKey<FormState>();
-  String name;
-  String password;
+  String name = '';
+  String password = '';
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +38,10 @@ class _AddListDialogState extends State<AddListDialog> {
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Ui.dialog(
           child: Container(
-            padding: EdgeInsets.only(right: 32.0),
+            padding: const EdgeInsets.only(right: 32.0),
             height: 280,
             decoration: BoxDecoration(
               color: Colors.white,
@@ -50,18 +49,18 @@ class _AddListDialogState extends State<AddListDialog> {
             ),
             child: Row(
               children: <Widget>[
-                SizedBox(width: 40.0),
+                const SizedBox(width: 40.0),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       Text(
                         widget.title,
                         style: Theme.of(context).textTheme.headline5,
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       Material(
                         color: Colors.white,
                         child: Form(
@@ -72,8 +71,8 @@ class _AddListDialogState extends State<AddListDialog> {
                                 autofocus: true,
                                 maxLength: 30,
                                 onChanged: (String value) => name = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
+                                validator: (String? value) {
+                                  if (value != null && value.isEmpty) {
                                     return locale.field_required;
                                   }
                                   return null;
@@ -87,8 +86,8 @@ class _AddListDialogState extends State<AddListDialog> {
                                 obscureText: true,
                                 maxLength: 30,
                                 onChanged: (String value) => password = value,
-                                validator: (value) {
-                                  if (value.isEmpty) {
+                                validator: (String? value) {
+                                  if (value != null && value.isEmpty) {
                                     return locale.field_required;
                                   }
                                   return null;
@@ -102,40 +101,44 @@ class _AddListDialogState extends State<AddListDialog> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
                           Expanded(
-                            child: RaisedButton(
+                            child: ElevatedButton(
                               child: Text(locale.cancel),
-                              color: Colors.red,
-                              colorBrightness: Brightness.dark,
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.red,
+                                onPrimary: Colors.white,
+                                shape: Constant.buttonShape,
+                              ),
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                             ),
                           ),
-                          SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
+                          const SizedBox(width: 10.0),
                           Expanded(
-                            child: RaisedButton(
+                            child: ElevatedButton(
                               child: Text(widget.agreeButtonText ?? locale.create),
-                              color: Colors.blue,
-                              colorBrightness: Brightness.dark,
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.blue,
+                                onPrimary: Colors.white,
+                                shape: Constant.buttonShape,
+                              ),
                               onPressed: () {
-                                if (!_formKey.currentState.validate()) {
+                                if (!_formKey.currentState!.validate()) {
                                   return;
                                 }
                                 widget.savePressed(name, password);
                                 Navigator.pop(context);
                               },
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                     ],
                   ),
                 ),

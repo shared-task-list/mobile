@@ -7,13 +7,13 @@ class TaskDetailRepository {
   final _fbClient = FbClient();
 
   Future createTask(UserTask task) async {
-    var db = await DBProvider.db.database;
+    final db = await DBProvider.db.database;
     await db.insert(_taskTable, task.toMap());
     await _fbClient.addTask(task);
   }
 
   Future updateTask(UserTask task) async {
-    var db = await DBProvider.db.database;
+    final db = await DBProvider.db.database;
     await db.rawUpdate(
       'update $_taskTable set Title = ?, Comment = ?, Category = ? where Uid = ?',
       [task.title, task.comment, task.category, task.uid],

@@ -34,7 +34,7 @@ class ListOfListsBloc {
     }
 
     TaskList list = await _repo.get(name, password);
-    return list != null;
+    return list.id != 0;
   }
 
   Future createList(String name, String password, bool createInFb) async {

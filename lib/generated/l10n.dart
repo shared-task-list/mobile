@@ -8,9 +8,20 @@ import 'intl/messages_all.dart';
 // Made by Localizely
 // **************************************************************************
 
+// ignore_for_file: non_constant_identifier_names, lines_longer_than_80_chars
+// ignore_for_file: join_return_with_assignment, prefer_final_in_for_each
+// ignore_for_file: avoid_redundant_argument_values
+
 class S {
   S();
-  
+
+  static S? _current;
+
+  static S get current {
+    assert(_current != null, 'No instance of S was loaded. Try to initialize the S delegate before accessing S.current.');
+    return _current!;
+  }
+
   static const AppLocalizationDelegate delegate =
     AppLocalizationDelegate();
 
@@ -19,14 +30,24 @@ class S {
     final localeName = Intl.canonicalizedLocale(name); 
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
-      return S();
+      final instance = S();
+      S._current = instance;
+ 
+      return instance;
     });
   } 
 
   static S of(BuildContext context) {
+    final instance = S.maybeOf(context);
+    assert(instance != null, 'No instance of S present in the widget tree. Did you add S.delegate in localizationsDelegates?');
+    return instance!;
+  }
+
+  static S? maybeOf(BuildContext context) {
     return Localizations.of<S>(context, S);
   }
 
+  /// `Task List already exist`
   String get taskListExists {
     return Intl.message(
       'Task List already exist',
@@ -36,6 +57,7 @@ class S {
     );
   }
 
+  /// `Username`
   String get username {
     return Intl.message(
       'Username',
@@ -45,6 +67,7 @@ class S {
     );
   }
 
+  /// `Task List`
   String get taskListName {
     return Intl.message(
       'Task List',
@@ -54,6 +77,7 @@ class S {
     );
   }
 
+  /// `Password`
   String get password {
     return Intl.message(
       'Password',
@@ -63,6 +87,7 @@ class S {
     );
   }
 
+  /// `Open`
   String get open {
     return Intl.message(
       'Open',
@@ -72,6 +97,7 @@ class S {
     );
   }
 
+  /// `Could not be empty`
   String get required {
     return Intl.message(
       'Could not be empty',
@@ -81,6 +107,7 @@ class S {
     );
   }
 
+  /// `Error`
   String get error {
     return Intl.message(
       'Error',
@@ -90,6 +117,7 @@ class S {
     );
   }
 
+  /// `Wrong Task List or Password`
   String get openError {
     return Intl.message(
       'Wrong Task List or Password',
@@ -99,6 +127,7 @@ class S {
     );
   }
 
+  /// `New Name`
   String get newName {
     return Intl.message(
       'New Name',
@@ -108,6 +137,7 @@ class S {
     );
   }
 
+  /// `Cancel`
   String get cancel {
     return Intl.message(
       'Cancel',
@@ -117,6 +147,7 @@ class S {
     );
   }
 
+  /// `Update`
   String get update {
     return Intl.message(
       'Update',
@@ -126,6 +157,7 @@ class S {
     );
   }
 
+  /// `Task Title`
   String get taskTitle {
     return Intl.message(
       'Task Title',
@@ -135,6 +167,7 @@ class S {
     );
   }
 
+  /// `Create`
   String get create {
     return Intl.message(
       'Create',
@@ -144,6 +177,7 @@ class S {
     );
   }
 
+  /// `New Category`
   String get newCategory {
     return Intl.message(
       'New Category',
@@ -153,6 +187,7 @@ class S {
     );
   }
 
+  /// `New Task`
   String get newTask {
     return Intl.message(
       'New Task',
@@ -162,6 +197,7 @@ class S {
     );
   }
 
+  /// `Task`
   String get task {
     return Intl.message(
       'Task',
@@ -171,6 +207,7 @@ class S {
     );
   }
 
+  /// `Comment`
   String get comment {
     return Intl.message(
       'Comment',
@@ -180,6 +217,7 @@ class S {
     );
   }
 
+  /// `Category`
   String get category {
     return Intl.message(
       'Category',
@@ -189,6 +227,7 @@ class S {
     );
   }
 
+  /// `Category List (tap or drag)`
   String get categoryList {
     return Intl.message(
       'Category List (tap or drag)',
@@ -198,6 +237,7 @@ class S {
     );
   }
 
+  /// `Title`
   String get title {
     return Intl.message(
       'Title',
@@ -207,6 +247,7 @@ class S {
     );
   }
 
+  /// `Settings`
   String get settings {
     return Intl.message(
       'Settings',
@@ -216,6 +257,7 @@ class S {
     );
   }
 
+  /// `Default Category`
   String get defaultCategory {
     return Intl.message(
       'Default Category',
@@ -225,6 +267,7 @@ class S {
     );
   }
 
+  /// `No Category`
   String get noCategory {
     return Intl.message(
       'No Category',
@@ -234,6 +277,7 @@ class S {
     );
   }
 
+  /// `Category Name`
   String get categoryName {
     return Intl.message(
       'Category Name',
@@ -243,6 +287,7 @@ class S {
     );
   }
 
+  /// `Exit`
   String get exit {
     return Intl.message(
       'Exit',
@@ -252,6 +297,7 @@ class S {
     );
   }
 
+  /// `Background`
   String get background {
     return Intl.message(
       'Background',
@@ -261,6 +307,7 @@ class S {
     );
   }
 
+  /// `Image`
   String get image {
     return Intl.message(
       'Image',
@@ -270,6 +317,7 @@ class S {
     );
   }
 
+  /// `Color`
   String get color {
     return Intl.message(
       'Color',
@@ -279,6 +327,7 @@ class S {
     );
   }
 
+  /// `Clear`
   String get clear {
     return Intl.message(
       'Clear',
@@ -288,6 +337,7 @@ class S {
     );
   }
 
+  /// `Show Quick Add`
   String get show_quick_add {
     return Intl.message(
       'Show Quick Add',
@@ -297,6 +347,7 @@ class S {
     );
   }
 
+  /// `Tasks`
   String get tasks {
     return Intl.message(
       'Tasks',
@@ -306,6 +357,7 @@ class S {
     );
   }
 
+  /// `Categories`
   String get categories {
     return Intl.message(
       'Categories',
@@ -315,6 +367,7 @@ class S {
     );
   }
 
+  /// `Add New`
   String get add_new {
     return Intl.message(
       'Add New',
@@ -324,15 +377,9 @@ class S {
     );
   }
 
-  String get current {
-    return Intl.message(
-      'current',
-      name: 'current',
-      desc: '',
-      args: [],
-    );
-  }
+  // skipped getter for the 'current' key
 
+  /// `Current List Changed`
   String get current_list_changed {
     return Intl.message(
       'Current List Changed',
@@ -342,6 +389,7 @@ class S {
     );
   }
 
+  /// `You current list was changed to `
   String get current_list_changed_to {
     return Intl.message(
       'You current list was changed to ',
@@ -351,6 +399,7 @@ class S {
     );
   }
 
+  /// `Delete List `
   String get delete_list {
     return Intl.message(
       'Delete List ',
@@ -360,6 +409,7 @@ class S {
     );
   }
 
+  /// `All tasks in list also will be deleted`
   String get task_delete_too {
     return Intl.message(
       'All tasks in list also will be deleted',
@@ -369,6 +419,7 @@ class S {
     );
   }
 
+  /// `Delete`
   String get delete {
     return Intl.message(
       'Delete',
@@ -378,6 +429,7 @@ class S {
     );
   }
 
+  /// `New List`
   String get new_list {
     return Intl.message(
       'New List',
@@ -387,6 +439,7 @@ class S {
     );
   }
 
+  /// `My Lists`
   String get my_lists {
     return Intl.message(
       'My Lists',
@@ -396,6 +449,7 @@ class S {
     );
   }
 
+  /// `Field is required`
   String get field_required {
     return Intl.message(
       'Field is required',
@@ -405,6 +459,7 @@ class S {
     );
   }
 
+  /// `Recent Lists`
   String get recent_lists {
     return Intl.message(
       'Recent Lists',
@@ -433,11 +488,9 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   bool shouldReload(AppLocalizationDelegate old) => false;
 
   bool _isSupported(Locale locale) {
-    if (locale != null) {
-      for (var supportedLocale in supportedLocales) {
-        if (supportedLocale.languageCode == locale.languageCode) {
-          return true;
-        }
+    for (var supportedLocale in supportedLocales) {
+      if (supportedLocale.languageCode == locale.languageCode) {
+        return true;
       }
     }
     return false;

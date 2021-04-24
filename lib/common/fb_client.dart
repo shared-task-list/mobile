@@ -6,11 +6,10 @@ import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/model/task.dart';
 
 class FbClient {
-  static DatabaseReference _db;
+  static DatabaseReference _db = FirebaseDatabase.instance.reference();
   static final FbClient _singleton = FbClient._internal();
 
   factory FbClient() {
-    _db = FirebaseDatabase.instance.reference();
     return _singleton;
   }
 
@@ -22,9 +21,9 @@ class FbClient {
     String hash = _getPasswordHash();
     DataSnapshot snapshot = await _db.child(taskList + hash).once();
 
-    var data = snapshot.value as Map<dynamic, dynamic>;
+    final data = snapshot.value as Map<dynamic, dynamic>;
 
-    return data != null;
+    return data.isNotEmpty;
   }
 
   Future<bool> isExistList(String name, String password) async {
@@ -33,16 +32,16 @@ class FbClient {
 
     var data = snapshot.value as Map<dynamic, dynamic>;
 
-    return data != null;
+    return data.isNotEmpty;
   }
 
   Future<List<UserTask>> getAll(String taskList) async {
     String hash = _getPasswordHash();
     DataSnapshot snapshot = await _db.child(taskList + hash).once();
 
-    var data = snapshot.value as Map<dynamic, dynamic>;
-    var tasks = List<UserTask>();
-    var items = List<Map<String, dynamic>>();
+    final data = snapshot.value as Map<dynamic, dynamic>;
+    final tasks = <UserTask>[];
+    final items = <Map<String, dynamic>>[];
 
     for (final item in data.values) {
       var itemMap = item as Map<dynamic, dynamic>;
@@ -54,6 +53,7 @@ class FbClient {
 
       items.add(jsonData);
     }
+
     for (final item in items) {
       UserTask task = UserTask.fromMap(item);
 
@@ -73,11 +73,12 @@ class FbClient {
       author: 'Admin',
       comment: Constant.serviceTaskComment,
       timestamp: DateTime.now(),
-      authorUid: null,
-      category: null,
-      title: null,
-      uid: null,
+      authorUid: '',
+      category: '',
+      title: '',
+      uid: '',
     );
+
     await _db.child(taskList + hash).push().set(serviceTask.toMap());
   }
 
@@ -87,11 +88,12 @@ class FbClient {
       author: 'Admin',
       comment: Constant.serviceTaskComment,
       timestamp: DateTime.now(),
-      authorUid: null,
-      category: null,
-      title: null,
-      uid: null,
+      authorUid: '',
+      category: '',
+      title: '',
+      uid: '',
     );
+
     await _db.child(name + hash).push().set(serviceTask.toMap());
   }
 

@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:grouped_buttons/grouped_buttons.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
@@ -14,11 +11,11 @@ class QuickAddDialog extends StatefulWidget {
   final Function(String) onSetCategory;
 
   QuickAddDialog({
-    Key key,
-    this.onSetName,
-    this.categories,
-    this.defaultCategory,
-    this.onSetCategory,
+    Key? key,
+    required this.onSetName,
+    required this.categories,
+    required this.defaultCategory,
+    required this.onSetCategory,
   }) : super(key: key);
 
   @override
@@ -26,7 +23,7 @@ class QuickAddDialog extends StatefulWidget {
         onSetName,
         onSetCategory,
         categories,
-        (defaultCategory == null || defaultCategory.isEmpty) ? Constant.noCategory : defaultCategory,
+        defaultCategory.isEmpty ? Constant.noCategory : defaultCategory,
       );
 }
 
@@ -35,13 +32,17 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
   final Function(String, String) onSetName;
   final Function(String) onSetCategory;
   final _formKey = GlobalKey<FormState>();
-  final isIos = Platform.isIOS;
   String defaultCategory;
   String _title = '';
   String _category = '';
-  S locale;
+  late S locale;
 
-  _QuickAddDialogState(this.onSetName, this.onSetCategory, this.categories, this.defaultCategory) {
+  _QuickAddDialogState(
+    this.onSetName,
+    this.onSetCategory,
+    this.categories,
+    this.defaultCategory,
+  ) {
     _category = defaultCategory;
   }
 
@@ -57,21 +58,19 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
             child: Container(
               padding: const EdgeInsets.only(right: 32.0),
               height: 230 + (categories.length * 45.0),
-//            height: 400,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderRadius: const BorderRadius.all(const Radius.circular(10)),
               ),
               child: Row(
                 children: <Widget>[
-                  SizedBox(width: 40.0),
+                  const SizedBox(width: 40.0),
                   Expanded(
                     child: Column(
-//                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SizedBox(height: 20.0),
+                        const SizedBox(height: 20.0),
                         Text(
                           locale.taskTitle,
                           style: Theme.of(context).textTheme.headline6,
@@ -83,75 +82,85 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
                             style: TextStyle(backgroundColor: Colors.white),
                             autofocus: true,
                             onChanged: (value) => _title = value,
-                            validator: (value) {
-                              if (value.isEmpty) {
+                            validator: (String? value) {
+                              if (value != null && value.isEmpty) {
                                 return S.of(context).required;
                               }
+
                               return null;
                             },
                           ),
                         ),
-//                      SizedBox(height: 10.0),
                         Expanded(
                           child: SingleChildScrollView(
-                            child: RadioButtonGroup(
-                              labels: categories.map((category) => category.name).toList(),
-                              onSelected: (String selected) => setState(() {
-                                _category = selected;
-                                defaultCategory = selected;
-                                onSetCategory(selected);
-                              }),
-                              picked: _category,
-                              itemBuilder: (Radio rb, Text txt, int i) {
-                                return InkWell(
-                                  child: Container(
-                                    child: Row(children: <Widget>[rb, txt]),
+                            child: Column(
+                              children: [
+                                for (final category in categories)
+                                  RadioListTile<String>(
+                                    activeColor: Constant.primaryColor,
+                                    groupValue: _category,
+                                    value: category.name,
+                                    title: Text(
+                                      category.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .subtitle1!
+                                          .copyWith(color: category.name == defaultCategory ? Colors.black : Colors.black38),
+                                    ),
+                                    onChanged: (String? value) {
+                                      if (value == null) {
+                                        return;
+                                      }
+
+                                      setState(() {
+                                        _category = value;
+                                        defaultCategory = value;
+                                        onSetCategory(value);
+                                      });
+                                    },
                                   ),
-                                  onTap: () => setState(() {
-                                    _category = txt.data;
-                                    defaultCategory = txt.data;
-                                    onSetCategory(txt.data);
-                                  }),
-                                );
-                              },
+                              ],
                             ),
                           ),
                         ),
-//                      SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Expanded(
-                              child: RaisedButton(
+                              child: ElevatedButton(
                                 child: Text(locale.cancel),
-                                color: Colors.red,
-                                colorBrightness: Brightness.dark,
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.red,
+                                  onPrimary: Colors.white,
+                                  shape: Constant.buttonShape,
+                                ),
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                shape: Constant.buttonShape,
                               ),
                             ),
-                            SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
+                            const SizedBox(width: 10.0),
                             Expanded(
-                              child: RaisedButton(
+                              child: ElevatedButton(
                                 child: Text(locale.create),
-                                color: Colors.blue,
-                                colorBrightness: Brightness.dark,
-                                onPressed: () async {
-                                  if (!_formKey.currentState.validate()) {
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.blue,
+                                  onPrimary: Colors.white,
+                                  shape: Constant.buttonShape,
+                                ),
+                                onPressed: () {
+                                  if (!_formKey.currentState!.validate()) {
                                     return;
                                   }
 
                                   onSetName(_title, _category);
                                   Navigator.pop(context);
                                 },
-                                shape: Constant.buttonShape,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                       ],
                     ),
                   ),
@@ -159,37 +168,6 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRow(Category category) {
-    return InkWell(
-      enableFeedback: false,
-      onTap: () {
-        _category = category.name;
-        defaultCategory = category.name;
-        onSetCategory(category.name);
-      },
-      child: Container(
-        child: Row(
-          children: <Widget>[
-            Radio(
-              autofocus: _category == category.name,
-              value: category.name,
-              onChanged: (String value) {
-                _category = value;
-                defaultCategory = value;
-                onSetCategory(value);
-              },
-              groupValue: _category,
-            ),
-            Text(
-              category.name,
-              style: TextStyle(),
-            ),
-          ],
         ),
       ),
     );

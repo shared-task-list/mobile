@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -16,7 +16,17 @@ import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GlobalConfiguration().loadFromAsset("settings");
+  final cfg = await GlobalConfiguration().loadFromAsset("settings");
+  final FirebaseApp _ = await Firebase.initializeApp(
+    name: 'GeneralShoppingList',
+    options: FirebaseOptions(
+      appId: cfg.getValue("fb_app_id"),
+      apiKey: cfg.getValue("api_key"),
+      messagingSenderId: cfg.getValue("fb_sender_id"),
+      projectId: cfg.getValue("fb_project_id"),
+      databaseURL: cfg.getValue("url"),
+    ),
+  );
 
   runApp(MyApp());
 }
@@ -41,31 +51,18 @@ class MyApp extends StatelessWidget {
       builder: (ctx, snapshot) {
         final screen = (Constant.taskList.isEmpty && Constant.password.isEmpty) ? JoinScreen() : Home();
 
-        if (Platform.isIOS) {
-          return CupertinoApp(
-            localizationsDelegates: [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate
-            ],
-            supportedLocales: S.delegate.supportedLocales,
-            home: screen,
-          );
-        } else {
-          return MaterialApp(
-            localizationsDelegates: [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: S.delegate.supportedLocales,
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-            ),
-            home: screen,
-          );
-        }
+        return MaterialApp(
+          localizationsDelegates: [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: screen,
+        );
       },
     );
   }
@@ -83,7 +80,7 @@ class MyApp extends StatelessWidget {
     }
 
     String colorString = prefs.getString('bg_color') ?? '';
-    Constant.bgColor = colorString.isEmpty ? Colors.white : colorString.toColor;
+    Constant.bgColor = colorString.isEmpty ? Colors.white : colorString.toColor();
 
     return prefs;
   }

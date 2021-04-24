@@ -8,10 +8,10 @@ class SvgIcon extends StatelessWidget {
   final Color color;
 
   const SvgIcon({
-    Key key,
+    Key? key,
     this.width = 24,
     this.height = 24,
-    @required this.path,
+    required this.path,
     this.color = Colors.white,
   }) : super(key: key);
 

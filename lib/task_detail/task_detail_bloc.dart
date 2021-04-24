@@ -11,7 +11,6 @@ class TaskDetailBloc {
   final _repository = TaskDetailRepository();
   final categories = BehaviorSubject<List<Category>>();
   final categoryButtonTitle = BehaviorSubject<String>();
-  final _categoryTitle = 'Category';
 
   String title = '';
   String comment = '';
@@ -20,6 +19,7 @@ class TaskDetailBloc {
 
   Future getCategories() async {
     final categoryList = await CategoryProvider.getList();
+    categoryList.sort((cat1, cat2) => cat1.order.compareTo(cat2.order));
     categories.add(categoryList);
   }
 
@@ -29,7 +29,7 @@ class TaskDetailBloc {
     }
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userUid = prefs.getString(Constant.authorUidKey);
+    String userUid = prefs.getString(Constant.authorUidKey) ?? '';
 
     final task = UserTask(
       title: title,
@@ -61,8 +61,7 @@ class TaskDetailBloc {
   }
 
   void setCategoryTitle(String category) {
-    String title = _categoryTitle + ' - $category';
-    categoryButtonTitle.add(title);
+    categoryButtonTitle.add(category);
   }
 
   void dispose() {

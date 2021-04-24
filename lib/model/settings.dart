@@ -1,21 +1,31 @@
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
+import 'package:shared_task_list/common/constant.dart';
 
 class Settings {
-  final int id;
+  late int id;
   String defaultCategory;
   String name;
   bool isShowCategories;
   bool isShowQuickAdd;
 
   Settings({
-    this.id,
-    @required this.defaultCategory,
-    @required this.isShowCategories,
-    @required this.isShowQuickAdd,
-    this.name,
+    this.id = 0,
+    required this.defaultCategory,
+    required this.isShowCategories,
+    required this.isShowQuickAdd,
+    required this.name,
   });
+
+  static Settings empty() {
+    return Settings(
+      id: 0,
+      defaultCategory: Constant.noCategory,
+      isShowCategories: true,
+      isShowQuickAdd: true,
+      name: Constant.userName,
+    );
+  }
 
   factory Settings.fromJson(String str) => Settings.fromMap(json.decode(str));
 
@@ -31,7 +41,7 @@ class Settings {
 
   Map<String, dynamic> toMap() => {
         "id": id,
-        "default_category": defaultCategory ?? '',
+        "default_category": defaultCategory,
         "is_show_categories": isShowCategories ? 1 : 0,
         "is_show_quick_add": isShowQuickAdd ? 1 : 0,
         "name": name,

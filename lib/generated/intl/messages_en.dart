@@ -32,7 +32,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "color" : MessageLookupByLibrary.simpleMessage("Color"),
     "comment" : MessageLookupByLibrary.simpleMessage("Comment"),
     "create" : MessageLookupByLibrary.simpleMessage("Create"),
-    "current" : MessageLookupByLibrary.simpleMessage("current"),
     "current_list_changed" : MessageLookupByLibrary.simpleMessage("Current List Changed"),
     "current_list_changed_to" : MessageLookupByLibrary.simpleMessage("You current list was changed to "),
     "defaultCategory" : MessageLookupByLibrary.simpleMessage("Default Category"),

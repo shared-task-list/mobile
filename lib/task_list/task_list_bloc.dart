@@ -7,202 +7,189 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/category_provider.dart';
 import 'package:shared_task_list/common/constant.dart';
+import 'package:shared_task_list/common/extension/color_extension.dart';
 import 'package:shared_task_list/common/fb_client.dart';
+import 'package:shared_task_list/model/app_model.dart';
 import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
+import 'package:shared_task_list/settings/settings_repository.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
 import 'package:uuid/uuid.dart';
-import 'package:shared_task_list/common/extension/color_extension.dart';
 
 class TaskListBloc {
   final _repository = TaskListRepository();
-  final _fbClient = FbClient(); // TODO: to provider
-  final tasksMap = BehaviorSubject<Map<String, List<UserTask>>>();
+  final _settingsRepo = SettingsRepository();
+  final _fbClient = FbClient();
   final settings = BehaviorSubject<Settings>();
-  final categoryMapStream = BehaviorSubject<Map<String, Category>>();
+  final categoryTaskMapStream = BehaviorSubject<Map<Category, List<UserTask>>>();
 
-  var _taskList = List<UserTask>();
-  var _taskMap = Map<String, List<UserTask>>();
-  var categoryMap = Map<String, Category>();
-  DatabaseReference ref;
+  final _categoryTaskMap = Map<Category, List<UserTask>>();
+  late DatabaseReference ref;
 
   TaskListBloc() {
-//    _fbClient.reference.onChildChanged.listen(onData);
     String hash = _getPasswordHash();
     ref = _fbClient.reference.child(Constant.taskList + hash);
   }
 
   void _subscribe() {
-    ref.onChildAdded.listen((Event event) {
+    ref.onChildAdded.listen((Event event) async {
       final task = UserTask.fromFbData(event);
 
-      if (task == null || task.comment == Constant.serviceTaskComment) {
+      if (task.comment == Constant.serviceTaskComment) {
         return;
       }
+
       if (task.category.isEmpty) {
         task.category = Constant.noCategory;
       }
-      if (!categoryMap.containsKey(task.category)) {
-        categoryMap[task.category] = Category(
+
+      try {
+        final category = _categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
+        final taskList = _categoryTaskMap[category]!;
+
+        for (final existTask in taskList) {
+          if (existTask.uid == task.uid) {
+            return;
+          }
+        }
+
+        taskList.add(task);
+        _categoryTaskMap[category] = taskList;
+      } catch (e) {
+        final newCategory = Category(
           name: task.category,
-          colorString: Colors.grey.shade600.toRgbString(),
+          colorString: Constant.defaultCategoryColor.toRgbString(),
           order: DateTime.now().millisecondsSinceEpoch,
         );
+        _categoryTaskMap[newCategory] = [task];
       }
-      try {
-        _taskList.firstWhere((UserTask t) => t.uid == task.uid);
-      } catch (e) {
-        if (!_taskMap.containsKey(task.category)) {
-          _taskMap[task.category] = List<UserTask>();
-        }
-        _taskMap[task.category].add(task);
-        tasksMap.add(_taskMap);
-      }
+
+      categoryTaskMapStream.add(_categoryTaskMap);
     });
-    ref.onChildRemoved.listen((Event event) {
+    ref.onChildRemoved.listen((Event event) async {
       final task = UserTask.fromFbData(event);
 
-      if (task == null) {
+      if (task.uid == '') {
         return;
       }
+
       if (task.category.isEmpty) {
         task.category = Constant.noCategory;
       }
 
-      _taskList.removeWhere((UserTask t) => t.uid == task.uid);
-      _taskMap[task.category].removeWhere((UserTask t) => t.uid == task.uid);
-      tasksMap.add(_taskMap);
+      final category = _categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
+      final taskList = _categoryTaskMap[category]!;
+
+      taskList.remove(task);
+      _categoryTaskMap[category] = taskList;
+
+      categoryTaskMapStream.add(_categoryTaskMap);
+      await _repository.remove(task);
     });
     ref.onChildChanged.listen((Event event) {
       final task = UserTask.fromFbData(event);
 
-      if (task == null) {
+      if (task.uid == '') {
         return;
       }
 
-      int index = _taskList.indexWhere((UserTask t) => t.uid == task.uid);
+      try {
+        final category = _categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
+        final taskList = _categoryTaskMap[category]!;
+        int index = taskList.indexWhere((UserTask t) => t.uid == task.uid);
 
-      if (!_taskMap.containsKey(task.category)) {
+        if (index == -1) {
+          return;
+        }
+
+        taskList[index] = task;
+        _categoryTaskMap[category] = taskList;
+        categoryTaskMapStream.add(_categoryTaskMap);
+      } catch (e) {
         return;
       }
-
-      int mapIndex = _taskMap[task.category].indexWhere((UserTask t) => t.uid == task.uid);
-
-      _taskList[index] = task;
-      _taskMap[task.category][mapIndex] = task;
-      tasksMap.add(_taskMap);
     });
   }
 
   Future<bool> init() async {
-    _repository.initStream.listen((data) {
+    _repository.initStream.listen((ListInitData data) {
       settings.add(data.settings);
-      _setCategories(data.categories);
 
-      _taskList = data.tasks;
-      _createTaskMap(_taskList);
-      tasksMap.add(_taskMap);
+      for (final category in data.categories) {
+        final tasks = data.tasks.where((task) => task.category == category.name);
 
-      _load();
+        if (tasks.isEmpty) {
+          continue;
+        }
+
+        _categoryTaskMap[category] = tasks.toList();
+      }
+
+      categoryTaskMapStream.add(_categoryTaskMap);
+
+      load();
       _subscribe();
-      CategoryProvider.saveList(data.categories);
     });
 
     await _repository.init();
+
     return true;
   }
 
-  void _setCategories(List<Category> categories) {
-    for (final cat in categories) {
-      categoryMap[cat.name] = cat;
+  Future load() async {
+    if (_categoryTaskMap.isNotEmpty) {
+      return;
     }
 
-    categoryMapStream.add(categoryMap);
-  }
+    final taskList = await _fbClient.getAll(Constant.taskList);
+    final categoryNames = taskList.map((task) => task.category.isEmpty ? Constant.noCategory : task.category).toSet();
+    final existCategories = _categoryTaskMap.keys.toList();
+    final existsCategoryNames = existCategories.map((category) => category.name).toSet();
 
-  Future _load() async {
-    await getTasks();
-    await CategoryProvider.saveList(categoryMap.values.toList());
+    _categoryTaskMap.clear();
 
-    final cats = await getCategories();
-    _setCategories(cats);
-  }
+    for (final categoryName in categoryNames) {
+      late Category category;
 
-  Future getTasks() async {
-    _taskList = await _fbClient.getAll(Constant.taskList);
-
-    _createTaskMap(_taskList);
-    tasksMap.add(_taskMap);
-
-    await _repository.saveTasks(_taskList);
-  }
-
-  Future remove(UserTask task) async {
-    _taskList.remove(task);
-
-    _createTaskMap(_taskList);
-    tasksMap.add(_taskMap);
-
-    _repository.remove(task);
-    await _fbClient.removeTask(task);
-
-    _repository.saveTasks(_taskList);
-  }
-
-  // todo: to extension
-  String _colorToString(Color color) {
-    return "${color.red},${color.green},${color.blue}";
-  }
-
-  // FIXME: need refactoring
-  void _createTaskMap(List<UserTask> taskList) {
-    _taskMap.clear();
-
-    for (final task in taskList) {
-      if (task.category == null || task.category.isEmpty) {
-        task.category = Constant.noCategory;
-      }
-
-      String colorString = _colorToString(Colors.grey.shade600);
-      Category category;
-
-      if (categoryMap.isNotEmpty) {
-        Color color = categoryMap.containsKey(task.category) ? categoryMap[task.category].getColor() : Colors.grey.shade600;
-        colorString = _colorToString(color);
-      }
-      if (categoryMap.containsKey(task.category)) {
-        category = categoryMap[task.category];
+      if (existsCategoryNames.contains(categoryName)) {
+        category = existCategories.firstWhere((cat) => cat.name == categoryName);
       } else {
         category = Category(
-          name: task.category,
-          colorString: colorString,
+          name: categoryName,
+          colorString: Constant.defaultCategoryColor.toRgbString(),
           order: DateTime.now().millisecondsSinceEpoch,
+          isExpand: true,
         );
+        int id = await CategoryProvider.create(category);
+        category.id = id;
       }
 
-      categoryMap[task.category] = category;
-    }
-    for (final category in categoryMap.keys) {
-      if (category == Constant.noCategory) {
-        _taskMap[Constant.noCategory] = taskList.where((task) => task.category == Constant.noCategory).toList();
-        _taskMap[Constant.noCategory].sort((task1, task2) => task1.timestamp.compareTo(task2.timestamp));
+      final tasks = taskList.where((task) => task.category == category.name);
+
+      if (tasks.isEmpty) {
         continue;
       }
 
-      _taskMap[category] = taskList.where((task) => task.category == category).toList();
-      _taskMap[category].sort((task1, task2) => task1.timestamp.compareTo(task2.timestamp));
+      _categoryTaskMap[category] = tasks.toList();
     }
 
-    // clean old cats
-    Set<String> taskCategories = taskList.map((t) => t.category).toSet();
-    Set<String> forDelete = {};
-    categoryMap.forEach((name, cat) {
-      if (!taskCategories.contains(name)) {
-        forDelete.add(name);
-      }
-    });
-    categoryMap.removeWhere((name, cat) => forDelete.contains(name));
+    categoryTaskMapStream.add(_categoryTaskMap);
+
+    await CategoryProvider.saveList(_categoryTaskMap.keys.toList());
+    await _repository.saveTasks(taskList);
+  }
+
+  Future remove(UserTask task) async {
+    final category = _categoryTaskMap.keys.firstWhere((category) => category.name == task.category);
+    final taskList = _categoryTaskMap[category]!;
+
+    taskList.remove(task);
+    _categoryTaskMap[category] = taskList;
+    categoryTaskMapStream.add(_categoryTaskMap);
+
+    _repository.remove(task);
+    await _fbClient.removeTask(task);
   }
 
   void createNewCategory(String newCategory) {
@@ -212,17 +199,16 @@ class TaskListBloc {
 
     final category = Category(
       name: newCategory,
-      colorString: _colorToString(Colors.grey.shade600),
+      colorString: Constant.defaultCategoryColor.toRgbString(),
       order: DateTime.now().millisecondsSinceEpoch,
     );
     category.save();
-    categoryMap[newCategory] = category;
   }
 
   Future quickAdd(String title, String category) async {
     // get preferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userUid = prefs.getString(Constant.authorUidKey);
+    String userUid = prefs.getString(Constant.authorUidKey) ?? '';
 
     // create task
     final task = UserTask(
@@ -234,12 +220,9 @@ class TaskListBloc {
       category: category,
       authorUid: userUid,
     );
+
     await _repository.createTask(task);
     await _fbClient.addTask(task);
-  }
-
-  Future<List<Category>> getCategories() async {
-    return await CategoryProvider.getList();
   }
 
   String _getPasswordHash() {
@@ -250,25 +233,31 @@ class TaskListBloc {
   }
 
   void dispose() {
-    tasksMap.close();
     settings.close();
-    categoryMapStream.close();
+    categoryTaskMapStream.close();
     _repository.dispose();
   }
 
-  Future setColorForCategory(String category, Color color) async {
-    var cat = categoryMap[category];
-    cat.colorString = "${color.red},${color.green},${color.blue}";
-    await CategoryProvider.save(cat);
+  Future setColorForCategory(Category category, Color color) async {
+    final taskList = _categoryTaskMap[category]!;
 
-    categoryMap[category] = cat;
-    categoryMapStream.add(categoryMap);
+    category.colorString = color.toRgbString();
+    _categoryTaskMap[category] = taskList;
+
+    categoryTaskMapStream.add(_categoryTaskMap);
+    await CategoryProvider.update(category);
   }
 
-  Future setCategoryExpand(String category) async {
-    var cat = categoryMap[category];
-    cat.isExpand = !cat.isExpand;
+  List<Category> get categories {
+    final categories = _categoryTaskMap.keys.toList();
+    categories.sort((cat1, cat2) => cat1.order.compareTo(cat2.order));
+    // categories.insert(0, AppData.noCategory);
 
-    await CategoryProvider.save(cat);
+    return categories;
+  }
+
+  Future getSettings() async {
+    final setts = await _settingsRepo.getSettings();
+    settings.add(setts);
   }
 }

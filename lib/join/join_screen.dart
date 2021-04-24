@@ -4,12 +4,9 @@ import 'dart:io';
  * Author: Damodar Lohani
  * profile: https://github.com/lohanidamodar
  */
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:shared_task_list/common/constant.dart';
-import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/join/join_bloc.dart';
 import 'package:shared_task_list/model/task_list.dart';
@@ -44,32 +41,6 @@ class JoinScreen extends StatelessWidget {
             ),*/
           const SizedBox(height: 20.0),
           _buildLoginForm(context),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Ui.flatButton(S.of(context).create, () async {
-                if (!_formKey.currentState.validate()) {
-                  return;
-                }
-                bool isExist = await _bloc.isExist();
-
-                if (isExist) {
-                  _alertDialog(context, S.of(context).taskListExists);
-                  return;
-                }
-
-                await _bloc.create();
-                await _bloc.savePreferences();
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => Home(),
-                  ),
-                );
-              }, style: TextStyle(color: Colors.blue, fontSize: 18.0)),
-            ],
-          ),
           const SizedBox(height: 20),
           _buildRecentLists(),
         ],
@@ -81,7 +52,11 @@ class JoinScreen extends StatelessWidget {
     return StreamBuilder<List<TaskList>>(
         stream: _bloc.taskLists,
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data.isEmpty) {
+          if (!snapshot.hasData || snapshot.data == null) {
+            return Container();
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Container();
           }
 
@@ -99,8 +74,8 @@ class JoinScreen extends StatelessWidget {
             ),
           ];
 
-          for (final list in snapshot.data) {
-            if (list.name == null || list.name.isEmpty) {
+          for (final list in snapshot.data!) {
+            if (list.name.isEmpty) {
               continue;
             }
             widgets.add(ListTile(
@@ -149,7 +124,6 @@ class JoinScreen extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             ClipPath(
-              clipper: RoundedDiagonalPathClipper(),
               child: Container(
                 height: 420,
                 padding: const EdgeInsets.all(10.0),
@@ -165,6 +139,7 @@ class JoinScreen extends StatelessWidget {
                       children: <Widget>[
                         const SizedBox(height: 90.0),
                         ..._buildFormRow(
+                          context: context,
                           hintText: S.of(context).username,
                           icon: Icons.person,
                           value: Constant.userName,
@@ -174,6 +149,7 @@ class JoinScreen extends StatelessWidget {
                           },
                         ),
                         ..._buildFormRow(
+                          context: context,
                           hintText: S.of(context).taskListName,
                           icon: Icons.list,
                           value: Constant.taskList,
@@ -183,6 +159,7 @@ class JoinScreen extends StatelessWidget {
                           },
                         ),
                         ..._buildFormRow(
+                          context: context,
                           hintText: S.of(context).password,
                           icon: Icons.lock,
                           isPassword: true,
@@ -211,35 +188,40 @@ class JoinScreen extends StatelessWidget {
             ),
             Positioned(
               bottom: 0,
-              left: MediaQuery.of(context).size.width / 2 - (Platform.isIOS ? 100 : 65),
+              left: MediaQuery.of(context).size.width / 2 - 65,
               child: Container(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: Ui.button(
-                      title: S.of(context).open,
-                      radius: 40,
-                      textStyle: const TextStyle(color: Colors.white70),
-                      onPressed: () async {
-                        if (_formKey.currentState != null && !_formKey.currentState.validate()) {
-                          return;
-                        }
-                        bool isExist = await _bloc.isExist();
+                  child: ElevatedButton(
+                    child: Text(
+                      S.of(context).open,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                      shape: Constant.buttonShape,
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
+                        return;
+                      }
+                      bool isExist = await _bloc.isExist();
 
-                        if (!isExist) {
-                          _alertDialog(context, S.of(context).openError);
-                          return;
-                        }
+                      if (!isExist) {
+                        await _bloc.create();
+                      }
 
-                        await _bloc.savePreferences();
+                      await _bloc.savePreferences();
 
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (BuildContext context) => Home(),
-                          ),
-                          (Route<dynamic> route) => false,
-                        );
-                      }),
+                      await Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => Home(),
+                        ),
+                        (Route<dynamic> route) => false,
+                      );
+                    },
+                  ),
                 ),
               ),
             )
@@ -257,12 +239,12 @@ class JoinScreen extends StatelessWidget {
   }
 
   List<Widget> _buildFormRow({
-    ValueChanged<String> valueChanged,
-    String hintText,
-    String value,
-    IconData icon,
+    required ValueChanged<String> valueChanged,
+    required String hintText,
+    required String value,
+    required IconData icon,
+    required BuildContext context,
     bool isPassword = false,
-    BuildContext context,
   }) {
     return [
       Container(
@@ -280,8 +262,8 @@ class JoinScreen extends StatelessWidget {
                 color: Colors.blue,
               )),
           onChanged: valueChanged,
-          validator: (value) {
-            if (value.isEmpty) {
+          validator: (String? value) {
+            if (value != null && value.isEmpty) {
               return S.of(context).required;
             }
             return null;
@@ -296,21 +278,12 @@ class JoinScreen extends StatelessWidget {
       ),
     ];
   }
-
-  _alertDialog(BuildContext context, String alertText) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return BeautifulAlertDialog(alertText: alertText);
-      },
-    );
-  }
 }
 
 class BeautifulAlertDialog extends StatelessWidget {
   final String alertText;
 
-  const BeautifulAlertDialog({Key key, this.alertText}) : super(key: key);
+  const BeautifulAlertDialog({Key? key, required this.alertText}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -350,14 +323,16 @@ class BeautifulAlertDialog extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text("Ok"),
-                          color: Colors.red,
-                          colorBrightness: Brightness.dark,
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red,
+                            onPrimary: Colors.white,
+                            shape: Constant.buttonShape,
+                          ),
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                         ),
                       ],
                     )

@@ -10,9 +10,9 @@ class JoinBloc {
   final _repository = JoinRepository();
   final taskLists = BehaviorSubject<List<TaskList>>();
 
-  String username;
-  String taskList;
-  String password;
+  late String username;
+  late String taskList;
+  late String password;
 
   Future<bool> isExist() async {
     if (taskList.isEmpty || password.isEmpty) {

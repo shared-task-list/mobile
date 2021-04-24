@@ -9,15 +9,15 @@ import 'migrations.dart';
 
 class DBProvider {
   static final DBProvider db = DBProvider._();
-  static Database _database;
+  static Database? _database;
 
   Future<Database> get database async {
     if (_database != null) {
-      return _database;
+      return _database!;
     }
 
     _database = await initDB();
-    return _database;
+    return _database!;
   }
 
   DBProvider._();
@@ -50,7 +50,7 @@ class DBProvider {
   }
 
   Future replaceTable(Database db, String table) async {
-    List<Map> maps;
+    List<Map<String, Object?>> maps;
 
     try {
       maps = await db.query(table);
@@ -60,7 +60,7 @@ class DBProvider {
 
     final batch = db.batch();
     batch.rawDelete('drop table IF EXISTS $table');
-    batch.execute(scriptMap[table]);
+    batch.execute(scriptMap[table]!);
 
     for (final m in maps) {
       batch.insert(table, m);

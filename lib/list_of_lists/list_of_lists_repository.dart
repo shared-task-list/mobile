@@ -10,8 +10,8 @@ class ListOfListsRepository {
 
   Future getLists() async {
     var db = await DBProvider.db.database;
-    List<Map> maps = await db.query(_taskListTable, orderBy: 'updated_at desc');
-    var lists = List<TaskList>();
+    List<Map<String, dynamic>> maps = await db.query(_taskListTable, orderBy: 'updated_at desc');
+    var lists = <TaskList>[];
 
     for (final map in maps) {
       lists.add(TaskList.fromMap(map));
@@ -26,14 +26,14 @@ class ListOfListsRepository {
 
   Future<TaskList> get(String name, String password) async {
     var db = await DBProvider.db.database;
-    List<Map> maps = await db.query(
+    List<Map<String, dynamic>> maps = await db.query(
       _taskListTable,
       where: 'name = ? and password = ?',
       whereArgs: [name, password],
     );
 
     if (maps.isEmpty) {
-      return null;
+      return TaskList.empty();
     }
 
     return TaskList.fromMap(maps.first);
@@ -51,9 +51,10 @@ class ListOfListsRepository {
       return null;
     }
 
-    var taskList = TaskList()
-      ..password = password
-      ..name = name;
+    var taskList = TaskList(
+      name: name,
+      password: password,
+    );
     await db.insert(_taskListTable, taskList.toMap());
     getLists();
 

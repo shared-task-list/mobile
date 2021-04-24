@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_task_list/category_list/category_list_repository.dart';
+import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/extension/color_extension.dart';
 import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/category.dart';
@@ -14,8 +14,12 @@ class CategoryListBloc {
   final _repo = CategoryListRepository();
 
   CategoryListBloc() {
-    _repo.getList();
+    // _repo.getList();
     _repo.categories.listen((taskList) => categories.add(taskList));
+  }
+
+  Future getList() async {
+    await _repo.getList();
   }
 
   Future updateOrder(int oldIndex, int newIndex, List<Category> cats) async {
@@ -32,7 +36,7 @@ class CategoryListBloc {
 
     for (int i = 0; i < cats.length; ++i) {
       cats[i].order = i + 1;
-      await _repo.save(cats[i]);
+      await _repo.update(cats[i]);
     }
   }
 
@@ -52,7 +56,7 @@ class CategoryListBloc {
   Future updateCategoryName(Category category, String newName) async {
     String oldName = category.name;
     category.name = newName;
-    await _repo.save(category);
+    await _repo.update(category);
     _repo.getList();
 
     final fbClient = FbClient();
@@ -72,12 +76,13 @@ class CategoryListBloc {
 
     final category = Category(
       name: name,
-      colorString: Colors.grey.shade600.toRgbString(),
+      colorString: Constant.defaultCategoryColor.toRgbString(),
       order: DateTime.now().millisecondsSinceEpoch,
     );
 
-    await category.save();
-    _repo.getList();
+    // await category.save();
+    await _repo.create(category);
+    await _repo.getList();
   }
 
   void dispose() {

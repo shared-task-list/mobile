@@ -17,16 +17,17 @@ class JoinRepository {
       return;
     }
 
-    var taskList = TaskList()
-      ..password = Constant.password
-      ..name = Constant.taskList;
+    var taskList = TaskList(
+      password: Constant.password,
+      name: Constant.taskList,
+    );
     db.insert(_taskListTable, taskList.toMap());
   }
 
   Future<List<TaskList>> getLists() async {
     var db = await DBProvider.db.database;
-    List<Map> maps = await db.query(_taskListTable, orderBy: 'updated_at desc');
-    var lists = List<TaskList>();
+    List<Map<String, dynamic>> maps = await db.query(_taskListTable, orderBy: 'updated_at desc');
+    var lists = <TaskList>[];
 
     for (final map in maps) {
       lists.add(TaskList.fromMap(map));

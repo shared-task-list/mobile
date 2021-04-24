@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:flushbar/flushbar.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_task_list/common/constant.dart';
@@ -14,7 +12,7 @@ import 'add_list_dialog.dart';
 
 class ListOfListsScreen extends StatelessWidget {
   final _bloc = ListOfListsBloc();
-  S _locale;
+  late S _locale;
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +22,9 @@ class ListOfListsScreen extends StatelessWidget {
     return Ui.scaffold(
       bar: Ui.appBar(
         title: _locale.my_lists,
-        rightButton: Platform.isIOS
-            ? Ui.actionButton(Ui.icon(CupertinoIcons.add, Icons.add), () {
-                _showAddDialog(context);
-              })
-            : null,
+        rightButton: Ui.actionButton(Icon(Icons.add), () {
+          _showAddDialog(context);
+        }),
       ),
       body: Material(
         child: _buildBody(context),
@@ -37,7 +33,11 @@ class ListOfListsScreen extends StatelessWidget {
       bodyColor: Constant.bgColor,
       float: Platform.isAndroid
           ? FloatingActionButton(
-              child: const Icon(Icons.add),
+              backgroundColor: Constant.accentColor,
+              child: Icon(
+                Icons.add,
+                color: Constant.getTextColor(Constant.accentColor),
+              ),
               onPressed: () {
                 _showAddDialog(context);
               })
@@ -48,29 +48,31 @@ class ListOfListsScreen extends StatelessWidget {
   Widget _buildBody(BuildContext context) {
     return Column(
       children: <Widget>[
-        Ui.flatButton(_locale.add_new, () {
-          _showAddDialog(context);
-        }),
+        const SizedBox(height: 16),
         StreamBuilder<List<TaskList>>(
           stream: _bloc.taskLists,
           builder: (BuildContext context, AsyncSnapshot<List<TaskList>> snapshot) {
             if (!snapshot.hasData) {
               return Ui.waitIndicator();
             }
+
+            final taskList = snapshot.data ?? [];
+
             return ListView.builder(
               shrinkWrap: true,
-              itemCount: snapshot.data.length,
+              itemCount: taskList.length,
               itemBuilder: (ctx, index) {
-                final list = snapshot.data[index];
+                final list = taskList[index];
 
                 return ListTile(
                   trailing: list.name == Constant.taskList
                       ? Padding(
                           padding: const EdgeInsets.only(right: 10),
-                          child: Text('(${_locale.current})'),
+                          // child: Text('(${_locale.current})'),
+                          child: Text('current'),
                         )
                       : IconButton(
-                          icon: Ui.icon(CupertinoIcons.delete_simple, Icons.delete),
+                          icon: Icon(Icons.delete),
                           onPressed: () {
                             _showConfirmDeleteDialog(context, list);
                           },
@@ -83,11 +85,11 @@ class ListOfListsScreen extends StatelessWidget {
                     }
                     await _bloc.open(list);
                     _bloc.getTaskLists();
-                    Flushbar(
-                      title: _locale.current_list_changed,
-                      message: _locale.current_list_changed_to + list.name,
-                      duration: Duration(seconds: 3),
-                    )..show(context);
+                    // Flushbar(
+                    //   title: _locale.current_list_changed,
+                    //   message: _locale.current_list_changed_to + list.name,
+                    //   duration: Duration(seconds: 3),
+                    // )..show(context);
                   },
                 );
               },
@@ -118,11 +120,11 @@ class ListOfListsScreen extends StatelessWidget {
               onPressed: () {
                 _bloc.deleteList(list);
                 Navigator.of(ctx).pop();
-                Flushbar(
-                  title: _locale.delete,
-                  message: "You list ${list.name} was deleted",
-                  duration: Duration(seconds: 3),
-                )..show(context);
+                // Flushbar(
+                //   title: _locale.delete,
+                //   message: "You list ${list.name} was deleted",
+                //   duration: Duration(seconds: 3),
+                // )..show(context);
               },
               text: _locale.delete,
             ),
@@ -134,8 +136,8 @@ class ListOfListsScreen extends StatelessWidget {
     );
   }
 
-  void _showAddDialog(BuildContext context) {
-    Ui.openDialog(
+  Future _showAddDialog(BuildContext context) async {
+    await Ui.openDialog(
       context: context,
       dialog: AddListDialog(
         savePressed: (String name, String password) async {
@@ -143,12 +145,12 @@ class ListOfListsScreen extends StatelessWidget {
           bool isExistInDb = await _bloc.isExistInDb(name, password);
 
           if (isExistInDb) {
-            Flushbar(
-              title: _locale.create,
-              message: "List $name already exist. Please change name or password",
-              duration: Duration(seconds: 3),
-              backgroundColor: Colors.red,
-            )..show(context);
+            // Flushbar(
+            //   title: _locale.create,
+            //   message: "List $name already exist. Please change name or password",
+            //   duration: Duration(seconds: 3),
+            //   backgroundColor: Colors.red,
+            // )..show(context);
             return;
           }
 
@@ -157,13 +159,13 @@ class ListOfListsScreen extends StatelessWidget {
           bool isExist = await _bloc.isExistList(name, password);
 
           _bloc.createList(name, password, !isExist);
-          Flushbar(
-            title: _locale.create,
-            message: "New List $name was created",
-            duration: Duration(seconds: 3),
-          )..show(context);
+          // Flushbar(
+          //   title: _locale.create,
+          //   message: "New List $name was created",
+          //   duration: Duration(seconds: 3),
+          // )..show(context);
         },
-        labelText: null,
+        labelText: '',
         hintText: _locale.taskListName,
         title: _locale.new_list,
       ),

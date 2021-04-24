@@ -32,7 +32,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "color" : MessageLookupByLibrary.simpleMessage("Цвет"),
     "comment" : MessageLookupByLibrary.simpleMessage("Комментарий"),
     "create" : MessageLookupByLibrary.simpleMessage("Создать"),
-    "current" : MessageLookupByLibrary.simpleMessage("текущий"),
     "current_list_changed" : MessageLookupByLibrary.simpleMessage("Текущий список изменен"),
     "current_list_changed_to" : MessageLookupByLibrary.simpleMessage("Ваш текущий списрк изменен на "),
     "defaultCategory" : MessageLookupByLibrary.simpleMessage("Категория по умолчанию"),

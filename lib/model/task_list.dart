@@ -4,14 +4,18 @@ class TaskList {
   int id;
   String name;
   String password;
-  DateTime updatedAt;
+  DateTime? updatedAt;
 
   TaskList({
-    this.id,
-    this.name,
-    this.password,
+    this.id = 0,
+    required this.name,
+    required this.password,
     this.updatedAt,
   });
+
+  static TaskList empty() {
+    return TaskList(name: '', password: '');
+  }
 
   factory TaskList.fromJson(String str) => TaskList.fromMap(json.decode(str));
 
@@ -28,6 +32,6 @@ class TaskList {
         "id": id,
         "name": name,
         "password": password,
-        "updated_at": updatedAt == null ? DateTime.now().toIso8601String() : updatedAt.toIso8601String(),
+        "updated_at": updatedAt == null ? DateTime.now().toIso8601String() : updatedAt?.toIso8601String(),
       };
 }

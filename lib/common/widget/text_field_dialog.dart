@@ -1,26 +1,26 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
+
+import '../constant.dart';
 
 class TextFieldDialog extends StatefulWidget {
   final String title;
   final String hintText;
   final String labelText;
-  final String agreeButtonText;
-  final String oldText;
+  final String? agreeButtonText;
+  final String? oldText;
   final ValueChanged<String> savePressed;
-  final IconData icon;
+  final IconData? icon;
 
   TextFieldDialog({
-    Key key,
-    @required this.savePressed,
-    @required this.title,
+    Key? key,
+    required this.savePressed,
+    required this.title,
+    required this.hintText,
+    required this.labelText,
     this.agreeButtonText,
     this.icon,
-    @required this.hintText,
-    @required this.labelText,
     this.oldText,
   }) : super(key: key);
 
@@ -30,7 +30,7 @@ class TextFieldDialog extends StatefulWidget {
 
 class _TextFieldDialogState extends State<TextFieldDialog> {
   final _formKey = GlobalKey<FormState>();
-  String newData;
+  String newData = '';
 
   @override
   Widget build(BuildContext context) {
@@ -38,29 +38,29 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Ui.dialog(
           child: Container(
-            padding: EdgeInsets.only(right: 32.0),
+            padding: const EdgeInsets.only(right: 32.0),
             height: 220,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderRadius: const BorderRadius.all(const Radius.circular(10)),
             ),
             child: Row(
               children: <Widget>[
-                SizedBox(width: 40.0),
+                const SizedBox(width: 40.0),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       Text(
                         widget.title,
                         style: Theme.of(context).textTheme.headline5,
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       Material(
                         color: Colors.white,
                         child: Form(
@@ -71,7 +71,7 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
                             maxLength: 30,
                             onChanged: (String value) => newData = value,
                             validator: (value) {
-                              if (value.isEmpty) {
+                              if (value == null || value.isEmpty) {
                                 return 'Field is required';
                               }
                               return null;
@@ -84,40 +84,44 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
                           Expanded(
-                            child: RaisedButton(
+                            child: ElevatedButton(
                               child: Text(locale.cancel),
-                              color: Colors.red,
-                              colorBrightness: Brightness.dark,
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.red,
+                                onPrimary: Colors.white,
+                                shape: Constant.buttonShape,
+                              ),
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                             ),
                           ),
-                          SizedBox(width: Platform.isIOS ? 20.0 : 10.0),
+                          const SizedBox(width: 10.0),
                           Expanded(
-                            child: RaisedButton(
+                            child: ElevatedButton(
                               child: Text(widget.agreeButtonText ?? locale.create),
-                              color: Colors.blue,
-                              colorBrightness: Brightness.dark,
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.blue,
+                                onPrimary: Colors.white,
+                                shape: Constant.buttonShape,
+                              ),
                               onPressed: () {
-                                if (!_formKey.currentState.validate()) {
+                                if (!_formKey.currentState!.validate()) {
                                   return;
                                 }
                                 widget.savePressed(newData);
                                 Navigator.pop(context);
                               },
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                     ],
                   ),
                 ),

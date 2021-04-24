@@ -23,13 +23,11 @@ class CategoryProvider {
 
       if (savedCategories.containsKey(category.name)) {
         isExist = true;
-        category.colorString = savedCategories[category.name].colorString;
-        category.order = savedCategories[category.name].order;
-        category.isExpand = savedCategories[category.name].isExpand;
+        category.colorString = savedCategories[category.name]!.colorString;
+        category.order = savedCategories[category.name]!.order;
+        category.isExpand = savedCategories[category.name]!.isExpand;
       }
-      if (category.isExpand == null) {
-        category.isExpand = true;
-      }
+
       if (isExist) {
         batch.rawUpdate(
           'update $_categoryTable set name = ?, color_string = ?, "order" = ?, is_expand = ? where id = ?',
@@ -48,8 +46,8 @@ class CategoryProvider {
 
   static Future<List<Category>> getList() async {
     var db = await DBProvider.db.database;
-    List<Map> maps = await db.query(_categoryTable);
-    var lists = List<Category>();
+    List<Map<String, dynamic>> maps = await db.query(_categoryTable);
+    var lists = <Category>[];
 
     for (final map in maps) {
       final task = Category.fromMap(map);
@@ -60,7 +58,7 @@ class CategoryProvider {
     return lists;
   }
 
-  static Future save(Category category) async {
+  static Future update(Category category) async {
     var db = await DBProvider.db.database;
     var batch = db.batch();
     batch.rawUpdate(
@@ -68,6 +66,11 @@ class CategoryProvider {
       [category.name, category.colorString, category.order, category.getExpand(), category.id],
     );
     batch.commit(noResult: true);
+  }
+
+  static Future<int> create(Category category) async {
+    final db = await DBProvider.db.database;
+    return await db.insert(_categoryTable, category.toMap());
   }
 
   static Future delete(Category category) async {

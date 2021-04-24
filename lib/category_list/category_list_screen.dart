@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +10,11 @@ import 'package:shared_task_list/model/category.dart';
 
 class CategoryListScreen extends StatelessWidget {
   final _bloc = CategoryListBloc();
-  S _locale;
+  late S _locale;
+
+  CategoryListScreen() {
+    _bloc.getList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,24 +22,21 @@ class CategoryListScreen extends StatelessWidget {
 
     return Ui.scaffold(
       bar: Ui.appBar(
-        title: 'Categories',
-        rightButton: Platform.isIOS
-            ? Ui.actionButton(Ui.icon(CupertinoIcons.add, Icons.add), () {
-                _showAddDialog(context);
-              })
-            : null,
+        title: _locale.categories,
       ),
       body: Material(
         child: _buildBody(),
         color: Constant.bgColor,
       ),
-      float: Platform.isAndroid
-          ? FloatingActionButton(
-              child: const Icon(Icons.add),
-              onPressed: () {
-                _showAddDialog(context);
-              })
-          : null,
+      float: FloatingActionButton(
+          backgroundColor: Constant.accentColor,
+          child: Icon(
+            Icons.add,
+            color: Constant.getTextColor(Constant.accentColor),
+          ),
+          onPressed: () {
+            _showAddDialog(context);
+          }),
     );
   }
 
@@ -50,13 +48,11 @@ class CategoryListScreen extends StatelessWidget {
             return Container();
           }
 
-          final categories = snapshot.data;
+          final categories = snapshot.data ?? [];
 
           return Column(
             children: <Widget>[
-              Ui.flatButton(_locale.add_new, () {
-                _showAddDialog(context);
-              }),
+              const SizedBox(height: 16),
               Expanded(
                 child: ReorderableListView(
                   onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex, categories),
@@ -71,13 +67,13 @@ class CategoryListScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: <Widget>[
                               IconButton(
-                                icon: Ui.icon(CupertinoIcons.pen, Icons.edit),
+                                icon: const Icon(Icons.edit),
                                 onPressed: () {
                                   _showEditDialog(context, category);
                                 },
                               ),
                               IconButton(
-                                icon: Ui.icon(CupertinoIcons.delete_simple, Icons.delete),
+                                icon: const Icon(Icons.delete),
                                 onPressed: () {
                                   _showConfirmDeleteDialog(context, category);
                                 },
@@ -102,7 +98,7 @@ class CategoryListScreen extends StatelessWidget {
         savePressed: (String newName) {
           _bloc.updateCategoryName(category, newName);
         },
-        labelText: null,
+        labelText: '',
         hintText: 'Name',
         title: 'New Name',
         agreeButtonText: 'Update',
@@ -131,11 +127,11 @@ class CategoryListScreen extends StatelessWidget {
               onPressed: () {
                 _bloc.deleteCategory(category);
                 Navigator.of(ctx).pop();
-                Flushbar(
-                  title: "Delete",
-                  message: "Category $category was deleted",
-                  duration: Duration(seconds: 3),
-                )..show(context);
+                // Flushbar(
+                //   title: "Delete",
+                //   message: "Category $category was deleted",
+                //   duration: Duration(seconds: 3),
+                // )..show(context);
               },
               text: 'Delete',
             ),
@@ -147,19 +143,19 @@ class CategoryListScreen extends StatelessWidget {
     );
   }
 
-  void _showAddDialog(BuildContext context) {
-    Ui.openDialog(
+  Future _showAddDialog(BuildContext context) async {
+    await Ui.openDialog(
       context: context,
       dialog: TextFieldDialog(
         savePressed: (String newName) {
           _bloc.createNewCategory(newName);
-          Flushbar(
-            title: "Create",
-            message: "Category $newName was created",
-            duration: Duration(seconds: 3),
-          )..show(context);
+          // Flushbar(
+          //   title: "Create",
+          //   message: "Category $newName was created",
+          //   duration: Duration(seconds: 3),
+          // )..show(context);
         },
-        labelText: null,
+        labelText: '',
         hintText: 'Name',
         title: 'New Category',
       ),

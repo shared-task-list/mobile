@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/constant.dart';
-import 'package:shared_task_list/common/widget/color_set_dialog.dart';
+import 'package:shared_task_list/common/widget/color_picker_dialog.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
@@ -15,6 +15,7 @@ import 'package:shared_task_list/join/join_screen.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/settings/category_dialog.dart';
 import 'package:shared_task_list/settings/settings_bloc.dart';
+import 'package:shared_task_list/common/extension/color_extension.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -25,8 +26,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _bloc = SettingsBloc();
   final _primaryStyle = TextStyle(fontSize: 18, color: Colors.black);
   final _secondStyle = TextStyle(fontSize: 15, color: Colors.grey);
-  Settings _settings;
-  S locale;
+  late Settings _settings;
+  late S locale;
 
   @override
   void dispose() {
@@ -46,11 +47,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             body: FutureBuilder<Settings>(
                 future: _bloc.getSettings(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+                  if (!snapshot.hasData || snapshot.data == null) {
                     return Container();
                   }
 
-                  _settings = snapshot.data;
+                  _settings = snapshot.data!;
                   _bloc.setVisibleCats(_settings.isShowCategories);
                   _bloc.category.add(_settings.defaultCategory);
 
@@ -108,9 +109,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       locale.show_quick_add,
                       style: _primaryStyle,
                     ),
-                    Ui.wswitch(
+                    Switch(
+                      activeColor: Constant.primaryColor,
                       value: _settings.isShowQuickAdd,
-                      onChange: (bool value) {
+                      onChanged: (bool value) {
                         setState(() {
                           _settings.isShowQuickAdd = value;
                         });
@@ -128,7 +130,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     return Container();
                   }
 
-                  final prefs = snapshot.data;
+                  if (snapshot.data == null) {
+                    return Container();
+                  }
+
+                  final prefs = snapshot.data!;
                   String name = prefs.getString(Constant.authorKey) ?? '';
                   _bloc.name.add(name);
 
@@ -148,7 +154,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     prefs.setString(Constant.authorKey, newName);
                                   },
                                   title: locale.newName,
-                                  labelText: null,
+                                  labelText: '',
                                   hintText: locale.newName,
                                 ),
                               );
@@ -158,13 +164,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildRow(
               primaryText: locale.background,
               secondText: '',
-              onTap: () {
-                Ui.showActionSheet(
+              onTap: () async {
+                await showModalBottomSheet(
                   context: context,
-                  builder: (ctx) => Ui.actionSheet(
-                    context: ctx,
-                    iosActions: _getBackgroundMenuOptions(ctx, forIos: true),
-                    androidActions: _getBackgroundMenuOptions(ctx, forIos: false),
+                  builder: (ctx) => Container(
+                    child: Wrap(
+                      children: _getBackgroundMenuOptions(ctx),
+                    ),
                   ),
                 );
               },
@@ -176,13 +182,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: <Widget>[
                   SizedBox(
                     width: 200,
-                    child: Ui.flatButton(
-                      locale.exit,
-                      () async {
+                    child: OutlinedButton(
+                      child: Text(
+                        locale.exit,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 18,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: Constant.buttonShape,
+                        side: BorderSide(color: Colors.red),
+                      ),
+                      onPressed: () async {
                         await _bloc.exit();
-                        Ui.route(context, JoinScreen(), withHistory: false);
+                        await Ui.route(context, JoinScreen(), withHistory: false);
                       },
-                      style: TextStyle(color: Colors.red, fontSize: 22),
                     ),
                   ),
                 ],
@@ -198,20 +213,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future _openColor() async {
     Ui.openDialog(
       context: context,
-      dialog: ColorSetDialog(
-        onSetColor: (Color color) async {
-          final colorString = "${color.red},${color.green},${color.blue}";
-          var prefs = await SharedPreferences.getInstance();
-          prefs.setString('bg_color', colorString);
+      dialog: ColorPickerDialog(
+        applyFunction: (Color color) async {
           Constant.bgColor = color;
           _bloc.bgColor.add(color);
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('bg_color', color.toRgbString());
         },
       ),
     );
   }
 
   Future _openPick() async {
-    final image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    final picker = ImagePicker();
+    final image = await picker.getImage(source: ImageSource.gallery);
 
     if (image == null) {
       return;
@@ -220,21 +236,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = documentsDirectory.path;
 
-    var bytes = await image.readAsBytes();
+    final bytes = await image.readAsBytes();
     String fileName = image.path.split('/').last;
 
     final file = File('$path/$fileName');
     await file.writeAsBytes(bytes);
 
-    var prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     prefs.setString('bg_name', fileName);
   }
 
   Widget _buildRow({
-    @required String primaryText,
-    @required String secondText,
-    @required GestureTapCallback onTap,
-    Widget trailing,
+    required String primaryText,
+    required String secondText,
+    required GestureTapCallback onTap,
+    Widget? trailing,
   }) {
     return ListTile(
       onTap: onTap,
@@ -268,22 +284,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _bloc.bgColor.add(Colors.white);
   }
 
-  Function _closeable(BuildContext ctx, Function f) {
+  VoidCallback _closeable(BuildContext ctx, Function f) {
     return () {
       Navigator.pop(ctx);
       f();
     };
   }
 
-  List<Widget> _getBackgroundMenuOptions(BuildContext ctx, {@required bool forIos}) {
-    if (forIos) {
-      return [
-        CupertinoActionSheetAction(child: Text(locale.image), onPressed: _closeable(ctx, _openPick)),
-        CupertinoActionSheetAction(child: Text(locale.color), onPressed: _closeable(ctx, _openColor)),
-        CupertinoActionSheetAction(child: Text(locale.clear), onPressed: _closeable(ctx, _clear)),
-      ];
-    }
-
+  List<Widget> _getBackgroundMenuOptions(BuildContext ctx) {
     return [
       ListTile(title: Text(locale.image), onTap: _closeable(ctx, _openPick), leading: const Icon(Icons.image)),
       ListTile(title: Text(locale.color), onTap: _closeable(ctx, _openColor), leading: const Icon(Icons.color_lens)),
