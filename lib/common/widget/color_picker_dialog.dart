@@ -33,11 +33,11 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             height: 44,
             borderRadius: 22,
             heading: Text(
-              'Select color',
+              _locale.select_color,
               style: Theme.of(context).textTheme.headline5,
             ),
             subheading: Text(
-              'Select color shade',
+              _locale.select_shade_color,
               style: Theme.of(context).textTheme.subtitle1,
             ),
             actionButtons: ColorPickerActionButtons(

@@ -41,5 +41,7 @@
     "new_list": "Новый список",
     "my_lists": "Мои списки",
     "field_required": "Поле обязательно",
-    "recent_lists": "Недавние списки"
+    "recent_lists": "Недавние списки",
+    "select_color": "Выбрать цвет",
+    "select_accent_color": "Выбрать оттенок"
 }

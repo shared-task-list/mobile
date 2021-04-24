@@ -41,5 +41,7 @@
     "new_list": "New List",
     "my_lists": "My Lists",
     "field_required": "Field is required",
-    "recent_lists": "Recent Lists"
+    "recent_lists": "Recent Lists",
+    "select_color": "Select Color",
+    "select_shade_color": "Select Shade Color"
 }

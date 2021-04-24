@@ -52,6 +52,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "password" : MessageLookupByLibrary.simpleMessage("Password"),
     "recent_lists" : MessageLookupByLibrary.simpleMessage("Recent Lists"),
     "required" : MessageLookupByLibrary.simpleMessage("Could not be empty"),
+    "select_color" : MessageLookupByLibrary.simpleMessage("Select Color"),
+    "select_shade_color" : MessageLookupByLibrary.simpleMessage("Select Shade Color"),
     "settings" : MessageLookupByLibrary.simpleMessage("Settings"),
     "show_quick_add" : MessageLookupByLibrary.simpleMessage("Show Quick Add"),
     "task" : MessageLookupByLibrary.simpleMessage("Task"),

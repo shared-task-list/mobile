@@ -52,6 +52,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "password" : MessageLookupByLibrary.simpleMessage("Пароль"),
     "recent_lists" : MessageLookupByLibrary.simpleMessage("Недавние списки"),
     "required" : MessageLookupByLibrary.simpleMessage("Поле не может быть пустым"),
+    "select_color" : MessageLookupByLibrary.simpleMessage("Выбрать цвет"),
     "settings" : MessageLookupByLibrary.simpleMessage("Настройки"),
     "show_quick_add" : MessageLookupByLibrary.simpleMessage("Show Quick Add"),
     "task" : MessageLookupByLibrary.simpleMessage("Задача"),
