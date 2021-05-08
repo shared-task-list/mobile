@@ -40,9 +40,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               _locale.select_shade_color,
               style: Theme.of(context).textTheme.subtitle1,
             ),
-            actionButtons: ColorPickerActionButtons(
-              closeButton: true,
-            ),
+            actionButtons: ColorPickerActionButtons(closeButton: true),
           ),
           Expanded(child: Container()),
           Row(

@@ -55,5 +55,3 @@ class AppData {
     colorString: Constant.defaultCategoryColor.toRgbString(),
   );
 }
-
-List<String> categories = <String>[];

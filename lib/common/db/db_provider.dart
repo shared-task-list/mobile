@@ -1,7 +1,3 @@
-import 'dart:io';
-
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -23,11 +19,8 @@ class DBProvider {
   DBProvider._();
 
   Future initDB() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, Constant.dbName);
-
     return await openDatabase(
-      path,
+      Constant.dbName,
       version: 11,
       onOpen: (db) {},
       singleInstance: true,
@@ -35,9 +28,6 @@ class DBProvider {
         initScript.forEach((script) async => await db.execute(script));
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
-        // for (int i = oldVersion - 1; i <= newVersion - 1; i++) {
-        //   await db.execute(migrationScripts[i]);
-        // }
         await migrate(db);
       },
     );

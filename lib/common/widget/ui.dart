@@ -6,13 +6,12 @@ import 'package:shared_task_list/common/widget/svg_icon.dart';
 
 class Ui {
   static Future route(BuildContext context, Widget widget, {bool withHistory = true}) async {
-    PageRoute pageRoute;
-
-    pageRoute = MaterialPageRoute(
+    PageRoute pageRoute = MaterialPageRoute(
       builder: (BuildContext context) {
         return widget;
       },
     );
+
     if (withHistory) {
       await Navigator.push(context, pageRoute);
     } else {
@@ -77,7 +76,6 @@ class Ui {
         if (rightButton != null) rightButton,
       ],
       leading: leftButton,
-//        forceElevated: innerBoxIsScrolled,
     );
   }
 
@@ -110,11 +108,11 @@ class Ui {
     );
   }
 
-  static void showAlert({
+  static Future showAlert({
     required WidgetBuilder builder,
     required BuildContext context,
-  }) {
-    showDialog(
+  }) async {
+    await showDialog(
       context: context,
       builder: builder,
     );

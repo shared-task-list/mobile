@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_task_list/common/constant.dart';
@@ -22,7 +23,7 @@ class ListOfListsScreen extends StatelessWidget {
     return Ui.scaffold(
       bar: Ui.appBar(
         title: _locale.my_lists,
-        rightButton: Ui.actionButton(Icon(Icons.add), () {
+        rightButton: Ui.actionButton(const Icon(Icons.add), () {
           _showAddDialog(context);
         }),
       ),
@@ -68,13 +69,13 @@ class ListOfListsScreen extends StatelessWidget {
                   trailing: list.name == Constant.taskList
                       ? Padding(
                           padding: const EdgeInsets.only(right: 10),
-                          // child: Text('(${_locale.current})'),
-                          child: Text('current'),
+                          // child: Text(_locale.current),
+                          child: const Text('current'),
                         )
                       : IconButton(
                           icon: Icon(Icons.delete),
-                          onPressed: () {
-                            _showConfirmDeleteDialog(context, list);
+                          onPressed: () async {
+                            await _showConfirmDeleteDialog(context, list);
                           },
                         ),
                   title: Text(list.name),
@@ -84,12 +85,12 @@ class ListOfListsScreen extends StatelessWidget {
                       return;
                     }
                     await _bloc.open(list);
-                    _bloc.getTaskLists();
-                    // Flushbar(
-                    //   title: _locale.current_list_changed,
-                    //   message: _locale.current_list_changed_to + list.name,
-                    //   duration: Duration(seconds: 3),
-                    // )..show(context);
+                    await _bloc.getTaskLists();
+                    Flushbar(
+                      title: _locale.current_list_changed,
+                      message: _locale.current_list_changed_to + list.name,
+                      duration: Duration(seconds: 3),
+                    )..show(context);
                   },
                 );
               },
@@ -100,8 +101,8 @@ class ListOfListsScreen extends StatelessWidget {
     );
   }
 
-  void _showConfirmDeleteDialog(BuildContext context, TaskList list) {
-    Ui.showAlert(
+  Future _showConfirmDeleteDialog(BuildContext context, TaskList list) async {
+    await Ui.showAlert(
       builder: (ctx) {
         return Ui.alertDialog(
           title: _locale.delete_list + list.name,
@@ -117,14 +118,14 @@ class ListOfListsScreen extends StatelessWidget {
             ),
             Ui.alertAction(
               context: ctx,
-              onPressed: () {
-                _bloc.deleteList(list);
+              onPressed: () async {
                 Navigator.of(ctx).pop();
-                // Flushbar(
-                //   title: _locale.delete,
-                //   message: "You list ${list.name} was deleted",
-                //   duration: Duration(seconds: 3),
-                // )..show(context);
+                await _bloc.deleteList(list);
+                Flushbar(
+                  title: _locale.delete,
+                  message: "You list ${list.name} was deleted",
+                  duration: Duration(seconds: 3),
+                )..show(context);
               },
               text: _locale.delete,
             ),
@@ -145,12 +146,12 @@ class ListOfListsScreen extends StatelessWidget {
           bool isExistInDb = await _bloc.isExistInDb(name, password);
 
           if (isExistInDb) {
-            // Flushbar(
-            //   title: _locale.create,
-            //   message: "List $name already exist. Please change name or password",
-            //   duration: Duration(seconds: 3),
-            //   backgroundColor: Colors.red,
-            // )..show(context);
+            Flushbar(
+              title: _locale.create,
+              message: "List $name already exist. Please change name or password",
+              duration: Duration(seconds: 3),
+              backgroundColor: Colors.red,
+            )..show(context);
             return;
           }
 
@@ -159,11 +160,11 @@ class ListOfListsScreen extends StatelessWidget {
           bool isExist = await _bloc.isExistList(name, password);
 
           _bloc.createList(name, password, !isExist);
-          // Flushbar(
-          //   title: _locale.create,
-          //   message: "New List $name was created",
-          //   duration: Duration(seconds: 3),
-          // )..show(context);
+          Flushbar(
+            title: _locale.create,
+            message: "New List $name was created",
+            duration: Duration(seconds: 3),
+          )..show(context);
         },
         labelText: '',
         hintText: _locale.taskListName,

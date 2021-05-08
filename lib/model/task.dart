@@ -45,10 +45,9 @@ class UserTask {
         "Uid": uid,
       };
 
-  static UserTask fromFbData(Event event) {
+  factory UserTask.fromFbData(Event event) {
     var data = event.snapshot.value as Map<dynamic, dynamic>;
     var jsonData = Map<String, dynamic>();
-    // jsonData[event.snapshot.key] = data;
 
     data.forEach((key, value) {
       jsonData[key.toString()] = value;

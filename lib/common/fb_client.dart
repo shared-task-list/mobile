@@ -18,7 +18,7 @@ class FbClient {
   DatabaseReference get reference => _db;
 
   Future<bool> isExist(String taskList) async {
-    String hash = _getPasswordHash();
+    String hash = _getHash(Constant.password);
     DataSnapshot snapshot = await _db.child(taskList + hash).once();
 
     final data = snapshot.value as Map<dynamic, dynamic>;
@@ -27,7 +27,7 @@ class FbClient {
   }
 
   Future<bool> isExistList(String name, String password) async {
-    String hash = _getPasswordHashForNew(password);
+    String hash = _getHash(password);
     DataSnapshot snapshot = await _db.child(name + hash).once();
 
     var data = snapshot.value as Map<dynamic, dynamic>;
@@ -36,7 +36,7 @@ class FbClient {
   }
 
   Future<List<UserTask>> getAll(String taskList) async {
-    String hash = _getPasswordHash();
+    String hash = _getHash(Constant.password);
     DataSnapshot snapshot = await _db.child(taskList + hash).once();
 
     final data = snapshot.value as Map<dynamic, dynamic>;
@@ -68,7 +68,7 @@ class FbClient {
   }
 
   Future createTaskList(String taskList) async {
-    String hash = _getPasswordHash();
+    String hash = _getHash(Constant.password);
     final serviceTask = UserTask(
       author: 'Admin',
       comment: Constant.serviceTaskComment,
@@ -83,7 +83,7 @@ class FbClient {
   }
 
   Future createNewTaskList(String name, String password) async {
-    String hash = _getPasswordHashForNew(password);
+    String hash = _getHash(password);
     final serviceTask = UserTask(
       author: 'Admin',
       comment: Constant.serviceTaskComment,
@@ -98,28 +98,21 @@ class FbClient {
   }
 
   Future addTask(UserTask task) async {
-    String hash = _getPasswordHash();
+    String hash = _getHash(Constant.password);
     await _db.child(Constant.taskList + hash).child(task.uid).set(task.toMap());
   }
 
   Future updateTask(UserTask task) async {
-    String hash = _getPasswordHash();
+    String hash = _getHash(Constant.password);
     await _db.child(Constant.taskList + hash).child(task.uid).update(task.toMap());
   }
 
   Future removeTask(UserTask task) async {
-    String hash = _getPasswordHash();
+    String hash = _getHash(Constant.password);
     await _db.child(Constant.taskList + hash).child(task.uid).remove();
   }
 
-  String _getPasswordHash() {
-    List<int> bytes = utf8.encode(Constant.password);
-    Digest digest = sha256.convert(bytes);
-
-    return base64.encode(digest.bytes);
-  }
-
-  String _getPasswordHashForNew(String password) {
+  String _getHash(String password) {
     List<int> bytes = utf8.encode(password);
     Digest digest = sha256.convert(bytes);
 

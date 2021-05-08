@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_task_list/common/constant.dart';
@@ -42,12 +43,12 @@ class TaskListItem extends StatelessWidget {
                 color: Constant.getTextColor(Constant.primaryColor),
               ),
               onPressed: () async {
+                Flushbar(
+                  title: "Done",
+                  message: "Task ${task.title} is complete!",
+                  duration: Duration(seconds: 3),
+                )..show(context);
                 await _bloc.remove(task);
-                // Flushbar(
-                //   title: "Done",
-                //   message: "Task ${task.title} is complete!",
-                //   duration: Duration(seconds: 3),
-                // )..show(context);
               },
             ),
           ),

@@ -6,6 +6,7 @@ import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/settings/settings_repository.dart';
+import 'package:sqflite/sqflite.dart';
 
 class TaskListRepository {
   static const _taskTable = 'tasks';
@@ -118,6 +119,25 @@ class TaskListRepository {
     }
   }
 
+  Future create(UserTask task) async {
+    final db = await DBProvider.db.database;
+    await db.insert(
+      _taskTable,
+      task.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future update(UserTask task) async {
+    final db = await DBProvider.db.database;
+    await db.update(
+      _taskTable,
+      task.toMap(),
+      where: "Uid = ?",
+      whereArgs: [task.uid],
+    );
+  }
+
   Future remove(UserTask task) async {
     final db = await DBProvider.db.database;
     await db.delete(_taskTable, where: 'Uid = ?', whereArgs: [task.uid]);
@@ -126,10 +146,5 @@ class TaskListRepository {
   Future clearTasks() async {
     final db = await DBProvider.db.database;
     await db.delete(_taskTable);
-  }
-
-  Future createTask(UserTask task) async {
-    final db = await DBProvider.db.database;
-    await db.insert(_taskTable, task.toMap());
   }
 }

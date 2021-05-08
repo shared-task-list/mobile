@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
@@ -187,11 +188,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
         onSetName: (String title, String category) async {
           _defaultCategory = category;
           await _bloc.quickAdd(title, category);
-          // Flushbar(
-          //   title: "Create",
-          //   message: "Task $title was created!",
-          //   duration: Duration(seconds: 3),
-          // )..show(context);
+          Flushbar(
+            title: "Create",
+            message: "Task $title was created!",
+            duration: Duration(seconds: 3),
+          )..show(context);
         },
         onSetCategory: (String cat) => _defaultCategory = cat,
       ),

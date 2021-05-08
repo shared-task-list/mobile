@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -127,11 +128,11 @@ class CategoryListScreen extends StatelessWidget {
               onPressed: () {
                 _bloc.deleteCategory(category);
                 Navigator.of(ctx).pop();
-                // Flushbar(
-                //   title: "Delete",
-                //   message: "Category $category was deleted",
-                //   duration: Duration(seconds: 3),
-                // )..show(context);
+                Flushbar(
+                  title: "Delete",
+                  message: "Category $category was deleted",
+                  duration: Duration(seconds: 3),
+                )..show(context);
               },
               text: 'Delete',
             ),
@@ -149,11 +150,11 @@ class CategoryListScreen extends StatelessWidget {
       dialog: TextFieldDialog(
         savePressed: (String newName) {
           _bloc.createNewCategory(newName);
-          // Flushbar(
-          //   title: "Create",
-          //   message: "Category $newName was created",
-          //   duration: Duration(seconds: 3),
-          // )..show(context);
+          Flushbar(
+            title: "Create",
+            message: "Category $newName was created",
+            duration: Duration(seconds: 3),
+          )..show(context);
         },
         labelText: '',
         hintText: 'Name',

@@ -46,7 +46,7 @@ class TaskListBloc {
 
       try {
         final category = _categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
-        final taskList = _categoryTaskMap[category]!;
+        final taskList = _categoryTaskMap[category] ?? [];
 
         for (final existTask in taskList) {
           if (existTask.uid == task.uid) {
@@ -61,7 +61,9 @@ class TaskListBloc {
           name: task.category,
           colorString: Constant.defaultCategoryColor.toRgbString(),
           order: DateTime.now().millisecondsSinceEpoch,
+          isExpand: true,
         );
+        await newCategory.save();
         _categoryTaskMap[newCategory] = [task];
       }
 
@@ -87,7 +89,7 @@ class TaskListBloc {
       categoryTaskMapStream.add(_categoryTaskMap);
       await _repository.remove(task);
     });
-    ref.onChildChanged.listen((Event event) {
+    ref.onChildChanged.listen((Event event) async {
       final task = UserTask.fromFbData(event);
 
       if (task.uid == '') {
@@ -106,6 +108,8 @@ class TaskListBloc {
         taskList[index] = task;
         _categoryTaskMap[category] = taskList;
         categoryTaskMapStream.add(_categoryTaskMap);
+
+        await _repository.update(task);
       } catch (e) {
         return;
       }
@@ -113,7 +117,7 @@ class TaskListBloc {
   }
 
   Future<bool> init() async {
-    _repository.initStream.listen((ListInitData data) {
+    _repository.initStream.listen((ListInitData data) async {
       settings.add(data.settings);
 
       for (final category in data.categories) {
@@ -128,7 +132,7 @@ class TaskListBloc {
 
       categoryTaskMapStream.add(_categoryTaskMap);
 
-      load();
+      await load();
       _subscribe();
     });
 
@@ -176,7 +180,7 @@ class TaskListBloc {
 
     categoryTaskMapStream.add(_categoryTaskMap);
 
-    await CategoryProvider.saveList(_categoryTaskMap.keys.toList());
+    // await CategoryProvider.saveList(_categoryTaskMap.keys.toList());
     await _repository.saveTasks(taskList);
   }
 
@@ -221,7 +225,7 @@ class TaskListBloc {
       authorUid: userUid,
     );
 
-    await _repository.createTask(task);
+    await _repository.create(task);
     await _fbClient.addTask(task);
   }
 

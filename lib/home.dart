@@ -16,19 +16,17 @@ class Home extends StatefulWidget {
 class _Home extends State<Home> {
   late S _locale;
   int _selectedIndex = 0;
-  final _pages = <Widget>[
-    TaskListScreen(),
-    CategoryListScreen(),
-    ListOfListsScreen(),
-    SettingsScreen(),
-  ];
+  late TaskListScreen _tastListScreen = TaskListScreen();
+  late CategoryListScreen _categoryListScreen = CategoryListScreen();
+  late ListOfListsScreen _listsScreen = ListOfListsScreen();
+  late SettingsScreen _settingsScreen = SettingsScreen();
 
   @override
   Widget build(BuildContext context) {
     _locale = S.of(context);
 
     return Scaffold(
-      body: _pages.elementAt(_selectedIndex),
+      body: _getScreen(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: _getItems(),
@@ -36,8 +34,24 @@ class _Home extends State<Home> {
         fixedColor: Constant.primaryColor,
         onTap: _onItemTapped,
         backgroundColor: Constant.bgColor,
+        unselectedItemColor: Colors.grey,
       ),
     );
+  }
+
+  Widget _getScreen(int index) {
+    switch (index) {
+      case 0:
+        return _tastListScreen;
+      case 1:
+        return _categoryListScreen;
+      case 2:
+        return _listsScreen;
+      case 3:
+        return _settingsScreen;
+      default:
+        return Container();
+    }
   }
 
   void _onItemTapped(int index) {
