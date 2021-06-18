@@ -67,6 +67,5 @@ class ListOfListsRepository {
     var db = await DBProvider.db.database;
     await db.delete(_taskListTable, where: 'id = ?', whereArgs: [list.id]);
     // TODO: delete in fb
-    getLists();
   }
 }

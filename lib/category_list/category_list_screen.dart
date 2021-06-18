@@ -2,7 +2,8 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_task_list/category_list/category_list_bloc.dart';
+import 'package:get/get.dart';
+import 'package:shared_task_list/category_list/category_list_ctrl.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
@@ -10,23 +11,18 @@ import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/model/category.dart';
 
 class CategoryListScreen extends StatelessWidget {
-  final _bloc = CategoryListBloc();
-  late S _locale;
-
-  CategoryListScreen() {
-    _bloc.getList();
-  }
+  final CategoryListCtrl ctrl = Get.put(CategoryListCtrl());
 
   @override
   Widget build(BuildContext context) {
-    _locale = S.of(context);
+    final locale = S.of(context);
 
     return Ui.scaffold(
       bar: Ui.appBar(
-        title: _locale.categories,
+        title: locale.categories,
       ),
       body: Material(
-        child: _buildBody(),
+        child: _buildBody(context),
         color: Constant.bgColor,
       ),
       float: FloatingActionButton(
@@ -35,69 +31,63 @@ class CategoryListScreen extends StatelessWidget {
             Icons.add,
             color: Constant.getTextColor(Constant.accentColor),
           ),
-          onPressed: () {
-            _showAddDialog(context);
+          onPressed: () async {
+            await _showAddDialog(context);
           }),
     );
   }
 
-  Widget _buildBody() {
-    return StreamBuilder<List<Category>>(
-        stream: _bloc.categories,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Container();
-          }
-
-          final categories = snapshot.data ?? [];
-
-          return Column(
-            children: <Widget>[
-              const SizedBox(height: 16),
-              Expanded(
-                child: ReorderableListView(
-                  onReorder: (int oldIndex, int newIndex) => _bloc.updateOrder(oldIndex, newIndex, categories),
-                  children: <Widget>[
-                    for (final category in categories)
-                      ListTile(
-                        key: ValueKey(category),
-                        leading: Icon(Icons.drag_handle),
-                        trailing: SizedBox(
-                          width: 100,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: <Widget>[
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  _showEditDialog(context, category);
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  _showConfirmDeleteDialog(context, category);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        title: Text(category.name),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        });
+  Widget _buildBody(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        const SizedBox(height: 16),
+        Expanded(
+          child: Obx(() => _buildCategoryList(context)),
+        ),
+      ],
+    );
   }
 
-  void _showEditDialog(BuildContext context, Category category) {
-    Ui.openDialog(
+  Widget _buildCategoryList(BuildContext context) {
+    return ReorderableListView(
+      shrinkWrap: true,
+      onReorder: (int oldIndex, int newIndex) => ctrl.updateOrder(oldIndex, newIndex),
+      children: ctrl.categories
+          .map((category) => ListTile(
+                key: ValueKey(category),
+                leading: const Icon(Icons.drag_handle),
+                trailing: SizedBox(
+                  width: 100,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          await _showEditDialog(context, category);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          await _showConfirmDeleteDialog(context, category);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                title: Text(category.name),
+              ))
+          .toList(),
+    );
+  }
+
+  Future _showEditDialog(BuildContext context, Category category) async {
+    await Ui.openDialog(
       context: context,
       dialog: TextFieldDialog(
         savePressed: (String newName) {
-          _bloc.updateCategoryName(category, newName);
+          ctrl.updateCategoryName(category, newName);
         },
         labelText: '',
         hintText: 'Name',
@@ -108,8 +98,8 @@ class CategoryListScreen extends StatelessWidget {
     );
   }
 
-  void _showConfirmDeleteDialog(BuildContext context, Category category) {
-    Ui.showAlert(
+  Future _showConfirmDeleteDialog(BuildContext context, Category category) async {
+    await Ui.showAlert(
       builder: (ctx) {
         return Ui.alertDialog(
           title: 'Delete Category ' + category.name,
@@ -126,7 +116,7 @@ class CategoryListScreen extends StatelessWidget {
             Ui.alertAction(
               context: ctx,
               onPressed: () {
-                _bloc.deleteCategory(category);
+                ctrl.deleteCategory(category);
                 Navigator.of(ctx).pop();
                 Flushbar(
                   title: "Delete",
@@ -149,7 +139,8 @@ class CategoryListScreen extends StatelessWidget {
       context: context,
       dialog: TextFieldDialog(
         savePressed: (String newName) {
-          _bloc.createNewCategory(newName);
+          Get.back();
+          ctrl.createNewCategory(newName);
           Flushbar(
             title: "Create",
             message: "Category $newName was created",

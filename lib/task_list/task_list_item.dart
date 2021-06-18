@@ -1,22 +1,22 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/instance_manager.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/task_detail/task_detail_screen.dart';
-import 'package:shared_task_list/task_list/task_list_bloc.dart';
+import 'package:shared_task_list/task_list/task_list_ctrl.dart';
 
 class TaskListItem extends StatelessWidget {
-  const TaskListItem({
+  final TaskListCtrl ctrl = Get.find();
+
+  TaskListItem({
     Key? key,
-    required TaskListBloc bloc,
     required this.task,
     required this.textWidth,
-  })   : _bloc = bloc,
-        super(key: key);
+  }) : super(key: key);
 
-  final TaskListBloc _bloc;
   final UserTask task;
   final double textWidth;
 
@@ -48,7 +48,7 @@ class TaskListItem extends StatelessWidget {
                   message: "Task ${task.title} is complete!",
                   duration: Duration(seconds: 3),
                 )..show(context);
-                await _bloc.remove(task);
+                await ctrl.remove(task);
               },
             ),
           ),
@@ -65,7 +65,7 @@ class TaskListItem extends StatelessWidget {
     Color catColor = Constant.defaultCategoryColor;
 
     try {
-      catColor = _bloc.categories.firstWhere((cat) => cat.name == task.category).getColor();
+      catColor = ctrl.categories.firstWhere((cat) => cat.name == task.category).getColor();
     } catch (e) {
       catColor = Colors.white;
       textColor = Colors.black;

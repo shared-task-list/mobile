@@ -1,4 +1,4 @@
-import 'package:rxdart/subjects.dart';
+import 'package:get/get.dart';
 import 'package:shared_task_list/category_list/category_list_repository.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/extension/color_extension.dart';
@@ -7,21 +7,37 @@ import 'package:shared_task_list/model/category.dart';
 import 'package:shared_task_list/task_detail/task_detail_repository.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
 
-class CategoryListBloc {
-  final categories = BehaviorSubject<List<Category>>();
-  final _taskListRepo = TaskListRepository();
-  final _taskDetailRepo = TaskDetailRepository();
-  final _repo = CategoryListRepository();
+class CategoryListCtrl extends GetxController {
+  late CategoryListRepository _repo;
+  late TaskDetailRepository _taskDetailRepo;
+  late TaskListRepository _taskListRepo;
+  var categories = List<Category>.empty().obs;
 
-  CategoryListBloc() {
-    _repo.categories.listen((taskList) => categories.add(taskList));
+  @override
+  void onInit() async {
+    super.onInit();
+
+    _taskDetailRepo = TaskDetailRepository();
+    _taskListRepo = TaskListRepository();
+
+    _repo = CategoryListRepository();
+    _repo.categories.listen((catList) => categories.value = catList);
+
+    await _repo.getList();
+  }
+
+  @override
+  void onClose() {
+    super.onClose();
+    _repo.dispose();
   }
 
   Future getList() async {
     await _repo.getList();
   }
 
-  Future updateOrder(int oldIndex, int newIndex, List<Category> cats) async {
+  Future updateOrder(int oldIndex, int newIndex) async {
+    List<Category> cats = categories.toList();
     final updatedCat = cats[oldIndex];
     cats.removeAt(oldIndex);
 
@@ -31,7 +47,7 @@ class CategoryListBloc {
       cats.insert(newIndex, updatedCat);
     }
 
-    categories.add(cats);
+    categories.value = cats;
 
     for (int i = 0; i < cats.length; ++i) {
       cats[i].order = i + 1;
@@ -40,8 +56,9 @@ class CategoryListBloc {
   }
 
   Future deleteCategory(Category category) async {
+    categories.removeWhere((cat) => cat.id == category.id);
     await _repo.delete(category);
-    _repo.getList();
+    // _repo.getList();
 
     final fbClient = FbClient();
     final tasks = await _taskListRepo.getTasks();
@@ -53,10 +70,18 @@ class CategoryListBloc {
   }
 
   Future updateCategoryName(Category category, String newName) async {
+    // _repo.getList();
+    int index = categories.indexOf(category);
+
+    if (index == -1) {
+      return;
+    }
+
     String oldName = category.name;
     category.name = newName;
+
+    categories[index] = category;
     await _repo.update(category);
-    _repo.getList();
 
     final fbClient = FbClient();
     final tasks = await _taskListRepo.getTasks();
@@ -79,13 +104,9 @@ class CategoryListBloc {
       order: DateTime.now().millisecondsSinceEpoch,
     );
 
-    // await category.save();
-    await _repo.create(category);
-    await _repo.getList();
-  }
-
-  void dispose() {
-    categories.close();
-    _repo.dispose();
+    int id = await _repo.create(category);
+    // await _repo.getList();
+    category.id = id;
+    categories.add(category);
   }
 }

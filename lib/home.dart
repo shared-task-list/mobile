@@ -16,10 +16,8 @@ class Home extends StatefulWidget {
 class _Home extends State<Home> {
   late S _locale;
   int _selectedIndex = 0;
-  late TaskListScreen _tastListScreen = TaskListScreen();
-  late CategoryListScreen _categoryListScreen = CategoryListScreen();
-  late ListOfListsScreen _listsScreen = ListOfListsScreen();
-  late SettingsScreen _settingsScreen = SettingsScreen();
+  // late TaskListScreen _taskListScreen = TaskListScreen();
+  // late SettingsScreen _settingsScreen = SettingsScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +40,13 @@ class _Home extends State<Home> {
   Widget _getScreen(int index) {
     switch (index) {
       case 0:
-        return _tastListScreen;
+        return TaskListScreen();
       case 1:
-        return _categoryListScreen;
+        return CategoryListScreen();
       case 2:
-        return _listsScreen;
+        return ListOfListsScreen();
       case 3:
-        return _settingsScreen;
+        return SettingsScreen();
       default:
         return Container();
     }

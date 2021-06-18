@@ -115,6 +115,7 @@ class TaskListRepository {
 
       await batch.commit(noResult: true);
     } catch (e) {
+      print(e);
       return;
     }
   }

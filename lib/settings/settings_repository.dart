@@ -1,19 +1,24 @@
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_task_list/common/db/db_provider.dart';
 import 'package:shared_task_list/model/settings.dart';
 
 class SettingsRepository {
   final _tableName = 'settings';
+  final sesstingsStream = BehaviorSubject<Settings>();
+  late Settings setts;
 
   Future<Settings> getSettings() async {
     try {
-      var db = await DBProvider.db.database;
+      final db = await DBProvider.db.database;
       List<Map<String, dynamic>> maps = await db.query(_tableName);
-      final lists = maps.map((map) => Settings.fromMap(map));
 
-      return lists.isNotEmpty ? lists.first : Settings.empty();
+      setts = maps.map((map) => Settings.fromMap(map)).first;
     } catch (e) {
-      return Settings.empty();
+      setts = Settings.empty();
     }
+
+    sesstingsStream.add(setts);
+    return setts;
   }
 
   Future saveSettings(Settings settings) async {
@@ -28,5 +33,9 @@ class SettingsRepository {
     // } else {
     await db.insert(_tableName, settings.toMap());
     // }
+  }
+
+  void dispose() {
+    sesstingsStream.close();
   }
 }

@@ -3,30 +3,25 @@ import 'dart:io';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 import 'package:shared_task_list/common/constant.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
-import 'package:shared_task_list/list_of_lists/list_of_lists_bloc.dart';
+import 'package:shared_task_list/list_of_lists/list_of_lists_ctrl.dart';
 import 'package:shared_task_list/model/task_list.dart';
 
 import 'add_list_dialog.dart';
 
 class ListOfListsScreen extends StatelessWidget {
-  final _bloc = ListOfListsBloc();
+  final ListOfListsCtrl controller = Get.put(ListOfListsCtrl());
   late S _locale;
 
   @override
   Widget build(BuildContext context) {
-    _bloc.getTaskLists();
     _locale = S.of(context);
 
     return Ui.scaffold(
-      bar: Ui.appBar(
-        title: _locale.my_lists,
-        rightButton: Ui.actionButton(const Icon(Icons.add), () {
-          _showAddDialog(context);
-        }),
-      ),
+      bar: Ui.appBar(title: _locale.my_lists),
       body: Material(
         child: _buildBody(context),
         color: Colors.transparent,
@@ -50,54 +45,46 @@ class ListOfListsScreen extends StatelessWidget {
     return Column(
       children: <Widget>[
         const SizedBox(height: 16),
-        StreamBuilder<List<TaskList>>(
-          stream: _bloc.taskLists,
-          builder: (BuildContext context, AsyncSnapshot<List<TaskList>> snapshot) {
-            if (!snapshot.hasData) {
-              return Ui.waitIndicator();
+        Obx(() => _buildList(context)),
+      ],
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: controller.lists.length,
+      itemBuilder: (ctx, index) {
+        final list = controller.lists[index];
+
+        return ListTile(
+          trailing: list.name == Constant.taskList
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  // child: Text(_locale.current),
+                  child: const Text('current'),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    await _showConfirmDeleteDialog(context, list);
+                  },
+                ),
+          title: Text(list.name),
+          onTap: () async {
+            if (list.name == Constant.taskList) {
+              return;
             }
 
-            final taskList = snapshot.data ?? [];
-
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: taskList.length,
-              itemBuilder: (ctx, index) {
-                final list = taskList[index];
-
-                return ListTile(
-                  trailing: list.name == Constant.taskList
-                      ? Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          // child: Text(_locale.current),
-                          child: const Text('current'),
-                        )
-                      : IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () async {
-                            await _showConfirmDeleteDialog(context, list);
-                          },
-                        ),
-                  title: Text(list.name),
-//                  subtitle: list.name == Constant.taskList ? Text('(${_locale.current})') : null,
-                  onTap: () async {
-                    if (list.name == Constant.taskList) {
-                      return;
-                    }
-                    await _bloc.open(list);
-                    await _bloc.getTaskLists();
-                    Flushbar(
-                      title: _locale.current_list_changed,
-                      message: _locale.current_list_changed_to + list.name,
-                      duration: Duration(seconds: 3),
-                    )..show(context);
-                  },
-                );
-              },
-            );
+            await controller.open(list);
+            Flushbar(
+              title: _locale.current_list_changed,
+              message: _locale.current_list_changed_to + list.name,
+              duration: Duration(seconds: 3), // todo: to const
+            )..show(context);
           },
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -120,7 +107,8 @@ class ListOfListsScreen extends StatelessWidget {
               context: ctx,
               onPressed: () async {
                 Navigator.of(ctx).pop();
-                await _bloc.deleteList(list);
+                await controller.deleteList(list);
+
                 Flushbar(
                   title: _locale.delete,
                   message: "You list ${list.name} was deleted",
@@ -143,7 +131,7 @@ class ListOfListsScreen extends StatelessWidget {
       dialog: AddListDialog(
         savePressed: (String name, String password) async {
           // если уже есть в базе отказываем
-          bool isExistInDb = await _bloc.isExistInDb(name, password);
+          bool isExistInDb = await controller.isExistInDb(name, password);
 
           if (isExistInDb) {
             Flushbar(
@@ -157,9 +145,9 @@ class ListOfListsScreen extends StatelessWidget {
 
           // если нет в базе, но есть на сервере - создаем только в базе
           // если на сервере нет - создаем там
-          bool isExist = await _bloc.isExistList(name, password);
+          bool isExist = await controller.isExistList(name, password);
 
-          _bloc.createList(name, password, !isExist);
+          controller.createList(name, password, !isExist);
           Flushbar(
             title: _locale.create,
             message: "New List $name was created",

@@ -3,11 +3,10 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_task_list/common/category_provider.dart';
 import 'package:shared_task_list/common/constant.dart';
-import 'package:shared_task_list/common/extension/color_extension.dart';
 import 'package:shared_task_list/common/fb_client.dart';
 import 'package:shared_task_list/model/app_model.dart';
 import 'package:shared_task_list/model/category.dart';
@@ -15,21 +14,37 @@ import 'package:shared_task_list/model/settings.dart';
 import 'package:shared_task_list/model/task.dart';
 import 'package:shared_task_list/settings/settings_repository.dart';
 import 'package:shared_task_list/task_list/task_list_repository.dart';
+import 'package:shared_task_list/common/extension/color_extension.dart';
 import 'package:uuid/uuid.dart';
 
-class TaskListBloc {
-  final _repository = TaskListRepository();
-  final _settingsRepo = SettingsRepository();
-  final _fbClient = FbClient();
-  final settings = BehaviorSubject<Settings>();
-  final categoryTaskMapStream = BehaviorSubject<Map<Category, List<UserTask>>>();
-
-  final _categoryTaskMap = Map<Category, List<UserTask>>();
+class TaskListCtrl extends GetxController {
+  late TaskListRepository _repository;
+  late SettingsRepository _settingsRepo;
+  late FbClient _fbClient;
   late DatabaseReference ref;
 
-  TaskListBloc() {
+  var settings = Settings.empty().obs;
+  var categories = List<Category>.empty().obs;
+  var categoryTaskMap = Map<Category, List<UserTask>>().obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    _fbClient = FbClient();
+    _repository = TaskListRepository();
+    _settingsRepo = SettingsRepository();
+
     String hash = _getPasswordHash();
     ref = _fbClient.reference.child(Constant.taskList + hash);
+
+    init();
+  }
+
+  @override
+  void onClose() {
+    super.onClose();
+    _repository.dispose();
   }
 
   void _subscribe() {
@@ -45,8 +60,8 @@ class TaskListBloc {
       }
 
       try {
-        final category = _categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
-        final taskList = _categoryTaskMap[category] ?? [];
+        final category = categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
+        final taskList = categoryTaskMap[category] ?? [];
 
         for (final existTask in taskList) {
           if (existTask.uid == task.uid) {
@@ -55,7 +70,7 @@ class TaskListBloc {
         }
 
         taskList.add(task);
-        _categoryTaskMap[category] = taskList;
+        categoryTaskMap[category] = taskList;
       } catch (e) {
         final newCategory = Category(
           name: task.category,
@@ -63,11 +78,12 @@ class TaskListBloc {
           order: DateTime.now().millisecondsSinceEpoch,
           // isExpand: true,
         );
-        await newCategory.save();
-        _categoryTaskMap[newCategory] = [task];
-      }
+        newCategory.isExpand.value = true;
+        newCategory.save();
 
-      categoryTaskMapStream.add(_categoryTaskMap);
+        categories.add(newCategory);
+        categoryTaskMap[newCategory] = [task];
+      }
     });
     ref.onChildRemoved.listen((Event event) async {
       final task = UserTask.fromFbData(event);
@@ -80,13 +96,13 @@ class TaskListBloc {
         task.category = Constant.noCategory;
       }
 
-      final category = _categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
-      final taskList = _categoryTaskMap[category]!;
+      final category = categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
+      final taskList = categoryTaskMap[category]!;
 
       taskList.remove(task);
-      _categoryTaskMap[category] = taskList;
+      categoryTaskMap[category] = taskList;
 
-      categoryTaskMapStream.add(_categoryTaskMap);
+      // categoryTaskMapStream.add(categoryTaskMap);
       await _repository.remove(task);
     });
     ref.onChildChanged.listen((Event event) async {
@@ -97,8 +113,8 @@ class TaskListBloc {
       }
 
       try {
-        final category = _categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
-        final taskList = _categoryTaskMap[category]!;
+        final category = categoryTaskMap.keys.firstWhere((cat) => cat.name == task.category);
+        final taskList = categoryTaskMap[category]!;
         int index = taskList.indexWhere((UserTask t) => t.uid == task.uid);
 
         if (index == -1) {
@@ -106,8 +122,8 @@ class TaskListBloc {
         }
 
         taskList[index] = task;
-        _categoryTaskMap[category] = taskList;
-        categoryTaskMapStream.add(_categoryTaskMap);
+        categoryTaskMap[category] = taskList;
+        // categoryTaskMapStream.add(categoryTaskMap);
 
         await _repository.update(task);
       } catch (e) {
@@ -116,9 +132,9 @@ class TaskListBloc {
     });
   }
 
-  Future<bool> init() async {
+  Future init() async {
     _repository.initStream.listen((ListInitData data) async {
-      settings.add(data.settings);
+      settings.value = data.settings;
 
       for (final category in data.categories) {
         final tasks = data.tasks.where((task) => task.category == category.name);
@@ -127,31 +143,25 @@ class TaskListBloc {
           continue;
         }
 
-        _categoryTaskMap[category] = tasks.toList();
+        categoryTaskMap[category] = tasks.toList();
+        categories.add(category);
       }
-
-      categoryTaskMapStream.add(_categoryTaskMap);
 
       await load();
       _subscribe();
     });
 
     await _repository.init();
-
-    return true;
   }
 
   Future load() async {
-    if (_categoryTaskMap.isNotEmpty) {
-      return;
-    }
-
     final taskList = await _fbClient.getAll(Constant.taskList);
     final categoryNames = taskList.map((task) => task.category.isEmpty ? Constant.noCategory : task.category).toSet();
-    final existCategories = _categoryTaskMap.keys.toList();
+    final existCategories = categoryTaskMap.keys.toList();
     final existsCategoryNames = existCategories.map((category) => category.name).toSet();
 
-    _categoryTaskMap.clear();
+    categoryTaskMap.clear();
+    categories.clear();
 
     for (final categoryName in categoryNames) {
       late Category category;
@@ -165,8 +175,9 @@ class TaskListBloc {
           order: DateTime.now().millisecondsSinceEpoch,
           // isExpand: true,
         );
-        int id = await CategoryProvider.create(category);
-        category.id = id;
+        category.isExpand.value = true;
+        // int id = await CategoryProvider.create(category);
+        // category.id = id;
       }
 
       final tasks = taskList.where((task) => task.category == category.name);
@@ -175,22 +186,21 @@ class TaskListBloc {
         continue;
       }
 
-      _categoryTaskMap[category] = tasks.toList();
+      categories.add(category);
+      categoryTaskMap[category] = tasks.toList();
     }
 
-    categoryTaskMapStream.add(_categoryTaskMap);
-
-    // await CategoryProvider.saveList(_categoryTaskMap.keys.toList());
-    await _repository.saveTasks(taskList);
+    _repository.saveTasks(taskList);
+    CategoryProvider.saveList(categoryTaskMap.keys.toList());
   }
 
   Future remove(UserTask task) async {
-    final category = _categoryTaskMap.keys.firstWhere((category) => category.name == task.category);
-    final taskList = _categoryTaskMap[category]!;
+    final category = categoryTaskMap.keys.firstWhere((category) => category.name == task.category);
+    final taskList = categoryTaskMap[category]!;
 
     taskList.remove(task);
-    _categoryTaskMap[category] = taskList;
-    categoryTaskMapStream.add(_categoryTaskMap);
+    categoryTaskMap[category] = taskList;
+    // categoryTaskMapStream.add(categoryTaskMap);
 
     _repository.remove(task);
     await _fbClient.removeTask(task);
@@ -236,32 +246,29 @@ class TaskListBloc {
     return base64.encode(digest.bytes);
   }
 
-  void dispose() {
-    settings.close();
-    categoryTaskMapStream.close();
-    _repository.dispose();
-  }
-
   Future setColorForCategory(Category category, Color color) async {
-    final taskList = _categoryTaskMap[category]!;
+    final taskList = categoryTaskMap[category] ?? [];
 
     category.colorString = color.toRgbString();
-    _categoryTaskMap[category] = taskList;
+    categoryTaskMap[category] = taskList;
 
-    categoryTaskMapStream.add(_categoryTaskMap);
     await CategoryProvider.update(category);
   }
 
-  List<Category> get categories {
-    final categories = _categoryTaskMap.keys.toList();
-    categories.sort((cat1, cat2) => cat1.order.compareTo(cat2.order));
-    // categories.insert(0, AppData.noCategory);
+  // List<Category> get categories {
+  //   final categories = categoryTaskMap.keys.toList();
+  //   categories.sort((cat1, cat2) => cat1.order.compareTo(cat2.order));
 
-    return categories;
-  }
+  //   int cindex = categories.indexWhere((c) => c.name == Constant.noCategory);
+
+  //   if (cindex == -1) {
+  //     categories.insert(0, AppData.noCategory);
+  //   }
+
+  //   return categories;
+  // }
 
   Future getSettings() async {
-    final setts = await _settingsRepo.getSettings();
-    settings.add(setts);
+    settings.value = await _settingsRepo.getSettings();
   }
 }

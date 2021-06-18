@@ -1,21 +1,22 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_task_list/common/widget/text_field_dialog.dart';
 import 'package:shared_task_list/common/widget/ui.dart';
 import 'package:shared_task_list/generated/l10n.dart';
 import 'package:shared_task_list/task_detail/task_detail_screen.dart';
-import 'package:shared_task_list/task_list/task_list_bloc.dart';
+import 'package:shared_task_list/task_list/task_list_ctrl.dart';
 
 enum MenuItem { addNew, addCategory }
 
 class PopoverMenu extends StatelessWidget {
-  const PopoverMenu({
-    Key? key,
-    required TaskListBloc bloc,
-    required this.rootContext,
-  })   : _bloc = bloc,
-        super(key: key);
+  final TaskListCtrl ctrl = Get.find();
 
-  final TaskListBloc _bloc;
+  PopoverMenu({
+    Key? key,
+    required this.rootContext,
+  }) : super(key: key);
+
   final BuildContext rootContext;
 
   @override
@@ -55,12 +56,12 @@ class PopoverMenu extends StatelessWidget {
       context: context,
       dialog: TextFieldDialog(
         savePressed: (String newCategory) {
-          _bloc.createNewCategory(newCategory);
-          // Flushbar(
-          //   title: "Create",
-          //   message: "Category $newCategory was created!",
-          //   duration: Duration(seconds: 3),
-          // )..show(rootContext);
+          ctrl.createNewCategory(newCategory);
+          Flushbar(
+            title: "Create",
+            message: "Category $newCategory was created!",
+            duration: Duration(seconds: 3),
+          )..show(rootContext);
         },
         title: locale.newCategory,
         labelText: '',
